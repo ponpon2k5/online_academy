@@ -1,10 +1,27 @@
-const express = require("express");
-const path = require("path");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { engine } from "express-handlebars";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
+app.engine(
+  "handlebars",
+  engine({
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    defaultLayout: "main",
+    extname: ".handlebars",
+  })
+);
+app.set("view engine", "handlebars");
+app.set("views", path.join(__dirname, "views"));
+
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "home.html"));
+  res.render("home", { title: "Trang chủ" });
 });
 
 app.listen(3000, () => {
