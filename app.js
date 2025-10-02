@@ -20,6 +20,8 @@ app.engine(
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
+app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
 });
