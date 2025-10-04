@@ -1,5 +1,5 @@
-import knex from "knex";
 import "dotenv/config";
+import knex from "knex";
 
 const db = knex({
   client: "pg",
@@ -9,8 +9,8 @@ const db = knex({
     database: process.env.DB_DATABASE,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    pool: { min: 0, max: 15 },
   },
+  pool: { min: 0, max: 15 },
 });
 
 export default db;

@@ -1,0 +1,24 @@
+
+<h1 class="mb-3">Categories</h1>
+<a class="btn btn-primary" href="/admin/categories/new">New</a>
+
+<table class="table table-striped mt-3">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Slug</th>
+      <th>Parent</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each categories}}
+      <tr>
+        <td>{{id}}</td>
+        <td>{{name}}</td>
+        <td>{{slug}}</td>
+        <td>{{parent_id}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

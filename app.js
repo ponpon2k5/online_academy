@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { engine } from "express-handlebars";
+import adminCategories from "./routes/admin.categories.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,6 +26,9 @@ app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
 });
+
+app.use(express.urlencoded({ extended: true }));
+app.use("/admin/categories", adminCategories);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
