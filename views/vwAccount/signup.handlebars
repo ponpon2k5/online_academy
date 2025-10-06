@@ -1,0 +1,62 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h4 mb-3 text-center">Đăng ký</h1>
+
+                    {{#if error}}
+                    <div class="alert alert-danger" role="alert">{{error}}</div>
+                    {{/if}}
+
+                    <form class="needs-validation" novalidate method="post" action="/auth/signup">
+                        {{!-- Nếu dùng CSRF: <input type="hidden" name="_csrf" value="{{csrfToken}}"> --}}
+
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label">Họ và tên</label>
+                            <input id="full_name" name="full_name" type="text" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input id="email" name="email" type="email" class="form-control" required
+                                placeholder="name@example.com" />
+                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input id="password" name="password" type="password" class="form-control" required
+                                minlength="6" />
+                            <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Nhập lại mật khẩu</label>
+                            <input id="confirm_password" name="confirm_password" type="password" class="form-control"
+                                required minlength="6" />
+                            <div class="invalid-feedback">Hãy nhập lại mật khẩu.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Vai trò</label>
+                            <select id="role" name="role" class="form-select" required>
+                                <option value="" selected disabled>Chọn vai trò…</option>
+                                <option value="student">Học viên</option>
+                                <option value="instructor">Giảng viên</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn vai trò.</div>
+                        </div>
+
+                        <button class="btn btn-primary w-100" type="submit">Tạo tài khoản</button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <span>Đã có tài khoản?</span> <a href="/auth/login">Đăng nhập</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
