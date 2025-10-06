@@ -22,6 +22,10 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
+//student routes
+import studentRouter from "./routes/student.route.js";
+app.use("/student", studentRouter);
+
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
 });
