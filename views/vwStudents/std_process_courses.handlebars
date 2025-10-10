@@ -1,44 +1,60 @@
-<div class="container my-4">
-    <div class="row g-4">
-        <!-- Cột trái: Thông tin học viên + menu -->
-        <div class="col">
-            <!-- Thông tin học viên -->
-            <div class="card mb-3 shadow-sm">
-                <div class="row g-0">
-                    <div class="col-4">
-                        <img src="..." class="img-fluid rounded-start" alt="...">
-                    </div>
-                    <div class="col-8">
-                        <div class="card-body py-3">
-                            <h5 class="card-title mb-1">Tên học viên</h5>
-                            <p class="card-text small text-muted mb-1">
-                                Sinh viên chuyên ngành Công nghệ thông tin<br>
-                                <small>Cập nhật 3 phút trước</small>
-                            </p>
+{{#> std_profile}}
+
+<div class="card shadow-sm">
+                <div class="card-header fw-semibold">Khóa học của bạn</div>
+                <div class="card-body">
+                    <!-- Container dạng hàng ngang, tự xuống dòng -->
+                    <div class="d-flex flex-wrap gap-3">
+
+                        <!-- 1 course item -->
+                        <div class="card" style="width: 15rem;">
+                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
+                                loading="lazy">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1 text-truncate">Lập trình Web cơ bản</h6>
+                                <p class="card-text small text-muted text-truncate">
+                                    Học HTML, CSS, JS để xây dựng website đầu tiên.
+                                </p>
+                                <a href="/course/html-css" class="btn btn-primary btn-sm w-100">View Detail</a>
+                            </div>
                         </div>
+
+                        <div class="card" style="width: 15rem;">
+                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
+                                loading="lazy">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
+                                <p class="card-text small text-muted text-truncate">
+                                    Làm quen cú pháp và DOM manipulation.
+                                </p>
+                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
+                            </div>
+                        </div>
+                        <div class="card" style="width: 15rem;">
+                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
+                                loading="lazy">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
+                                <p class="card-text small text-muted text-truncate">
+                                    Làm quen cú pháp và DOM manipulation.
+                                </p>
+                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
+                            </div>
+                        </div>
+                        <div class="card" style="width: 15rem;">
+                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
+                                loading="lazy">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
+                                <p class="card-text small text-muted text-truncate">
+                                    Làm quen cú pháp và DOM manipulation.
+                                </p>
+                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
+                            </div>
+                        </div>
+
+                        <!-- thêm các card khác -->
                     </div>
                 </div>
             </div>
-            <!-- Menu học viên -->
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    Tài khoản học viên
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">📺 Watchlist (yêu thích)</li>
-                    <li class="list-group-item">🛒 Khóa học đã mua</li>
-                    <li class="list-group-item">📈 Tiến độ học tập</li>
-                </ul>
-            </div>
-        </div>
-        <!-- Cột phải: Danh sách khóa học -->
-        <div class="col">
-            <div class="card" style="width: 50rem;">
-                <div class="card-header">
-                    Tiến độ học tập
-                </div>
-                
-            </div>
-        </div>
-    </div>
-</div>
+{{/std_profile}}           

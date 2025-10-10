@@ -9,13 +9,18 @@
                     <div class="alert alert-danger" role="alert">{{error}}</div>
                     {{/if}}
 
-                    <form class="needs-validation" novalidate method="post" action="/auth/signup">
-                        {{!-- Nếu dùng CSRF: <input type="hidden" name="_csrf" value="{{csrfToken}}"> --}}
+                    <form class="needs-validation" novalidate method="post" action="/account/signup">
 
                         <div class="mb-3">
-                            <label for="full_name" class="form-label">Họ và tên</label>
-                            <input id="full_name" name="full_name" type="text" class="form-control" required />
-                            <div class="invalid-feedback">Vui lòng nhập họ và tên.</div>
+                            <label for="fullname" class="form-label">Họ và tên</label>
+                            <input id="fullname" name="fullname" type="text" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input id="username" name="username" type="text" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập username</div>
                         </div>
 
                         <div class="mb-3">

@@ -1,0 +1,52 @@
+<div class="container my-4">
+    <div class="row">
+        <!-- Cột trái: Thông tin học viên + menu -->
+        <div class="col-lg-5">
+            <!-- Thông tin học viên -->
+            <div class="card mb-3 shadow-sm">
+                <div class="row g-0">
+                    <div class="col-4">
+                        <img src="..." class="img-fluid rounded-start" alt="...">
+                    </div>
+                    <div class="col-8">
+                        <div class="card-body py-3">
+                            {{#if isAuthenticated}}
+                            <h5 class="card-title mb-1"><b>{{authUser.full_name}}</b></h5>
+                            <p class="card-text small text-muted mb-1">
+                                <p>Email: {{authUser.email}}</p>
+                                <p>Vai trò: {{authUser.role}}</p>
+                                <p>Description: {{authUser.bio}}</p>
+                                <small>Cập nhật 3 phút trước</small>
+                            </p>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Menu học viên -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    Tài khoản học viên
+                </div>
+                <ul class="list-group list-group-flush">
+                    <a href="/student/profile-favor-courses" class="list-group-item list-group-item-action">
+                        <i class="bi bi-heart"></i> Watchlist (Yêu thích)
+                    </a>
+                    <a href="/student/profile-purchased-courses" class="list-group-item list-group-item-action">
+                        <i class="bi bi-bag"></i>Khóa học đã mua
+                    </a>
+                    <a href="/student/profile-process-course" class="list-group-item list-group-item-action">
+                        <i class="bi bi-gear-wide"></i> Tiến độ học tập
+                    </a>
+                    <a href="/student/profile-edit" class="list-group-item list-group-item-action">
+                        <i class="bi bi-pencil"></i>Thay đổi thông tin cá nhân
+                    </a>
+                </ul>
+            </div>
+        </div>
+        <!-- Cột phải: Danh sách khóa học -->
+        <div class="col-lg-7">
+            {{> @partial-block}}
+        </div>
+    </div>
+</div>

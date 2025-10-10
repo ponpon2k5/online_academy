@@ -3,20 +3,42 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { engine } from "express-handlebars";
+import session from 'express-session';
+import hbs_sections from 'express-handlebars-sections';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 
-app.engine(
-  "handlebars",
-  engine({
-    layoutsDir: path.join(__dirname, "views", "layouts"),
-    defaultLayout: "main",
-    extname: ".handlebars",
-  })
-);
+//session
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+    secret: 'duybodoi',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // secure = true chỉ dùng khi https
+}))
+app.use(express.urlencoded({ extended: true }));
+
+app.use(async function (req, res, next) {
+    if(req.session.isAuthenticated){
+        res.locals.isAuthenticated = true;
+        res.locals.authUser = req.session.authUser;
+    }
+    next();
+});
+
+
+app.engine("handlebars", engine({
+  extname: ".handlebars",
+  defaultLayout: "main",
+  layoutsDir: path.join(__dirname, "views", "layouts"),
+  partialsDir: path.join(__dirname, "views", "partials"),
+  helpers: {
+        section: hbs_sections()
+    }
+}));
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 

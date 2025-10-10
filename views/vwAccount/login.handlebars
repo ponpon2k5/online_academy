@@ -12,13 +12,12 @@
                     <div class="alert alert-success" role="alert">{{message}}</div>
                     {{/if}}
 
-                    <form class="needs-validation" novalidate method="post" action="/auth/login">
+                    <form class="needs-validation" novalidate method="post" action="/account/login">
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input id="email" name="email" type="email" class="form-control" required
-                                placeholder="name@example.com" />
-                            <div class="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
+                            <label for="username" class="form-label">Email</label>
+                            <input id="username" name="username" type="text" class="form-control" />
+                            <div class="invalid-feedback">Vui lòng nhập username hợp lệ.</div>
                         </div>
 
                         <div class="mb-3">
