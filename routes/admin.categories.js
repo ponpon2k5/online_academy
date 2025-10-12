@@ -77,4 +77,14 @@ router.post("/:id", async (req, res) => {
     res.status(400).send("Update failed: " + e.message);
   }
 });
+
+router.post("/:id/delete", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await db("categories").where({ id }).del();
+    res.redirect("/admin/categories");
+  } catch (e) {
+    res.status(400).send("Delete failed: " + e.message);
+  }
+});
 export default router;

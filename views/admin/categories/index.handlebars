@@ -8,7 +8,7 @@
       <th>Name</th>
       <th>Slug</th>
       <th>Parent</th>
-      <th style="width:180px">Actions</th>   <!-- ✅ -->
+      <th style="width:180px">Actions</th>  
     </tr>
   </thead>
   <tbody>
@@ -19,7 +19,7 @@
         <td>{{slug}}</td>
         <td>{{parent_id}}</td>
         <td>
-          <a class="btn btn-sm btn-secondary" href="/admin/categories/{{id}}/edit">Edit</a>  <!-- ✅ -->
+          <a class="btn btn-sm btn-secondary" href="/admin/categories/{{id}}/edit">Edit</a>  
           <form action="/admin/categories/{{id}}/delete" method="post" style="display:inline" onsubmit="return confirm('Delete this category?')">
             <button class="btn btn-sm btn-danger">Delete</button>
           </form>
