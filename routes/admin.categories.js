@@ -14,4 +14,13 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/new", async (req, res) => {
+  try {
+    const parents = await db("categories").select("id", "name").orderBy("name");
+    res.render("admin/categories/new", { parents });
+  } catch (e) {
+    res.status(500).send("Lỗi truy vấn DB: " + e.message);
+  }
+});
+
 export default router;

@@ -1,0 +1,21 @@
+<h1 class="mb-3">New Category</h1>
+
+<form method="post" action="/admin/categories">
+  <div class="mb-3">
+    <label>Name</label>
+    <input name="name" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label>Parent (optional)</label>
+    <select name="parent_id" class="form-select">
+      <option value="">-- none --</option>
+      {{#each parents}}
+        <option value="{{id}}">{{name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <button class="btn btn-primary">Create</button>
+  <a href="/admin/categories" class="btn btn-outline-secondary">Cancel</a>
+</form>
