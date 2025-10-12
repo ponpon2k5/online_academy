@@ -23,4 +23,21 @@ router.get("/new", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const { name, parent_id } = req.body;
+    const slug = slugify(name, { lower: true, strict: true });
+
+    await db("categories").insert({
+      name,
+      slug,
+      parent_id: parent_id || null,
+    });
+
+    res.redirect("/admin/categories");
+  } catch (e) {
+    res.status(400).send("Create failed: " + e.message);
+  }
+});
+
 export default router;
