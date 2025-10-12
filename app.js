@@ -16,6 +16,11 @@ app.engine(
     layoutsDir: path.join(__dirname, "views", "layouts"),
     defaultLayout: "main",
     extname: ".handlebars",
+    helpers: {
+      eq: function (a, b) {
+        return a === b;
+      },
+    },
   })
 );
 app.set("view engine", "handlebars");
