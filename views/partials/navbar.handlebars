@@ -13,11 +13,44 @@
     <!-- Nội dung Navbar -->
     <div class="collapse navbar-collapse" id="navbarMain">
       <!-- Nút Explore -->
-      <ul class="navbar-nav me-3">
-        <li class="nav-item">
-          <a class="nav-link fw-semibold" href="#">Explore</a>
-        </li>
-      </ul>
+      <!-- Nút Explore có menu 2 cấp -->
+<ul class="navbar-nav me-3">
+  <li class="nav-item dropdown position-static">
+    <a
+      class="nav-link dropdown-toggle fw-semibold"
+      href="#"
+      id="exploreDropdown"
+      role="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Explore
+    </a>
+
+    <ul class="dropdown-menu shadow p-3" aria-labelledby="exploreDropdown" style="min-width: 250px;">
+      <!-- Category 1 -->
+      <li class="dropdown-submenu">
+        <a class="dropdown-item dropdown-toggle" href="#">Development</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">Web Development</a></li>
+          <li><a class="dropdown-item" href="#">Data Science</a></li>
+          <li><a class="dropdown-item" href="#">Mobile Apps</a></li>
+        </ul>
+      </li>
+
+      <!-- Category 2 -->
+      <li class="dropdown-submenu">
+        <a class="dropdown-item dropdown-toggle" href="#">Design</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">UI/UX</a></li>
+          <li><a class="dropdown-item" href="#">Graphic Design</a></li>
+          <li><a class="dropdown-item" href="#">3D & Animation</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
 
       <!-- Ô tìm kiếm -->
       <form class="d-flex flex-grow-1 mx-2">

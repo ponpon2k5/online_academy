@@ -1,31 +1,35 @@
 import express from "express";
+import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
-import { engine } from "express-handlebars";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.engine(
-  "handlebars",
-  engine({
-    layoutsDir: path.join(__dirname, "views", "layouts"),
-    defaultLayout: "main",
-    extname: ".handlebars",
-  })
-);
+app.engine("handlebars", engine());
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "statics")));
+app.use("/css", express.static(path.join(__dirname, "statics", "css")));
 
-app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
 app.get("/", (req, res) => {
-  res.render("home", { title: "Trang chủ" });
+  res.render("home", { layout: "main" });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.get("/courses", (req, res) => {
+  res.render("courses", { layout: "main" });
 });
+
+app.get("/course/:id", (req, res) => {
+  res.render("courseDetail", { layout: "main" });
+});
+
+app.get("/search", (req, res) => {
+  res.render("search", { layout: "main" });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
