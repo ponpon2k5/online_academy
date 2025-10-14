@@ -113,6 +113,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Thêm để xử lý JSON trong fetch
 app.use('/static', express.static('static'));
 
+app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+
 app.get("/", (req, res) => {
     if (req.session.isAuthenticated) {
         console.log('User is authenticated');

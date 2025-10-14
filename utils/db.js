@@ -1,20 +1,16 @@
-import knex from 'knex';
+import knex from "knex";
+import "dotenv/config";
 
 const db = knex({
-  client: 'pg',
+  client: "pg",
   connection: {
-    host: 'aws-1-ap-southeast-1.pooler.supabase.com',
-    port: 6543,
-    user: 'postgres.jpwictcnidovsyjbvuzq',
-    password: 'onlineacademy',
-    database: 'postgres',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_DATABASE,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    pool: { min: 0, max: 15 },
   },
-  pool: { min: 0, max: 15 }
 });
-
-// Kiểm tra kết nối
-db.raw('SELECT 1')
-  .then(() => console.log('Kết nối Supabase thành công'))
-  .catch((err) => console.error('Lỗi kết nối Supabase:', err));
 
 export default db;
