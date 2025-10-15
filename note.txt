@@ -1,0 +1,3 @@
+render != redict
+render sẽ hiện ra file handlebar nhưng url vẫn giữ nguyên
+redirect gửi lệnh cho trình duyệt yêu cầu một URL mới (GET)

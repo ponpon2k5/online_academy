@@ -29,15 +29,21 @@ export default {
     totalUser() {
         return db('profiles').count('id as total');
     },
-    editUser(user) {
-        const id = user.id;
-        return db('profiles')
-            .where('id', id)
-            .update(user);
+    totalEnrollment() {
+        return db('enrollments').count('id as total');
     },
     delCourse(userId, courseId) {
         return db('watchlist')
             .where({ user_id: userId, course_id: courseId })
             .del();
+    },
+    findCourseByID(courseId){
+        return db('courses').where('id', courseId).first();
+    },
+    enrollCourse(userId, courseId, enrollID, course) {
+        if (!course) {
+            throw new Error('Course not found');
+        }
+        return db('enrollments').insert({ id:enrollID, user_id: userId, course_id: courseId, price_paid: course.price, purchased_at: new Date(), refunded: false });
     }
 }

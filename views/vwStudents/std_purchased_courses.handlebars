@@ -17,7 +17,10 @@
                     <p class="card-text small text-muted text-truncate">
                         {{long_desc}}
                     </p>
-                    <a href="#" class="btn btn-primary btn-sm w-100">View Detail</a>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <a href="/courses/preview-lessons/{{id}}" class="btn btn-outline-primary btn-sm w-100">Lesson</a>
+                        <a href="#" class="btn btn-primary btn-sm w-100">View Detail</a>
+                    </div>
                 </div>
             </div>
             {{/each}}

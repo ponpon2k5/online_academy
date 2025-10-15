@@ -50,6 +50,8 @@ import studentRouter from "./routes/student.route.js";
 app.use("/student", studentRouter);
 import accountRouter from "./routes/account.route.js";
 app.use("/account", accountRouter);
+import coursesRouter from "./routes/courses.route.js";
+app.use("/courses", coursesRouter);
 
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
