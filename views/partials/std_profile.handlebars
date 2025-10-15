@@ -13,10 +13,10 @@
                             {{#if isAuthenticated}}
                             <h5 class="card-title mb-1"><b>{{authUser.full_name}}</b></h5>
                             <p class="card-text small text-muted mb-1">
-                                <p>Email: {{authUser.email}}</p>
-                                <p>Vai trò: {{authUser.role}}</p>
-                                <p>Description: {{authUser.bio}}</p>
-                                <small>Cập nhật 3 phút trước</small>
+                            <p>Email: {{authUser.email}}</p>
+                            <p>Vai trò: {{authUser.role}}</p>
+                            <p>Description: {{authUser.bio}}</p>
+                            <small>Cập nhật 3 phút trước</small>
                             </p>
                             {{/if}}
                         </div>
@@ -47,6 +47,31 @@
         <!-- Cột phải: Danh sách khóa học -->
         <div class="col-lg-7">
             {{> @partial-block}}
+            <nav aria-label="Pagination">
+                <ul class="pagination justify-content-center">
+                    {{#if pagination.hasPrev}}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{pagination.prevPage}}" aria-label="Previous">
+                            &laquo;
+                        </a>
+                    </li>
+                    {{/if}}
+
+                    {{#each pagination.pages}}
+                    <li class="page-item {{#if active}}active{{/if}}">
+                        <a class="page-link" href="?page={{number}}">{{number}}</a>
+                    </li>
+                    {{/each}}
+
+                    {{#if pagination.hasNext}}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{pagination.nextPage}}" aria-label="Next">
+                            &raquo;
+                        </a>
+                    </li>
+                    {{/if}}
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

@@ -3,30 +3,71 @@ import bcrypt from 'bcryptjs'
 import path from 'path';
 import userModel from '../models/user.model.js'
 const router = express.Router();
+//function
+function getPagination(page, totalItems, limit) {
+    const totalPages = Math.ceil(totalItems / limit);
+    const currentPage = Math.min(Math.max(1, page), totalPages);
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push({
+            number: i,
+            active: i === currentPage
+        });
+    }
+
+    return {
+        pages,
+        hasPrev: currentPage > 1,
+        hasNext: currentPage < totalPages,
+        prevPage: currentPage - 1,
+        nextPage: currentPage + 1,
+        currentPage,
+        totalPages
+    };
+}
 
 //profile student
 router.get('/profile-favor-courses', async (req, res) => {
+    const limit = 6; //số khóa học trên mỗi trang
+    const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
+    const userId = req.session.authUser.id;
+
     if (!req.session.authUser) {
-        // Redirect to login or show an error
-        return res.redirect('/account/login'); // or your login route
+        return res.redirect('/account/login'); 
     }
-    const result = await userModel.findFavoriteCoursesByUserId(req.session.authUser.id);
-    console.log('Favorite courses of user', req.session.authUser.id, ':');
-    console.log(result);
-    res.render('vwStudents/std_favor_courses', {
-        favor_courses: result
+
+    const total = await userModel.countFavoriteCourses(userId); // tổng số khóa học yêu thích
+    const offset = (page - 1) * limit; // vị trí bắt đầu lấy dữ liệu
+
+    const courses = await userModel.getFavoriteCourses(userId, limit, offset);
+
+    const pagination = getPagination(page, total, limit);
+
+    res.render("vwStudents/std_favor_courses", {
+        courses,
+        pagination,
     });
 });
 router.get('/profile-purchased-courses', async (req, res) => {
+    const limit = 6; //số khóa học trên mỗi trang
+    const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
+    const userId = req.session.authUser.id;
+
     if (!req.session.authUser) {
         // Redirect to login or show an error
         return res.redirect('/account/login'); // or your login route
     }
-    const result = await userModel.findPurcharsedCoursesByUserId(req.session.authUser.id);
-    console.log('Purchased courses of user', req.session.authUser.id, ':');
-    console.log(result);
-    res.render('vwStudents/std_purchased_courses', {
-        enroll_courses: result
+    const total = await userModel.countPurchasedCourses(userId); // tổng số khóa học yêu thích
+    const offset = (page - 1) * limit; // vị trí bắt đầu lấy dữ liệu
+
+    const courses = await userModel.getPurchasedCourses(userId, limit, offset);
+
+    const pagination = getPagination(page, total, limit);
+
+    res.render("vwStudents/std_purchased_courses", {
+        courses,
+        pagination,
     });
 });
 //edit profile

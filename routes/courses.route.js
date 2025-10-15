@@ -11,6 +11,7 @@ async function totalEnrollment() {
     // row.cnt có thể là string => ép về number
     return Number(row?.cnt ?? 0);
 }
+
 //view courses
 router.get('/view-courses', async (req, res) => {
     const list = await coursesModel.view_all_courses();
@@ -127,4 +128,5 @@ router.post('/save-progress', express.json(), async (req, res) => {
 
     res.json({ ok: true });
 });
+
 export default router;

@@ -53,5 +53,6 @@ export default {
                 isCompleted: db.raw('(??.??) OR ?', [TABLE, 'isCompleted', !!completed]),
                 update_time: db.fn.now(),
             });
-    }
+    },
+    
 }

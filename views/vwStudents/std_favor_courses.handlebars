@@ -7,13 +7,13 @@
         <div class="d-flex flex-wrap gap-3">
 
             <!-- 1 course item -->
-            {{#each favor_courses}}
-            <div class="card" style="width: 15rem;">
+            {{#each courses}}
+            <div class="card" style="width: 13rem;">
 
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-2 delete-btn" aria-label="Close"
                     data-course-id="{{id}}"></button>
 
-                <img src="/images/{{hero_image_url}}.jpg" class="card-img-top" alt="Ảnh môn học"
+                <img src="/images/{{hero_image_url}}.jpg" class="w-100 h-100 object-fit-cover rounded-top" alt="Ảnh môn học"
                     loading="lazy">
                 <div class="card-body p-2">
                     <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
