@@ -47,4 +47,61 @@
         </form>
     </div>
 </div>
+
+{{#section "js"}}
+<script>
+    const btnEnable = document.querySelector('#btnEnable'); //lấy phần tử có id="btnEnable"
+    const inputs = document.querySelectorAll('#frmEditProfile input'); //lấy toàn bộ input trong form
+    const form = document.querySelector('#frmEditProfile'); //lấy thẻ <form id="frmEditProfile">...</form> để gắn sự kiện “submit
+
+    // Nút "Enable change" -> bật các ô input để chỉnh sửa
+    btnEnable.addEventListener('click', () => {
+        inputs.forEach(i => i.removeAttribute('disabled'));
+    });
+
+    // Khi nhấn “Enable change” — bật chế độ chỉnh sửa
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // chặn submit mặc định để kiểm tra
+
+        const full_name = document.querySelector('#full_name').value.trim();
+        const email = document.querySelector('#email').value.trim();
+        const phone = document.querySelector('#phone').value.trim();
+        const dob = document.querySelector('#dob').value.trim();
+        const address = document.querySelector('#address').value.trim();
+        const bio = document.querySelector('#bio').value.trim();
+
+        // ✅ Kiểm tra rỗng
+        if (!full_name || !email || !phone || !dob || !address || !bio) {
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+        }
+
+        // ✅ Kiểm tra email hợp lệ (regex cơ bản)
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert('Email không hợp lệ.');
+            return;
+        }
+
+        // ✅ Kiểm tra số điện thoại (chỉ số, >= 10 ký tự)
+        if (!/^\d{10,}$/.test(phone)) {
+            alert('Số điện thoại phải có ít nhất 10 chữ số.');
+            return;
+        }
+
+        // ✅ Kiểm tra ngày sinh (ngày hợp lệ, không lớn hơn hôm nay)
+        const birthDate = new Date(dob);
+        const today = new Date();
+        if (isNaN(birthDate.getTime()) || birthDate > today) {
+            alert('Ngày sinh không hợp lệ.');
+            return;
+        }
+
+        // ✅ Nếu tất cả đều hợp lệ -> gửi form thật
+        alert('Thông tin hợp lệ. Dữ liệu sẽ được lưu lại.');
+        event.target.submit();
+    });
+</script>
+{{/section}}
+
 {{/std_profile}}

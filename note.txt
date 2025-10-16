@@ -1,3 +1,17 @@
 render != redict
 render sẽ hiện ra file handlebar nhưng url vẫn giữ nguyên
 redirect gửi lệnh cho trình duyệt yêu cầu một URL mới (GET)
+---------------------------------------------------------------------------------
+Cái gì kiểm tra được ở client (trình duyệt) thì làm ở client
+Ví dụ:
+Kiểm tra “Email trống” → hiện lỗi ngay mà không cần reload trang.
+Kiểm tra “Mật khẩu và xác nhận không trùng” → báo ngay trong form.
+Kiểm tra “Số điện thoại phải đủ 10 số”.
+Kiểm tra “Không được chọn ngày sinh trong tương lai”
+
+nhưng cái gì cần bảo mật hoặc xác minh thực tế thì phải làm lại ở server.”
+Ví dụ:
+Kiểm tra email có hợp lệ và chưa tồn tại trong database.
+Kiểm tra user_id gửi lên có thật không.
+Kiểm tra role = 'admin' có hợp lệ hay không.
+Xác thực mật khẩu (hash & bcrypt).

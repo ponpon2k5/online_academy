@@ -19,7 +19,7 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false } // secure = true chỉ dùng khi https
 }))
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); //Giúp Express đọc dữ liệu trong form POST
 
 app.use(async function (req, res, next) {
     if(req.session.isAuthenticated){
@@ -29,7 +29,7 @@ app.use(async function (req, res, next) {
     next();
 });
 
-
+//view engine
 app.engine("handlebars", engine({
   extname: ".handlebars",
   defaultLayout: "main",
@@ -42,6 +42,7 @@ app.engine("handlebars", engine({
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
+//static files
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
 //router
@@ -53,10 +54,13 @@ app.use("/account", accountRouter);
 import coursesRouter from "./routes/courses.route.js";
 app.use("/courses", coursesRouter);
 
+
+//test homepage
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
 });
 
+//start server
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });

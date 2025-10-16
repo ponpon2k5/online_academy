@@ -1,7 +1,6 @@
 import express from 'express';
-import bcrypt from 'bcryptjs'
-import path from 'path';
 import userModel from '../models/user.model.js'
+import { checkAuthenticated } from '../middlewares/auth.mdw.js';
 const router = express.Router();
 //function
 function getPagination(page, totalItems, limit) {
@@ -28,7 +27,7 @@ function getPagination(page, totalItems, limit) {
 }
 
 //profile student
-router.get('/profile-favor-courses', async (req, res) => {
+router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
     const userId = req.session.authUser.id;
@@ -49,7 +48,7 @@ router.get('/profile-favor-courses', async (req, res) => {
         pagination,
     });
 });
-router.get('/profile-purchased-courses', async (req, res) => {
+router.get('/profile-purchased-courses',checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
     const userId = req.session.authUser.id;
@@ -71,7 +70,7 @@ router.get('/profile-purchased-courses', async (req, res) => {
     });
 });
 //edit profile
-router.get('/profile-edit', (req, res) => {
+router.get('/profile-edit',checkAuthenticated, (req, res) => {
     res.render('vwStudents/std_edit_profile', { title: 'Hồ sơ cá nhân' });
 });
 router.post('/profile-edit', async (req, res) => {
@@ -106,7 +105,7 @@ router.get('/change-password', (req, res) => {
     res.render('vwStudents/std_change_pass');
 });
 //delete course
-router.delete('/favor-courses/:id', async (req, res) => {
+router.delete('/favor-courses/:id', checkAuthenticated,async (req, res) => {
     if (!req.session.authUser) { // kiểm tra lại trạng thái đăng nhập
         return res.status(403).json({ success: false, message: 'Bạn cần đăng nhập.' });
     }

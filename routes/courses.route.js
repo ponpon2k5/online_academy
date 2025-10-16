@@ -19,6 +19,7 @@ router.get('/view-courses', async (req, res) => {
         list: list
     });
 });
+
 //enroll course
 router.post('/enroll-course', async (req, res) => {
     if (!req.session.authUser) {
@@ -30,8 +31,8 @@ router.post('/enroll-course', async (req, res) => {
 
     await coursesModel.enrollCourse(userId, courseId);
     res.redirect('/courses/view-courses'); // Redirect to the purchased courses page after enrollment
-
 });
+
 //course detail
 router.get('/course-detail/:id', async (req, res) => {
     const courseId = req.params.id;
@@ -44,6 +45,7 @@ router.get('/course-detail/:id', async (req, res) => {
         course: course
     });
 });
+
 //purchase course
 router.get('/purchase-courses/:id', async (req, res) => {
     const courseId = req.params.id;
@@ -70,6 +72,7 @@ router.post('/purchase-courses-process/:id', async (req, res) => {
     }
     res.redirect('/courses/view-courses');
 });
+
 //video courses
 router.get('/preview-lessons/:id', async (req, res) => {
     const courseId = req.params.id;
