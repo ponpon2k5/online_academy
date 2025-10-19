@@ -4,31 +4,46 @@
     Discover thousands of courses from top instructors. Learn new skills, advance your career, or explore a new hobby—all in one place.
   </p>
   <a href="/courses/view-courses" class="btn btn-primary btn-lg px-4">Browse Courses</a>
+  
+  <h3>🔥 Featured Courses</h3>
+<div class="row mt-3">
+  {{#each featuredCourses}}
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <img src="{{this.image}}" class="card-img-top" alt="{{this.title}}">
+      <div class="card-body">
+        <h5 class="card-title">{{this.title}}</h5>
+        <p class="card-text">{{this.description}}</p>
+        <a href="/course/{{this.id}}" class="btn btn-primary">View Details</a>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
+<h3 class="mt-5">🔥 Most Viewed Courses</h3>
+<div class="row mt-3">
+  {{#each mostViewedCourses}}
+  <div class="col-md-3">
+    <div class="card">
+      <img src="{{this.image}}" class="card-img-top">
+      <div class="card-body">
+        <h5>{{this.title}}</h5>
+      </div>
+    </div>
+  </div>
+  {{/each}}
 </div>
 
-<div class="row mt-5">
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
+<h3 class="mt-5">🆕 Newest Courses</h3>
+<div class="row mt-3">
+  {{#each newestCourses}}
+  <div class="col-md-3">
+    <div class="card">
+      <img src="{{this.image}}" class="card-img-top">
       <div class="card-body">
-        <h5 class="card-title">Learn at Your Own Pace</h5>
-        <p class="card-text">Access courses anytime, anywhere, and learn on your schedule.</p>
+        <h5>{{this.title}}</h5>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Expert Instructors</h5>
-        <p class="card-text">Gain knowledge from industry leaders and experienced educators.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Wide Range of Topics</h5>
-        <p class="card-text">From programming to photography, find courses that match your interests.</p>
-      </div>
-    </div>
-  </div>
+  {{/each}}
 </div>
