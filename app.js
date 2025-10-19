@@ -12,6 +12,7 @@ import passport from 'passport';
 import GoogleStrategy from 'passport-google-oauth20';
 import FacebookStrategy from 'passport-facebook';
 import userModel from './models/user.model.js';
+import adminCategories from "./routes/admin.categories.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -109,6 +110,19 @@ app.engine("handlebars", engine({
     }
   },
 }));
+app.engine(
+  "handlebars",
+  engine({
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    defaultLayout: "main",
+    extname: ".handlebars",
+    helpers: {
+      eq: function (a, b) {
+        return a === b;
+      },
+    },
+  })
+);
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
@@ -165,6 +179,9 @@ app.get("/", (req, res) => {
 });
 
 //start server
+app.use(express.urlencoded({ extended: true }));
+app.use("/admin/categories", adminCategories);
+
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
