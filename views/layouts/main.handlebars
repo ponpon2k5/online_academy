@@ -23,9 +23,12 @@
       <a class="nav-link" href="#">Explore</a>
 
       <!-- Ô tìm kiếm -->
-      <form class="d-flex flex-grow-1 mx-3">
+      <form class="d-flex flex-grow-1 mx-3" method="get" action="/courses/search" role ="search">
         <input class="form-control rounded-pill" type="search" placeholder="Tìm kiếm nội dung bất kỳ"
-          aria-label="Search">
+          aria-label="Search" name="q" />
+        <button class="btn rounded-pill btn-outline-success" type="submit">
+          <i class="bi bi-search"></i> Tìm Kiếm
+        </button>
       </form>
 
       <!-- Menu bên phải -->

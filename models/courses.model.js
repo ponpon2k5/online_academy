@@ -16,6 +16,10 @@ export default {
             .select('courses.title as course_title', 'lessons.lesson as lesson_title', 'lessons.video_url')
             .where('course_id', courseId).first();
     },
+    findCourseByQuery(query){
+        return db('courses')
+        .whereRaw('fts @@ to_tsquery(remove_accents(?))', [query]);
+    },
     findCourseById(courseId) {
         return db('courses').where('id', courseId).first();
     },
@@ -54,5 +58,6 @@ export default {
                 update_time: db.fn.now(),
             });
     },
+
     
 }

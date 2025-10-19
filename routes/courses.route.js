@@ -127,9 +127,30 @@ router.post('/save-progress', express.json(), async (req, res) => {
         return res.status(400).json({ message: 'Bad payload' });
     }
     await coursesModel.saveProgess(user_id, lesson_id, seconds, completed, new Date());
-    console.log(`[DB] ✅ Đã lưu tiến độ: user=${user_id}, lesson=${lesson_id}, seconds=${seconds}`);
+    console.log(`[DB] Đã lưu tiến độ: user=${user_id}, lesson=${lesson_id}, seconds=${seconds}`);
 
     res.json({ ok: true });
+});
+//search courses
+router.get('/search', async (req, res) => {
+    const query = req.query.q || '';
+    const terms = query.trim().split(/\s+/).map(t => `${t}:*`).join(' & ');
+    const courses = await coursesModel.findCourseByQuery(terms);
+    if (query.length === 0) {
+        console.log("Không có khóa học nào");
+        res.render("vwCourses/search_courses", {
+            q: query,
+            empty: true
+        })
+    }
+    else {
+        console.log("Đã tìm thấy khóa học nào");
+        res.render("vwCourses/search_courses", {
+            q: query,
+            empty: false,
+            courses: courses
+        })
+    }
 });
 
 export default router;
