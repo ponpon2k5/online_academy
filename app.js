@@ -63,7 +63,7 @@ app.get("/", (req, res) => {
 //start server
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
-
+});
 
 app.get("/course/:id", (req, res) => {
   res.render("courseDetail", { layout: "main" });
@@ -74,7 +74,3 @@ app.get("/search", (req, res) => {
 });
 
 
-app.use("/course", courseRoute);
-
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
