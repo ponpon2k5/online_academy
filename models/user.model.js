@@ -59,5 +59,28 @@ export default {
             throw new Error('Course not found');
         }
         return db('enrollments').insert({ id:enrollID, user_id: userId, course_id: courseId, price_paid: course.price, purchased_at: new Date(), refunded: false });
+    },
+
+    add(user) {
+        return db('users').insert(user);
+    },
+
+    async findByUsername(username) {
+        const result = await db('users').where('username', username);
+        return result.length > 0 ? result[0] : null;
+    },
+
+    async findByEmail(email) {
+        const result = await db('users').where('email', email);
+        return result.length > 0 ? result[0] : null;
+    },
+
+    async findById(id) {
+        const result = await db('users').where('id', id);
+        return result.length > 0 ? result[0] : null;
+    },
+
+    patch(id, user) {
+        return db('users').where('id', id).update(user);
     }
-}
+};
