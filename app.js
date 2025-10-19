@@ -2,6 +2,7 @@ import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
+import courseRoute from "./routes/course.route.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,9 @@ app.get("/course/:id", (req, res) => {
 app.get("/search", (req, res) => {
   res.render("search", { layout: "main" });
 });
+
+
+app.use("/course", courseRoute);
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

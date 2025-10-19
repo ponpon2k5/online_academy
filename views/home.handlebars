@@ -1,48 +1,68 @@
 <div class="container mt-4">
-  <div id="homeCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+  <div id="homeCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="3000">
     <div class="carousel-inner">
       <div class="carousel-item active">
-        <img src="/images/banner1.jpg" class="d-block w-100 rounded" alt="Banner 1">
+        <img src="https://img.timviecthietke.com/2021/06/kich-thuoc-banner-website-1.png" class="d-block w-100 banner-img" alt="Banner 1">
       </div>
       <div class="carousel-item">
-        <img src="/images/banner2.jpg" class="d-block w-100 rounded" alt="Banner 2">
+        <img src="https://www.shutterstock.com/image-vector/data-science-banner-web-icon-260nw-1567366987.jpg" class="d-block w-100 banner-img" alt="Banner 2">
+      </div>
+      <div class="carousel-item">
+        <img src="https://itplus-academy.edu.vn/landing-page/landingpage-uiux/images/Banner%20UIUX%201.jpg" class="d-block w-100 banner-img" alt="Banner 3">
       </div>
     </div>
+
+    <!-- Nút điều hướng trái phải -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
   </div>
+</div>
 
   <h3>🔥 Featured Courses</h3>
-  <div class="row mt-3">
-    {{!-- ví dụ 3 khóa học nổi bật --}}
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <img src="/images/react-course.jpg" class="card-img-top" alt="React">
-        <div class="card-body">
-          <h5 class="card-title">React for Beginners</h5>
-          <p class="card-text">Learn React from scratch with practical examples.</p>
-          <a href="/course/1" class="btn btn-primary">View Details</a>
-        </div>
+<div class="row mt-3">
+  {{#each featuredCourses}}
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <img src="{{this.image}}" class="card-img-top" alt="{{this.title}}">
+      <div class="card-body">
+        <h5 class="card-title">{{this.title}}</h5>
+        <p class="card-text">{{this.description}}</p>
+        <a href="/course/{{this.id}}" class="btn btn-primary">View Details</a>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <img src="/images/react-course.jpg" class="card-img-top" alt="React">
-        <div class="card-body">
-          <h5 class="card-title">React for Beginners</h5>
-          <p class="card-text">Learn React from scratch with practical examples.</p>
-          <a href="/course/1" class="btn btn-primary">View Details</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <img src="/images/react-course.jpg" class="card-img-top" alt="React">
-        <div class="card-body">
-          <h5 class="card-title">React for Beginners</h5>
-          <p class="card-text">Learn React from scratch with practical examples.</p>
-          <a href="/course/1" class="btn btn-primary">View Details</a>
-        </div>
-      </div>
-    </div>
-    {{!-- lặp tương tự --}}
   </div>
+  {{/each}}
+</div>
+<h3 class="mt-5">🔥 Most Viewed Courses</h3>
+<div class="row mt-3">
+  {{#each mostViewedCourses}}
+  <div class="col-md-3">
+    <div class="card">
+      <img src="{{this.image}}" class="card-img-top">
+      <div class="card-body">
+        <h5>{{this.title}}</h5>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
+
+<h3 class="mt-5">🆕 Newest Courses</h3>
+<div class="row mt-3">
+  {{#each newestCourses}}
+  <div class="col-md-3">
+    <div class="card">
+      <img src="{{this.image}}" class="card-img-top">
+      <div class="card-body">
+        <h5>{{this.title}}</h5>
+      </div>
+    </div>
+  </div>
+  {{/each}}
 </div>
