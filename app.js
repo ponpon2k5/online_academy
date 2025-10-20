@@ -49,7 +49,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(ensureAuth);
 
 app.get("/", (req, res) => {
-  return res.redirect("/instructor/courses");
+  res.render("home");
 });
 
 app.get("/debug/login/:role", (req, res) => {
