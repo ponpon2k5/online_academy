@@ -94,6 +94,41 @@ app.get("/debug/db", async (_req, res) => {
   }
 });
 
+app.get("/debug/seed-dev", async (req, res) => {
+  try {
+    if (!req.session?.user?.id) return res.status(400).send("Login first");
+    const me = req.session.user;
+
+    // upsert instructor profile theo id session (DÙNG name, KHÔNG dùng full_name)
+    await db("profiles")
+      .insert({
+        id: me.id,
+        name: "DEV Instructor",
+        role: "instructor",
+        email: "dev@local",
+      })
+      .onConflict("id")
+      .merge({ role: "instructor" });
+
+    // ensure 1 category 'development'
+    await db.raw(`
+      insert into categories (id, name, slug, level, sort_order)
+      values (gen_random_uuid()::text, 'Development', 'development', 1, 0)
+      on conflict (slug) do nothing;
+    `);
+
+    const cat = await db("categories").where("slug", "development").first();
+    res.json({
+      ok: true,
+      session_user: me,
+      category: { id: cat.id, name: cat.name },
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
 app.use(express.urlencoded({ extended: true }));
 
 // Authentication middleware

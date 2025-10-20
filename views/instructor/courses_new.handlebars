@@ -1,0 +1,44 @@
+<h3 class="mb-3">Create Course</h3>
+<form method="post" action="/instructor/courses" class="row g-3">
+  <div class="col-md-6">
+    <label class="form-label">Title *</label>
+    <input name="title" class="form-control" required />
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Slug *</label>
+    <input name="slug" class="form-control" required placeholder="unique-course-slug" />
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Category *</label>
+    <select name="category_id" class="form-select" required>
+      <option value="">-- choose --</option>
+      {{#each categories}}
+        <option value="{{this.id}}">{{this.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Hero Image URL</label>
+    <input name="hero_image_url" class="form-control" />
+  </div>
+  <div class="col-12">
+    <label class="form-label">Short Description *</label>
+    <textarea name="short_desc" rows="2" class="form-control" required></textarea>
+  </div>
+  <div class="col-12">
+    <label class="form-label">Long Description (WYSIWYG) *</label>
+    <textarea id="long_desc" name="long_desc" class="form-control" required></textarea>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Price</label>
+    <input name="price" type="number" step="0.01" class="form-control"/>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Promo Price</label>
+    <input name="promo_price" type="number" step="0.01" class="form-control"/>
+  </div>
+  <div class="col-12">
+    <button class="btn btn-primary">Save Draft</button>
+    <a href="/instructor/courses" class="btn btn-outline-secondary">Cancel</a>
+  </div>
+</form>

@@ -23,11 +23,55 @@ r.get("/courses", isInstructor, async (req, res) => {
     .where("c.instructor_id", me.id)
     .orderBy("c.created_at", "desc");
 
-  res.render("instrutor/courses_index", {
+  res.render("instructor/courses_index", {
     layout: "admin",
     title: "My Courses",
     courses: rows,
   });
+});
+
+r.get("/courses/new", isInstructor, async (_req, res) => {
+  const cats = await db("categories")
+    .select("id", "name")
+    .orderBy("sort_order", "asc");
+  res.render("instructor/courses_new", {
+    layout: "admin",
+    title: "Create Course",
+    categories: cats,
+    _editor_head: `<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>`,
+    _editor_foot: `<script>tinymce.init({ selector:'#long_desc', height: 360 });</script>`,
+  });
+});
+
+r.post("/courses", isInstructor, async (req, res) => {
+  const me = req.session.user;
+  const {
+    category_id,
+    title,
+    slug,
+    short_desc,
+    long_desc,
+    hero_image_url,
+    price,
+    promo_price,
+  } = req.body;
+
+  if (!category_id || !title || !slug || !short_desc || !long_desc) {
+    return res.status(400).send("Missing required fields");
+  }
+  await db("courses").insert({
+    instructor_id: me.id,
+    category_id,
+    title,
+    slug,
+    short_desc,
+    long_desc,
+    hero_image_url: hero_image_url || null,
+    price: price ? Number(price) : 0,
+    promo_price: promo_price ? Number(promo_price) : null,
+    status: "draft",
+  });
+  res.redirect("/instructor/courses");
 });
 
 export default r;
