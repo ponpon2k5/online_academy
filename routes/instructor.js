@@ -154,4 +154,64 @@ r.post(
   }
 );
 
+r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  const course = await db("courses").where("id", courseId).first();
+  if (!course) return res.status(404).send("Course not found");
+  const cats = await db("categories")
+    .select("id", "name")
+    .orderBy("sort_order", "asc");
+
+  res.render("instructor/courses_edit", {
+    layout: "admin",
+    title: "Edit Course",
+    course,
+    categories: cats,
+    _editor_head: `<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>`,
+    _editor_foot: `<script>tinymce.init({ selector:'#long_desc', height: 360 });</script>`,
+  });
+});
+
+r.post("/courses/:courseId/edit", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  const {
+    category_id,
+    title,
+    short_desc,
+    long_desc,
+    hero_image_url,
+    price,
+    promo_price,
+  } = req.body;
+
+  await db("courses")
+    .where("id", courseId)
+    .update({
+      category_id,
+      title,
+      short_desc,
+      long_desc,
+      hero_image_url: hero_image_url || null,
+      price: price ? Number(price) : 0,
+      promo_price: promo_price ? Number(promo_price) : null,
+      updated_at: db.fn.now(),
+    });
+  res.redirect("/instructor/courses");
+});
+
+r.post("/courses/:courseId/publish", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  await db("courses").where("id", courseId).update({
+    status: "published",
+    last_published_at: db.fn.now(),
+  });
+  res.redirect("/instructor/courses");
+});
+
+r.post("/courses/:courseId/unpublish", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  await db("courses").where("id", courseId).update({ status: "draft" });
+  res.redirect("/instructor/courses");
+});
+
 export default r;
