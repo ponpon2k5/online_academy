@@ -4,11 +4,16 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { engine } from "express-handlebars";
 import adminCategories from "./routes/admin.categories.js";
+import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+
+app.use(
+  session({ secret: "dev-secret", resave: false, saveUninitialized: true })
+);
 
 app.engine(
   "handlebars",
@@ -30,6 +35,24 @@ app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
+});
+
+app.get("/debug/login/:role", (req, res) => {
+  const role = req.params.role; // "student" | "instructor" | "admin"
+  // NOTE: nhớ thay "mock-uuid-instructor" bằng 1 id hợp lệ trong bảng profiles khi test thật.
+  const id =
+    role === "instructor"
+      ? "mock-uuid-instructor"
+      : role === "admin"
+      ? "mock-uuid-admin"
+      : "mock-uuid-student";
+
+  req.session.user = { id, full_name: `DEV ${role}`, role };
+  res.send(`Logged in as ${role}`);
+});
+
+app.get("/debug/me", (req, res) => {
+  res.json(req.session.user ?? null);
 });
 
 app.use(express.urlencoded({ extended: true }));
