@@ -1,0 +1,26 @@
+<h4 class="mb-3">Sections – {{course.title}}</h4>
+
+<form class="row g-2 mb-4" method="post" action="/instructor/courses/{{course.id}}/sections">
+  <div class="col-md-6">
+    <input name="title" class="form-control" placeholder="Section title" required/>
+  </div>
+  <div class="col-md-3">
+    <input name="sort_order" type="number" class="form-control" placeholder="Sort"/>
+  </div>
+  <div class="col-md-3">
+    <button class="btn btn-primary w-100">Add Section</button>
+  </div>
+</form>
+
+<table class="table table-bordered">
+  <thead><tr><th>#</th><th>Title</th></tr></thead>
+  <tbody>
+  {{#each sections}}
+    <tr><td>{{this.sort_order}}</td><td>{{this.title}}</td></tr>
+  {{/each}}
+  </tbody>
+</table>
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" href="/instructor/courses">Back</a>
+</div>

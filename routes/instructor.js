@@ -74,4 +74,34 @@ r.post("/courses", isInstructor, async (req, res) => {
   res.redirect("/instructor/courses");
 });
 
+r.get("/courses/:courseId/sections", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  const course = await db("courses").where("id", courseId).first();
+  if (!course) return res.status(404).send("Course not found");
+
+  const sections = await db("course_sections")
+    .where("course_id", courseId)
+    .orderBy("sort_order", "asc");
+
+  res.render("instructor/sections_index", {
+    layout: "admin",
+    title: `Sections - ${course.title}`,
+    course,
+    sections,
+  });
+});
+
+r.post("/courses/:courseId/sections", isInstructor, async (req, res) => {
+  const { courseId } = req.params;
+  const { title, sort_order } = req.body;
+  if (!title) return res.redirect(`/instructor/courses/${courseId}/sections`);
+
+  await db("course_sections").insert({
+    course_id: courseId,
+    title,
+    sort_order: sort_order ? Number(sort_order) : 0,
+  });
+  res.redirect(`/instructor/courses/${courseId}/sections`);
+});
+
 export default r;
