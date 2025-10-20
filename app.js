@@ -8,6 +8,7 @@ import session from "express-session";
 import { ensureAuth } from "./middlewares/auth.js";
 import instructorRoutes from "./routes/instructor.js";
 import adminRoutes from "./routes/admin.js";
+import { requireAuth, requireRole } from "./middlewares/auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,6 +41,10 @@ app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+
+app.use(requireAuth);
+app.use("/instructor", instructorRoutes);
+app.use("/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });

@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { isInstructor } from "../middlewares/auth.js";
+import { isInstructor, requireRole } from "../middlewares/auth.js";
 import db from "../utils/db.js";
 
 const r = Router();
+
+r.use(requireRole("instructor", "admin"));
+r.get("/dashboard", (req, res) => res.render("instructor/dashboard"));
 
 r.get("/ping", isInstructor, (_req, res) => res.send("instructor ok"));
 

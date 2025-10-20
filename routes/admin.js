@@ -1,7 +1,10 @@
 import db from "../utils/db.js";
-import { isAdmin } from "../middlewares/auth.js";
+import { isAdmin, requireRole } from "../middlewares/auth.js";
 import { Router } from "express";
 const r = Router();
+
+r.use(requireRole("admin"));
+r.get("/dashboard", (req, res) => res.render("admin/dashboard"));
 
 r.get("/dashboard", isAdmin, async (_req, res) => {
   const [c, u, e] = await Promise.all([

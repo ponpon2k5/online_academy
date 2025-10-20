@@ -21,3 +21,25 @@ export function isAdmin(req, res, next) {
   if (r === "admin") return next();
   return res.status(403).send("Forbidden: Admin only");
 }
+
+export function requireAuth(req, res, next) {
+  // TODO: thay bằng session/real auth
+  if (!req.user) {
+    // Temp for dev: mock a user (instructor)
+    req.user = {
+      id: "instructor-001",
+      role: "instructor",
+      name: "Dev Instructor",
+    };
+  }
+  next();
+}
+
+export function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).send("Unauthorized");
+    if (!roles.includes(req.user.role))
+      return res.status(403).send("Forbidden");
+    next();
+  };
+}
