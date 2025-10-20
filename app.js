@@ -30,6 +30,9 @@ app.engine(
       eq: function (a, b) {
         return a === b;
       },
+      ne: function (a, b) {
+        return a !== b;
+      },
     },
   })
 );
