@@ -1,0 +1,24 @@
+<h3 class="mb-3">My Courses</h3>
+<div class="mb-3 text-end">
+  <a href="/instructor/courses/new" class="btn btn-primary">+ New Course</a>
+</div>
+<table class="table table-striped align-middle">
+  <thead><tr>
+    <th>Title</th><th>Category</th><th>Status</th><th>Students</th><th>Rating</th><th>Actions</th>
+  </tr></thead>
+  <tbody>
+  {{#each courses}}
+    <tr>
+      <td>{{this.title}}</td>
+      <td>{{this.category_name}}</td>
+      <td><span class="badge bg-secondary">{{this.status}}</span></td>
+      <td>{{this.students_count}}</td>
+      <td>{{this.rating_avg}}</td>
+      <td>
+        <a class="btn btn-sm btn-outline-secondary" href="/instructor/courses/{{this.id}}/sections">Sections</a>
+        <a class="btn btn-sm btn-outline-primary" href="/instructor/courses/{{this.id}}/edit">Edit</a>
+      </td>
+    </tr>
+  {{/each}}
+  </tbody>
+</table>

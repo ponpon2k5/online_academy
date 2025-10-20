@@ -58,6 +58,42 @@ app.get("/debug/me", (req, res) => {
   res.json(req.session.user ?? null);
 });
 
+import db from "./utils/db.js";
+
+app.get("/debug/db", async (_req, res) => {
+  try {
+    const r = await db.raw("select 1 as ok");
+    return res.json({ ok: true, row: r?.rows?.[0] ?? null });
+  } catch (e) {
+    // Mở bung AggregateError
+    const detail = {
+      name: e?.name,
+      message: e?.message,
+      code: e?.code,
+      errno: e?.errno,
+      address: e?.address,
+      port: e?.port,
+      stack: e?.stack,
+    };
+
+    // Nếu là AggregateError, liệt kê các lỗi con
+    if (e?.errors && Array.isArray(e.errors)) {
+      detail.inner = e.errors.map((err) => ({
+        name: err?.name,
+        message: err?.message,
+        code: err?.code,
+        errno: err?.errno,
+        address: err?.address,
+        port: err?.port,
+        stack: err?.stack,
+      }));
+    }
+
+    console.error("DB PING ERROR DETAIL:", detail);
+    return res.status(500).json({ ok: false, error: "DB_ERROR", detail });
+  }
+});
+
 app.use(express.urlencoded({ extended: true }));
 
 // Authentication middleware
