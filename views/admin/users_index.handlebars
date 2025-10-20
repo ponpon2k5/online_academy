@@ -1,17 +1,132 @@
-<h3 class="mb-3">Users</h3>
-<div class="mb-3">
-  <a href="/admin/users/new-instructor" class="btn btn-primary">+ New Instructor</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0"><i class="bi bi-people"></i> Quản lý người dùng</h3>
+  <div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="filterUsers('all')">Tất cả</button>
+    <button type="button" class="btn btn-outline-success" onclick="filterUsers('student')">Học viên</button>
+    <button type="button" class="btn btn-outline-info" onclick="filterUsers('instructor')">Giảng viên</button>
+    <button type="button" class="btn btn-outline-warning" onclick="filterUsers('admin')">Quản trị</button>
+  </div>
 </div>
-<table class="table table-striped">
-  <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Created</th></tr></thead>
-  <tbody>
+
+<div class="mb-3">
+  <a href="/admin/users/new-instructor" class="btn btn-primary">
+    <i class="bi bi-person-plus"></i> Tạo giảng viên mới
+  </a>
+</div>
+
+{{#if users.length}}
+<div class="row">
   {{#each users}}
-    <tr>
-      <td>{{this.name}}</td>
-      <td>{{this.role}}</td>
-      <td>{{this.email}}</td>
-      <td>{{this.created_at}}</td>
-    </tr>
+  <div class="col-md-6 col-lg-4 mb-4 user-card" data-role="{{this.role}}">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">{{this.name}}</h6>
+            <span class="badge {{#if (eq this.role 'admin')}}bg-warning{{else if (eq this.role 'instructor')}}bg-info{{else}}bg-success{{/if}}">
+              {{#if (eq this.role 'admin')}}Quản trị viên
+              {{else if (eq this.role 'instructor')}}Giảng viên
+              {{else}}Học viên{{/if}}
+            </span>
+          </div>
+        </div>
+        
+        <div class="mb-2">
+          <small class="text-muted">
+            <i class="bi bi-envelope"></i> {{this.email}}
+          </small>
+        </div>
+        
+        <div class="mb-3">
+          <small class="text-muted">
+            <i class="bi bi-calendar"></i> Tham gia: {{formatDate this.created_at}}
+          </small>
+        </div>
+        
+        <div class="d-grid gap-2">
+          {{#if (eq this.role 'instructor')}}
+          <a href="/instructor/courses?instructor={{this.id}}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-book"></i> Xem khóa học
+          </a>
+          {{else if (eq this.role 'student')}}
+          <a href="/student/courses?student={{this.id}}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-person-check"></i> Xem hồ sơ
+          </a>
+          {{/if}}
+          <button class="btn btn-outline-secondary btn-sm" onclick="viewUserDetails('{{this.id}}')">
+            <i class="bi bi-eye"></i> Chi tiết
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   {{/each}}
-  </tbody>
-</table>
+</div>
+{{else}}
+<div class="text-center py-5">
+  <i class="bi bi-people display-1 text-muted"></i>
+  <h4 class="mt-3 text-muted">Chưa có người dùng nào</h4>
+  <p class="text-muted">Hệ thống chưa có người dùng nào được đăng ký</p>
+</div>
+{{/if}}
+
+<!-- Modal chi tiết người dùng -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Chi tiết người dùng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="userDetailsContent">
+        <!-- Nội dung sẽ được load bằng JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function filterUsers(role) {
+  const cards = document.querySelectorAll('.user-card');
+  const buttons = document.querySelectorAll('.btn-group button');
+  
+  // Reset button styles
+  buttons.forEach(btn => {
+    btn.classList.remove('active');
+    btn.classList.add('btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
+  });
+  
+  // Set active button
+  const activeBtn = document.querySelector(`button[onclick="filterUsers('${role}')"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
+  }
+  
+  // Filter cards
+  cards.forEach(card => {
+    if (role === 'all' || card.dataset.role === role) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+function viewUserDetails(userId) {
+  // Có thể implement AJAX call để lấy chi tiết người dùng
+  document.getElementById('userDetailsContent').innerHTML = `
+    <p>Chi tiết người dùng ID: ${userId}</p>
+    <p>Chức năng này có thể được mở rộng để hiển thị thông tin chi tiết hơn.</p>
+  `;
+  
+  const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+  modal.show();
+}
+</script>

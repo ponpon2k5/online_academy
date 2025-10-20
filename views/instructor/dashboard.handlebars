@@ -1,10 +1,175 @@
-<h3 class="mb-3">Instructor Dashboard</h3>
-<div class="row g-3">
-  <div class="col-md-4">
-    <a class="btn btn-primary w-100" href="/instructor/courses">Quản lý khoá học</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0"><i class="bi bi-speedometer2"></i> Bảng điều khiển giảng viên</h3>
+  <div class="text-muted">
+    <i class="bi bi-person-circle"></i> Xin chào, {{#if authUser}}{{authUser.full_name}}{{else}}Giảng viên{{/if}}
   </div>
+</div>
+
+<!-- Thống kê tổng quan -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{totalCourses}}</h4>
+            <p class="mb-0">Khóa học</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-book display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{totalStudents}}</h4>
+            <p class="mb-0">Học viên</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-people display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-warning text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{totalLessons}}</h4>
+            <p class="mb-0">Bài học</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-play-circle display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{avgRating}}</h4>
+            <p class="mb-0">Đánh giá TB</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-star display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Các hành động nhanh -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-lightning"></i> Hành động nhanh</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <a href="/instructor/courses/new" class="btn btn-primary w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-plus-circle display-4 mb-2"></i>
+              <span>Tạo khóa học mới</span>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="/instructor/courses" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-book display-4 mb-2"></i>
+              <span>Quản lý khóa học</span>
+            </a>
+          </div>
+          <div class="col-md-4">
+            <a href="/instructor/profile" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-person-gear display-4 mb-2"></i>
+              <span>Cài đặt hồ sơ</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Khóa học gần đây -->
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Khóa học gần đây</h5>
+        <a href="/instructor/courses" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+      </div>
+      <div class="card-body">
+        {{#if recentCourses.length}}
+        <div class="list-group list-group-flush">
+          {{#each recentCourses}}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">{{this.title}}</h6>
+              <small class="text-muted">{{this.category_name}} • {{formatDate this.created_at}}</small>
+            </div>
+            <div>
+              <span class="badge {{#if (eq this.status 'published')}}bg-success{{else}}bg-secondary{{/if}}">
+                {{#if (eq this.status 'published')}}Đã xuất bản{{else}}Bản nháp{{/if}}
+              </span>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+        {{else}}
+        <div class="text-center py-4">
+          <i class="bi bi-book display-4 text-muted"></i>
+          <p class="text-muted mt-2">Chưa có khóa học nào</p>
+          <a href="/instructor/courses/new" class="btn btn-primary">Tạo khóa học đầu tiên</a>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  
   <div class="col-md-4">
-    <a class="btn btn-outline-primary w-100" href="/instructor/courses/new">Đăng khoá học mới</a>
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Thống kê</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Khóa học đã xuất bản:</span>
+            <strong>{{publishedCourses}}</strong>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Khóa học bản nháp:</span>
+            <strong>{{draftCourses}}</strong>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Tổng doanh thu:</span>
+            <strong>{{formatCurrency totalRevenue}}</strong>
+          </div>
+        </div>
+        <hr>
+        <div class="text-center">
+          <a href="/instructor/analytics" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-bar-chart"></i> Xem báo cáo chi tiết
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

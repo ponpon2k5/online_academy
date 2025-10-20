@@ -1,31 +1,111 @@
-<h3 class="mb-3">Create Instructor</h3>
-<form method="post" action="/admin/users/new-instructor" class="row g-3">
-  <div class="col-md-6">
-    <label class="form-label">ID (profiles.id)</label>
-    <input name="id" class="form-control" required />
+<div class="card">
+  <div class="card-header">
+    <h3 class="mb-0"><i class="bi bi-person-plus"></i> Tạo tài khoản giảng viên mới</h3>
   </div>
-  <div class="col-md-6">
-    <label class="form-label">Full name *</label>
-    <input name="name" class="form-control" required />
+  <div class="card-body">
+    <form method="post" action="/admin/users/new-instructor" class="row g-3" id="instructorForm">
+      <div class="col-md-6">
+        <label class="form-label">ID tài khoản *</label>
+        <input name="id" class="form-control" required placeholder="Nhập ID duy nhất cho giảng viên" />
+        <div class="form-text">ID này sẽ được sử dụng để đăng nhập hệ thống</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Họ và tên *</label>
+        <input name="name" class="form-control" required placeholder="Nhập họ và tên đầy đủ" />
+        <div class="form-text">Tên hiển thị của giảng viên</div>
+      </div>
+      
+      <div class="col-md-6">
+        <label class="form-label">Email *</label>
+        <input name="email" type="email" class="form-control" required placeholder="email@example.com" />
+        <div class="form-text">Email liên hệ của giảng viên</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Tên đăng nhập</label>
+        <input name="username" class="form-control" placeholder="Tên đăng nhập (tùy chọn)" />
+        <div class="form-text">Có thể để trống, hệ thống sẽ dùng ID</div>
+      </div>
+      
+      <div class="col-md-6">
+        <label class="form-label">Mật khẩu tạm thời</label>
+        <input name="password" type="password" class="form-control" placeholder="Mật khẩu tạm thời" />
+        <div class="form-text">Giảng viên sẽ được yêu cầu đổi mật khẩu lần đầu đăng nhập</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Xác nhận mật khẩu</label>
+        <input name="password_confirm" type="password" class="form-control" placeholder="Nhập lại mật khẩu" />
+        <div class="form-text">Nhập lại mật khẩu để xác nhận</div>
+      </div>
+      
+      <div class="col-12">
+        <label class="form-label">Tiểu sử giảng viên</label>
+        <textarea name="bio" rows="4" class="form-control" placeholder="Mô tả về kinh nghiệm, chuyên môn của giảng viên..."></textarea>
+        <div class="form-text">Thông tin này sẽ hiển thị trên hồ sơ giảng viên</div>
+      </div>
+      
+      <div class="col-12">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle"></i>
+          <strong>Lưu ý:</strong> Sau khi tạo tài khoản, giảng viên sẽ nhận được thông tin đăng nhập qua email (nếu có cấu hình email). Họ sẽ được yêu cầu đổi mật khẩu lần đầu đăng nhập.
+        </div>
+      </div>
+      
+      <div class="col-12">
+        <hr>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-person-plus"></i> Tạo tài khoản giảng viên
+        </button>
+        <a href="/admin/users" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+      </div>
+    </form>
   </div>
-  <div class="col-md-4">
-    <label class="form-label">Email</label>
-    <input name="email" type="email" class="form-control" />
-  </div>
-  <div class="col-md-4">
-    <label class="form-label">Username</label>
-    <input name="username" class="form-control" />
-  </div>
-  <div class="col-md-4">
-    <label class="form-label">Temp Password</label>
-    <input name="password" class="form-control" />
-  </div>
-  <div class="col-12">
-    <label class="form-label">Bio</label>
-    <textarea name="bio" rows="3" class="form-control"></textarea>
-  </div>
-  <div class="col-12">
-    <button class="btn btn-primary">Create</button>
-    <a href="/admin/users" class="btn btn-outline-secondary">Cancel</a>
-  </div>
-</form>
+</div>
+
+<script>
+// Form validation
+document.getElementById('instructorForm').addEventListener('submit', function(e) {
+  const id = document.querySelector('input[name="id"]').value.trim();
+  const name = document.querySelector('input[name="name"]').value.trim();
+  const email = document.querySelector('input[name="email"]').value.trim();
+  const password = document.querySelector('input[name="password"]').value;
+  const passwordConfirm = document.querySelector('input[name="password_confirm"]').value;
+  
+  if (!id || !name || !email) {
+    e.preventDefault();
+    alert('Vui lòng điền đầy đủ các trường bắt buộc!');
+    return false;
+  }
+  
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    e.preventDefault();
+    alert('Email không hợp lệ!');
+    return false;
+  }
+  
+  // Validate password if provided
+  if (password && password !== passwordConfirm) {
+    e.preventDefault();
+    alert('Mật khẩu xác nhận không khớp!');
+    return false;
+  }
+  
+  if (password && password.length < 6) {
+    e.preventDefault();
+    alert('Mật khẩu phải có ít nhất 6 ký tự!');
+    return false;
+  }
+});
+
+// Auto-generate username from ID
+document.querySelector('input[name="id"]').addEventListener('input', function() {
+  const id = this.value;
+  const usernameField = document.querySelector('input[name="username"]');
+  if (!usernameField.value) {
+    usernameField.value = id;
+  }
+});
+</script>

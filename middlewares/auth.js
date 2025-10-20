@@ -1,13 +1,16 @@
 export function ensureAuth(req, _res, next) {
   if (!req.session) req.session = {};
-  // DEV: nếu chưa login, tự set student để tránh null (có thể bỏ nếu muốn)
-  if (!req.session.user)
+
+  // Đồng bộ session data từ authUser sang user để tương thích
+  if (req.session.authUser) {
     req.session.user = {
-      id: "mock-uuid-student",
-      role: "student",
-      full_name: "DEV student",
+      id: req.session.authUser.id,
+      full_name: req.session.authUser.name || req.session.authUser.full_name,
+      role: req.session.authUser.role,
+      email: req.session.authUser.email,
     };
-  // Đồng bộ req.user từ session để các middleware khác dùng chung
+  }
+
   req.user = req.session.user;
   next();
 }

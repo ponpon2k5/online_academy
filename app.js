@@ -3,20 +3,18 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { engine } from "express-handlebars";
 import adminCategories from "./routes/admin.categories.js";
 import session from "express-session";
 import { ensureAuth } from "./middlewares/auth.js";
 import instructorRoutes from "./routes/instructor.js";
 import adminRoutes from "./routes/admin.js";
 import { requireAuth, requireRole } from "./middlewares/auth.js";
-import session from 'express-session';
-import hbs_sections from 'express-handlebars-sections';
-import passport from 'passport';
-import GoogleStrategy from 'passport-google-oauth20';
-import FacebookStrategy from 'passport-facebook';
-import userModel from './models/user.model.js';
-import 'dotenv/config';
+import hbs_sections from "express-handlebars-sections";
+import passport from "passport";
+import GoogleStrategy from "passport-google-oauth20";
+import FacebookStrategy from "passport-facebook";
+import userModel from "./models/user.model.js";
+import "dotenv/config";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,34 +46,77 @@ app.engine(
 app.use(express.urlencoded({ extended: true })); //Giúp Express đọc dữ liệu trong form POST
 app.use(express.json());
 //session
-app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-    secret: 'duybodoi',
+app.set("trust proxy", 1); // trust first proxy
+app.use(
+  session({
+    secret: "duybodoi",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // secure = true chỉ dùng khi https
-}))
-
+    cookie: { secure: false }, // secure = true chỉ dùng khi https
+  })
+);
 
 app.use(async function (req, res, next) {
-    if(req.session.isAuthenticated){
-        res.locals.isAuthenticated = true;
-        res.locals.authUser = req.session.authUser;
+  if (req.session.isAuthenticated) {
+    res.locals.isAuthenticated = true;
+    res.locals.authUser = req.session.authUser;
+
+    // Đồng bộ session data từ authUser sang user để tương thích
+    if (req.session.authUser) {
+      req.session.user = {
+        id: req.session.authUser.id,
+        full_name: req.session.authUser.name || req.session.authUser.full_name,
+        role: req.session.authUser.role,
+        email: req.session.authUser.email,
+      };
     }
-    next();
+  }
+  next();
 });
 
 //view engine
-app.engine("handlebars", engine({
-  extname: ".handlebars",
-  defaultLayout: "main",
-  layoutsDir: path.join(__dirname, "views", "layouts"),
-  partialsDir: path.join(__dirname, "views", "partials"),
-  helpers: {
-        section: hbs_sections(),
-        eq: (a, b) => String(a) === String(b),
-    }
-}));
+app.engine(
+  "handlebars",
+  engine({
+    extname: ".handlebars",
+    defaultLayout: "main",
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    partialsDir: path.join(__dirname, "views", "partials"),
+    helpers: {
+      section: hbs_sections(),
+      eq: (a, b) => String(a) === String(b),
+      ne: (a, b) => String(a) !== String(b),
+      and: (a, b) => a && b,
+      substring: (str, start, end) => (str ? str.substring(start, end) : ""),
+      formatDate: (date) => {
+        if (!date) return "";
+        const d = new Date(date);
+        return d.toLocaleDateString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+      },
+      formatCurrency: (amount) => {
+        if (!amount) return "0 VNĐ";
+        return new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(amount);
+      },
+      divide: (a, b) => {
+        if (!b || b === 0) return 0;
+        return a / b;
+      },
+      multiply: (a, b) => {
+        return a * b;
+      },
+      round: (num) => {
+        return Math.round(num);
+      },
+    },
+  })
+);
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 
@@ -87,80 +128,100 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(async function (req, res, next) {
-    if (req.session.isAuthenticated) {
-        res.locals.isAuthenticated = true;
-        res.locals.authUser = req.session.authUser;
+  if (req.session.isAuthenticated) {
+    res.locals.isAuthenticated = true;
+    res.locals.authUser = req.session.authUser;
+
+    // Đồng bộ session data từ authUser sang user để tương thích
+    if (req.session.authUser) {
+      req.session.user = {
+        id: req.session.authUser.id,
+        full_name: req.session.authUser.name || req.session.authUser.full_name,
+        role: req.session.authUser.role,
+        email: req.session.authUser.email,
+      };
     }
-    next();
+  }
+  next();
 });
 // Cấu hình serialize/deserialize
 passport.serializeUser((user, done) => {
-    done(null, user.id);
+  done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
-    try {
-        const user = await userModel.findById(id);
-        done(null, user);
-    } catch (err) {
-        done(err, null);
-    }
+  try {
+    const user = await userModel.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
 // Cấu hình Google Strategy
-passport.use(new GoogleStrategy({
-    clientID: 'YOUR_GOOGLE_CLIENT_ID',
-    clientSecret: 'YOUR_GOOGLE_CLIENT_SECRET',
-    callbackURL: '/account/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: "YOUR_GOOGLE_CLIENT_ID",
+      clientSecret: "YOUR_GOOGLE_CLIENT_SECRET",
+      callbackURL: "/account/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
         let user = await userModel.findByEmail(profile.emails[0].value);
         if (!user) {
-            user = {
-                username: profile.id,
-                email: profile.emails[0].value,
-                name: profile.displayName,
-                password: '',
-                permission: 0
-            };
-            await userModel.add(user);
+          user = {
+            username: profile.id,
+            email: profile.emails[0].value,
+            name: profile.displayName,
+            password: "",
+            permission: 0,
+          };
+          await userModel.add(user);
         }
         done(null, user);
-    } catch (err) {
+      } catch (err) {
         done(err, null);
+      }
     }
-}));
+  )
+);
 
 // Cấu hình Facebook Strategy
-passport.use(new FacebookStrategy({
-    clientID: 'YOUR_FACEBOOK_APP_ID',
-    clientSecret: 'YOUR_FACEBOOK_APP_SECRET',
-    callbackURL: '/account/auth/facebook/callback',
-    profileFields: ['id', 'emails', 'displayName']
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: "YOUR_FACEBOOK_APP_ID",
+      clientSecret: "YOUR_FACEBOOK_APP_SECRET",
+      callbackURL: "/account/auth/facebook/callback",
+      profileFields: ["id", "emails", "displayName"],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
         let user = await userModel.findByEmail(profile.emails[0].value);
         if (!user) {
-            user = {
-                username: profile.id,
-                email: profile.emails[0].value,
-                name: profile.displayName,
-                password: '',
-                permission: 0
-            };
-            await userModel.add(user);
+          user = {
+            username: profile.id,
+            email: profile.emails[0].value,
+            name: profile.displayName,
+            password: "",
+            permission: 0,
+          };
+          await userModel.add(user);
         }
         done(null, user);
-    } catch (err) {
+      } catch (err) {
         done(err, null);
+      }
     }
-}));
+  )
+);
 
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Thêm để xử lý JSON trong fetch
-app.use('/static', express.static('static'));
+app.use("/static", express.static("static"));
 
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
@@ -174,23 +235,7 @@ app.get("/", (req, res) => {
   res.render("home");
 });
 
-app.get("/debug/login/:role", (req, res) => {
-  const role = req.params.role; // "student" | "instructor" | "admin"
-  // NOTE: nhớ thay "mock-uuid-instructor" bằng 1 id hợp lệ trong bảng profiles khi test thật.
-  const id =
-    role === "instructor"
-      ? "mock-uuid-instructor"
-      : role === "admin"
-      ? "mock-uuid-admin"
-      : "mock-uuid-student";
-
-  req.session.user = { id, full_name: `DEV ${role}`, role };
-  res.send(`Logged in as ${role}`);
-});
-
-app.get("/debug/me", (req, res) => {
-  res.json(req.session.user ?? null);
-});
+// Debug routes removed - dashboard is working correctly
 
 import db from "./utils/db.js";
 
@@ -228,47 +273,12 @@ app.get("/debug/db", async (_req, res) => {
   }
 });
 
-app.get("/debug/seed-dev", async (req, res) => {
-  try {
-    if (!req.session?.user?.id) return res.status(400).send("Login first");
-    const me = req.session.user;
-
-    // upsert instructor profile theo id session (DÙNG name, KHÔNG dùng full_name)
-    await db("profiles")
-      .insert({
-        id: me.id,
-        name: "DEV Instructor",
-        role: "instructor",
-        email: "dev@local",
-      })
-      .onConflict("id")
-      .merge({ role: "instructor" });
-
-    // ensure 1 category 'development'
-    await db.raw(`
-      insert into categories (id, name, slug, level, sort_order)
-      values (gen_random_uuid()::text, 'Development', 'development', 1, 0)
-      on conflict (slug) do nothing;
-    `);
-
-    const cat = await db("categories").where("slug", "development").first();
-    res.json({
-      ok: true,
-      session_user: me,
-      category: { id: cat.id, name: cat.name },
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ ok: false, error: String(e) });
-  }
-});
+// Debug seed route removed - use proper database seeding instead
 
 // Routes
 app.use("/instructor", instructorRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/categories", adminCategories);
-
-
 
 //router
 //student routes
@@ -280,7 +290,6 @@ import coursesRouter from "./routes/courses.route.js";
 app.use("/courses", coursesRouter);
 import adminRouter from "./routes/admin.categories.js";
 app.use("/admin/categories", adminRouter);
-
 
 //test homepage
 app.get("/", (req, res) => {
@@ -299,5 +308,5 @@ app.get("/course/:id", (req, res) => {
 });
 
 app.use(function (req, res) {
-    res.status(404).render('404');
+  res.status(404).render("404");
 });

@@ -1,6 +1,194 @@
-<h3 class="mb-4">Admin Dashboard</h3>
-<div class="row g-3">
-  <div class="col-md-4"><div class="card p-3"><h6>Total Courses</h6><div class="fs-3">{{total_courses}}</div></div></div>
-  <div class="col-md-4"><div class="card p-3"><h6>Total Users</h6><div class="fs-3">{{total_users}}</div></div></div>
-  <div class="col-md-4"><div class="card p-3"><h6>Total Enrollments</h6><div class="fs-3">{{total_enrolls}}</div></div></div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0"><i class="bi bi-speedometer2"></i> Bảng điều khiển quản trị</h3>
+  <div class="text-muted">
+    <i class="bi bi-shield-check"></i> Quản trị viên
+  </div>
+</div>
+
+<!-- Thống kê tổng quan -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card bg-primary text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{total_courses}}</h4>
+            <p class="mb-0">Khóa học</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-book display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-success text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{total_users}}</h4>
+            <p class="mb-0">Người dùng</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-people display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-warning text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{total_enrolls}}</h4>
+            <p class="mb-0">Đăng ký</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-person-check display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card bg-info text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h4 class="mb-0">{{total_instructors}}</h4>
+            <p class="mb-0">Giảng viên</p>
+          </div>
+          <div class="align-self-center">
+            <i class="bi bi-person-badge display-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Các hành động nhanh -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-lightning"></i> Quản lý hệ thống</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <a href="/admin/courses" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-book display-4 mb-2"></i>
+              <span>Quản lý khóa học</span>
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/users" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-people display-4 mb-2"></i>
+              <span>Quản lý người dùng</span>
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/categories" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-tags display-4 mb-2"></i>
+              <span>Quản lý danh mục</span>
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="/admin/users/new-instructor" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center">
+              <i class="bi bi-person-plus display-4 mb-2"></i>
+              <span>Tạo giảng viên</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Thống kê chi tiết -->
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Thống kê hệ thống</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Khóa học theo trạng thái</h6>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Đã xuất bản:</span>
+                <strong class="text-success">{{published_courses}}</strong>
+              </div>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Bản nháp:</span>
+                <strong class="text-warning">{{draft_courses}}</strong>
+              </div>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Đã gỡ bỏ:</span>
+                <strong class="text-danger">{{removed_courses}}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6>Người dùng theo vai trò</h6>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Học viên:</span>
+                <strong class="text-primary">{{student_count}}</strong>
+              </div>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Giảng viên:</span>
+                <strong class="text-info">{{instructor_count}}</strong>
+              </div>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>Quản trị viên:</span>
+                <strong class="text-success">{{admin_count}}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Hoạt động gần đây</h5>
+      </div>
+      <div class="card-body">
+        {{#if recent_activities.length}}
+        <div class="list-group list-group-flush">
+          {{#each recent_activities}}
+          <div class="list-group-item px-0">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1">{{this.action}}</h6>
+              <small>{{formatDate this.created_at}}</small>
+            </div>
+            <p class="mb-1">{{this.description}}</p>
+          </div>
+          {{/each}}
+        </div>
+        {{else}}
+        <div class="text-center py-3">
+          <i class="bi bi-activity display-4 text-muted"></i>
+          <p class="text-muted mt-2">Chưa có hoạt động nào</p>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+  </div>
 </div>

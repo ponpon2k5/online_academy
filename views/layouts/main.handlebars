@@ -39,9 +39,19 @@
         <li class="nav-item">
           <a class="nav-link" href="#">Udemy Business</a>
         </li>
+        {{#if (and isAuthenticated (eq authUser.role 'instructor'))}}
         <li class="nav-item">
-          <a class="nav-link" href="#">Teach on Udemy</a>
+          <a class="nav-link" href="/instructor/dashboard">Teach on Academy</a>
         </li>
+        {{else if (and isAuthenticated (eq authUser.role 'admin'))}}
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/dashboard">Admin Panel</a>
+        </li>
+        {{else}}
+        <li class="nav-item">
+          <a class="nav-link" href="#">Teach on Academy</a>
+        </li>
+        {{/if}}
         <li class="nav-item">
           <a class="nav-link" href="#"><i class="bi bi-cart"></i></a>
         </li>
@@ -52,9 +62,19 @@
             Welcome, <b>{{authUser.name}}</b>
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="/student/profile-favor-courses"><i class="bi bi-person"></i>Trang cá
-                nhân</a></li>
-            <li><a class="dropdown-item" href="/account/change-password"><i class="bi bi"></i>Đổi mật khẩu</a></li>
+            {{#if (eq authUser.role 'instructor')}}
+            <li><a class="dropdown-item" href="/instructor/dashboard"><i class="bi bi-mortarboard"></i> Instructor Dashboard</a></li>
+            <li><a class="dropdown-item" href="/instructor/courses"><i class="bi bi-book"></i> My Courses</a></li>
+            <li><hr class="dropdown-divider"></li>
+            {{else if (eq authUser.role 'admin')}}
+            <li><a class="dropdown-item" href="/admin/dashboard"><i class="bi bi-shield-check"></i> Admin Dashboard</a></li>
+            <li><a class="dropdown-item" href="/admin/courses"><i class="bi bi-book"></i> Manage Courses</a></li>
+            <li><a class="dropdown-item" href="/admin/users"><i class="bi bi-people"></i> Manage Users</a></li>
+            <li><hr class="dropdown-divider"></li>
+            {{else}}
+            <li><a class="dropdown-item" href="/student/profile-favor-courses"><i class="bi bi-person"></i>Trang cá nhân</a></li>
+            {{/if}}
+            <li><a class="dropdown-item" href="/account/change-password"><i class="bi bi-key"></i>Đổi mật khẩu</a></li>
             <li>
               <hr class="dropdown-divider">
             </li>
