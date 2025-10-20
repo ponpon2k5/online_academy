@@ -9,20 +9,32 @@ import passport from 'passport';
 import GoogleStrategy from 'passport-google-oauth20';
 import FacebookStrategy from 'passport-facebook';
 import userModel from './models/user.model.js';
-import adminCategories from "./routes/admin.categories.js";
+import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.set('trust proxy', 1);
+app.use(express.urlencoded({ extended: true })); //Giúp Express đọc dữ liệu trong form POST
+app.use(express.json());
+//session
+app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-    secret: 'lotusalone',
+    secret: 'duybodoi',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
-}));
+    cookie: { secure: false } // secure = true chỉ dùng khi https
+}))
+
+
+app.use(async function (req, res, next) {
+    if(req.session.isAuthenticated){
+        res.locals.isAuthenticated = true;
+        res.locals.authUser = req.session.authUser;
+    }
+    next();
+});
 
 //view engine
 app.engine("handlebars", engine({
@@ -31,11 +43,15 @@ app.engine("handlebars", engine({
   layoutsDir: path.join(__dirname, "views", "layouts"),
   partialsDir: path.join(__dirname, "views", "partials"),
   helpers: {
-        section: hbs_sections()
+        section: hbs_sections(),
+        eq: (a, b) => String(a) === String(b),
     }
 }));
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
+
+//static files
+app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
 // Khởi tạo Passport
 app.use(passport.initialize());
@@ -111,19 +127,6 @@ passport.use(new FacebookStrategy({
     }
 }));
 
-app.engine(
-  "handlebars",
-  engine({
-    layoutsDir: path.join(__dirname, "views", "layouts"),
-    defaultLayout: "main",
-    extname: ".handlebars",
-    helpers: {
-      eq: function (a, b) {
-        return a === b;
-      },
-    },
-  })
-);
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
@@ -142,28 +145,6 @@ app.get("/", (req, res) => {
 
 
 
-import { checkAuthenticated, checkAdmin } from './middlewares/auth.mdw.js';
-
-app.use('/account', accountRouter);
-
-app.use(function (req, res) {
-    res.status(404).render('404');
-});
-
-//view engine
-app.engine("handlebars", engine({
-  extname: ".handlebars",
-  defaultLayout: "main",
-  layoutsDir: path.join(__dirname, "views", "layouts"),
-  partialsDir: path.join(__dirname, "views", "partials"),
-  helpers: {
-        section: hbs_sections()
-    }
-}));
-//static files
-app.use("/images", express.static(path.join(__dirname, "statics", "img")));
-
-
 //router
 //student routes
 import studentRouter from "./routes/student.route.js";
@@ -172,6 +153,8 @@ import accountRouter from "./routes/account.route.js";
 app.use("/account", accountRouter);
 import coursesRouter from "./routes/courses.route.js";
 app.use("/courses", coursesRouter);
+import adminRouter from "./routes/admin.categories.js";
+app.use("/admin/categories", adminRouter);
 
 
 //test homepage
@@ -181,7 +164,6 @@ app.get("/", (req, res) => {
 
 //start server
 app.use(express.urlencoded({ extended: true }));
-app.use("/admin/categories", adminCategories);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
@@ -191,7 +173,6 @@ app.get("/course/:id", (req, res) => {
   res.render("courseDetail", { layout: "main" });
 });
 
-app.get("/search", (req, res) => {
-  res.render("search", { layout: "main" });
+app.use(function (req, res) {
+    res.status(404).render('404');
 });
-

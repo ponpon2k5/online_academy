@@ -48,6 +48,7 @@ router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
         pagination,
     });
 });
+//
 router.get('/profile-purchased-courses',checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
@@ -76,7 +77,7 @@ router.get('/profile-edit',checkAuthenticated, (req, res) => {
 router.post('/profile-edit', async (req, res) => {
     const user = {
         id: req.session.authUser.id,
-        full_name: req.body.full_name,
+        name: req.body.full_name,
         email: req.body.email,
         dob: req.body.dob,
         address: req.body.address,
@@ -91,7 +92,7 @@ router.post('/profile-edit', async (req, res) => {
     }
     console.log('Update user', user.id, 'successfully');
     console.log(user);
-    res.render('vwStudents/std_favor_courses');
+    res.redirect('/student/profile-favor-courses');
 });
 
 router.get('/profile-process-course', (req, res) => {

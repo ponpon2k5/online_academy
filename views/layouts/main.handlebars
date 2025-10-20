@@ -23,7 +23,7 @@
       </a>
 
       <!-- Nút Explore -->
-      <a class="nav-link" href="#">Explore</a>
+      <a class="nav-link" href="/">Explore</a>
 
       <!-- Ô tìm kiếm -->
       <form class="d-flex flex-grow-1 mx-3" method="get" action="/courses/search" role ="search">
@@ -49,7 +49,7 @@
         {{#if isAuthenticated}}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Welcome, <b>{{authUser.full_name}}</b>
+            Welcome, <b>{{authUser.name}}</b>
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="/student/profile-favor-courses"><i class="bi bi-person"></i>Trang cá

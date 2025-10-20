@@ -9,7 +9,7 @@ export default {
         return db('watchlist as w')
             .join('courses as c', 'w.course_id', 'c.id')
             .where('w.user_id', userId)
-            .select('c.id', 'c.title', 'c.price', 'c.hero_image_url','c.long_desc')
+            .select('c.id', 'c.title', 'c.price', 'c.hero_image_url', 'c.long_desc')
             .limit(limit)
             .offset(offset);
     },
@@ -20,7 +20,7 @@ export default {
         return db('enrollments as e')
             .join('courses as c', 'e.course_id', 'c.id')
             .where('e.user_id', userId)
-            .select('c.id', 'c.title', 'c.price', 'c.hero_image_url','c.long_desc','e.purchased_at')
+            .select('c.id', 'c.title', 'c.price', 'c.hero_image_url', 'c.long_desc', 'e.purchased_at')
             .limit(limit)
             .offset(offset);
     },
@@ -30,7 +30,7 @@ export default {
     editUser(user) {
         const id = user.id;
         delete user.id;
-        return db('user')
+        return db('profiles')
             .where('id', id)
             .update(user);
     },
@@ -51,36 +51,25 @@ export default {
             .where({ user_id: userId, course_id: courseId })
             .del();
     },
-    findCourseByID(courseId){
+    findCourseByID(courseId) {
         return db('courses').where('id', courseId).first();
     },
     enrollCourse(userId, courseId, enrollID, course) {
         if (!course) {
             throw new Error('Course not found');
         }
-        return db('enrollments').insert({ id:enrollID, user_id: userId, course_id: courseId, price_paid: course.price, purchased_at: new Date(), refunded: false });
+        return db('enrollments').insert({ id: enrollID, user_id: userId, course_id: courseId, price_paid: course.price, purchased_at: new Date(), refunded: false });
     },
 
-    add(user) {
-        return db('users').insert(user);
+    findByEmail(email) {
+        const norm = String(email || '').trim().toLowerCase();
+        return db('profiles')
+            .whereRaw('LOWER(email) = ?', [norm])
+            .first();
     },
 
-    async findByUsername(username) {
-        const result = await db('users').where('username', username);
-        return result.length > 0 ? result[0] : null;
-    },
-
-    async findByEmail(email) {
-        const result = await db('users').where('email', email);
-        return result.length > 0 ? result[0] : null;
-    },
-
-    async findById(id) {
-        const result = await db('users').where('id', id);
-        return result.length > 0 ? result[0] : null;
-    },
 
     patch(id, user) {
-        return db('users').where('id', id).update(user);
+        return db('profile').where('id', id).update(user);
     }
 };
