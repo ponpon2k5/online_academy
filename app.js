@@ -18,6 +18,8 @@ app.use(
   session({ secret: "dev-secret", resave: false, saveUninitialized: true })
 );
 
+app.use("/uploads", express.static("./public/uploads"));
+
 app.engine(
   "handlebars",
   engine({
