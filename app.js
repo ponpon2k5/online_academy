@@ -3,11 +3,8 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { engine } from "express-handlebars";
 import session from 'express-session';
 import hbs_sections from 'express-handlebars-sections';
-import accountRouter from './routes/account.route.js';
-import session from 'express-session';
 import passport from 'passport';
 import GoogleStrategy from 'passport-google-oauth20';
 import FacebookStrategy from 'passport-facebook';
@@ -26,6 +23,19 @@ app.use(session({
     saveUninitialized: true,
     cookie: { secure: false }
 }));
+
+//view engine
+app.engine("handlebars", engine({
+  extname: ".handlebars",
+  defaultLayout: "main",
+  layoutsDir: path.join(__dirname, "views", "layouts"),
+  partialsDir: path.join(__dirname, "views", "partials"),
+  helpers: {
+        section: hbs_sections()
+    }
+}));
+app.set("view engine", "handlebars");
+app.set("views", path.join(__dirname, "views"));
 
 // Khởi tạo Passport
 app.use(passport.initialize());
@@ -101,15 +111,6 @@ passport.use(new FacebookStrategy({
     }
 }));
 
-app.engine("handlebars", engine({
-    helpers: {
-    fill_section: hbs_sections(),
-    eq: (a, b) => a === b,
-    format_number(value) {
-      return new Intl.NumberFormat('en-US').format(value);
-    }
-  },
-}));
 app.engine(
   "handlebars",
   engine({

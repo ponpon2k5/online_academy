@@ -38,6 +38,28 @@ router.post('/login', async (req, res) => {
         return res.status(401).json({ message: 'Sai thông tin đăng nhập' });
     }
 });
+
+router.get('/signin', function (req, res) {
+    res.render('vwAccount/signin', { error: false });
+});
+
+router.post('/signin', async function (req, res) {
+    const user = await userModel.findByUsername(req.body.username);
+    if (!user) {
+        return res.render('vwAccount/signin', { error: true });
+    }
+
+    const password_match = bcrypt.compareSync(req.body.password, user.password);
+    if (!password_match) {
+        return res.render('vwAccount/signin', { error: true });
+    }
+
+    req.session.isAuthenticated = true;
+    req.session.authUser = user;
+    const retUrl = req.session.retUrl || '/';
+    delete req.session.retUrl;
+    res.redirect(retUrl);
+});
 //sign up
 router.get('/signup', (req, res) => {
     res.render('vwAccount/signup');
@@ -69,15 +91,15 @@ router.post('/signup', async function (req, res) {
         });
     }
     //đăng ký thành công
+});
 //sign out
 
-router.get('/signup', function (req, res) {
-    res.render('vwAccount/signup');
+router.post('/signout', function (req, res) {
+    req.session.isAuthenticated = false;
+    req.session.authUser = null;
+    res.redirect(req.headers.referer);
 });
-router.get('/signup', function (req, res) {
-    res.render('vwAccount/signup');
-});
-
+// send otp
 router.post('/send-otp', async function (req, res) {
     const { username, password, name, email, dob, permission } = req.body;
 
@@ -160,40 +182,19 @@ router.post('/verify-otp', async function (req, res) {
         res.json({ success: false, message: 'Mã OTP không hợp lệ' });
     }
 });
-
+//check username
 router.get('/is-available', async function (req, res) {
     const username = req.query.username;
     const user = await userModel.findByUsername(username);
     res.json({ isAvailable: !user });
 });
-
+//check email
 router.get('/is-email-available', async function (req, res) {
     const email = req.query.email;
     const user = await userModel.findByEmail(email);
     res.json({ isAvailable: !user });
 });
 
-router.get('/signin', function (req, res) {
-    res.render('vwAccount/signin', { error: false });
-});
-
-router.post('/signin', async function (req, res) {
-    const user = await userModel.findByUsername(req.body.username);
-    if (!user) {
-        return res.render('vwAccount/signin', { error: true });
-    }
-
-    const password_match = bcrypt.compareSync(req.body.password, user.password);
-    if (!password_match) {
-        return res.render('vwAccount/signin', { error: true });
-    }
-
-    req.session.isAuthenticated = true;
-    req.session.authUser = user;
-    const retUrl = req.session.retUrl || '/';
-    delete req.session.retUrl;
-    res.redirect(retUrl);
-});
 
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/account/signin' }), (req, res) => {
@@ -207,12 +208,6 @@ router.get('/auth/facebook/callback', passport.authenticate('facebook', { failur
     req.session.isAuthenticated = true;
     req.session.authUser = req.user;
     res.redirect(req.session.retUrl || '/');
-});
-
-router.post('/signout', function (req, res) {
-    req.session.isAuthenticated = false;
-    req.session.authUser = null;
-    res.redirect(req.headers.referer);
 });
 //change password
 router.get('/change-password', (req, res) => {
@@ -242,12 +237,10 @@ router.post('/change-password', async (req, res) => {
     console.log('User', user.id, 'changed password successfully');
     res.render('vwStudents/std_favor_courses');
 });
-
+//view profile
 router.get('/profile', async function (req, res) {
     res.render('vwAccount/profile', { user: req.session.authUser });
 });
-
-
 router.post('/profile', checkAuthenticated, async function (req, res) {
     const id = req.body.id;
     const user = {
@@ -279,6 +272,5 @@ router.post('/change-pwd', checkAuthenticated, async function (req, res) {
     await userModel.patch(id, user);
     req.session.authUser.password = hash_password;
     res.redirect('/account/profile');
-});
 });
 export default router;
