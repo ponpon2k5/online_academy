@@ -42,9 +42,11 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
 
-app.use(requireAuth);
-app.use("/instructor", instructorRoutes);
-app.use("/admin", adminRoutes);
+// Parse urlencoded form bodies BEFORE routes
+app.use(express.urlencoded({ extended: true }));
+
+// Authentication/session bootstrap
+app.use(ensureAuth);
 
 app.get("/", (req, res) => {
   res.render("home", { title: "Trang chủ" });
@@ -138,11 +140,6 @@ app.get("/debug/seed-dev", async (req, res) => {
     res.status(500).json({ ok: false, error: String(e) });
   }
 });
-
-app.use(express.urlencoded({ extended: true }));
-
-// Authentication middleware
-app.use(ensureAuth);
 
 // Routes
 app.use("/instructor", instructorRoutes);

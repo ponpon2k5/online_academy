@@ -1,8 +1,12 @@
 import db from "../utils/db.js";
 import express from "express";
 import slugify from "slugify";
+import { isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();
+
+// Guard all category routes to admin only
+router.use(isAdmin);
 
 router.get("/", async (req, res) => {
   try {

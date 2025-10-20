@@ -7,6 +7,8 @@ export function ensureAuth(req, _res, next) {
       role: "student",
       full_name: "DEV student",
     };
+  // Đồng bộ req.user từ session để các middleware khác dùng chung
+  req.user = req.session.user;
   next();
 }
 
@@ -23,23 +25,19 @@ export function isAdmin(req, res, next) {
 }
 
 export function requireAuth(req, res, next) {
-  // TODO: thay bằng session/real auth
-  if (!req.user) {
-    // Temp for dev: mock a user (instructor)
-    req.user = {
-      id: "instructor-001",
-      role: "instructor",
-      name: "Dev Instructor",
-    };
-  }
+  // Đảm bảo có thông tin user từ session
+  if (!req.session?.user) return res.status(401).send("Unauthorized");
+  req.user = req.session.user;
   next();
 }
 
 export function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user) return res.status(401).send("Unauthorized");
-    if (!roles.includes(req.user.role))
-      return res.status(403).send("Forbidden");
+    const user = req.session?.user || req.user;
+    if (!user) return res.status(401).send("Unauthorized");
+    if (!roles.includes(user.role)) return res.status(403).send("Forbidden");
+    // đồng bộ lại
+    req.user = user;
     next();
   };
 }

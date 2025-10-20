@@ -1,6 +1,7 @@
 import db from "../utils/db.js";
 import { isAdmin, requireRole } from "../middlewares/auth.js";
 import { Router } from "express";
+import bcrypt from "bcryptjs";
 const r = Router();
 
 r.use(requireRole("admin"));
@@ -72,13 +73,19 @@ r.post("/users/new-instructor", isAdmin, async (req, res) => {
   const { id, name, email, username, password, bio } = req.body;
   if (!id || !name) return res.status(400).send("id & name required");
 
+  let passwordHash = null;
+  if (password) {
+    const salt = await bcrypt.genSalt(10);
+    passwordHash = await bcrypt.hash(password, salt);
+  }
+
   await db("profiles").insert({
     id,
     name,
     role: "instructor",
     email: email || null,
     username: username || null,
-    password: password || null,
+    password: passwordHash,
     bio: bio || null,
   });
   res.redirect("/admin/users");
