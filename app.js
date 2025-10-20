@@ -49,7 +49,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(ensureAuth);
 
 app.get("/", (req, res) => {
-  res.render("home", { title: "Trang chủ" });
+  return res.redirect("/instructor/courses");
 });
 
 app.get("/debug/login/:role", (req, res) => {
