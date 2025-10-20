@@ -1,0 +1,107 @@
+{{#> std_profile}}
+
+<div class="card" style="width: 50rem;">
+    <div class="card-header">
+        Thông tin cá nhân của học viên
+    </div>
+    <div class="card-body">
+        <form id="frmEditProfile" method="post" action="/student/profile-edit">
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Họ và tên</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Nhập họ và tên">
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email">
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại">
+            </div>
+            <div class="mb-3">
+                <label for="dob" class="form-label">Ngày tháng năm sinh</label>
+                <input type="date" class="form-control" id="dob" name="dob" placeholder="Ngày tháng năm sinh">
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ">
+            </div>
+            <div class="mb-3">
+                <label for="bio" class="form-label">Mô tả về bản thân</label>
+                <input type="text" class="form-control" id="bio" name="bio" placeholder="Nhập mô tả bản thân">
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="/account/change-password" class="btn btn-outline-secondary">
+                    <i class="bi bi-key"></i> Change password
+                </a>
+
+                <div>
+                    <button class="btn btn-outline-secondary" type="button" id="btnEnable">
+                        Enable change
+                    </button>
+                    <button class="btn btn-primary" type="submit" id="btnSave">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{#section "js"}}
+<script>
+    const btnEnable = document.querySelector('#btnEnable'); //lấy phần tử có id="btnEnable"
+    const inputs = document.querySelectorAll('#frmEditProfile input'); //lấy toàn bộ input trong form
+    const form = document.querySelector('#frmEditProfile'); //lấy thẻ <form id="frmEditProfile">...</form> để gắn sự kiện “submit
+
+    // Nút "Enable change" -> bật các ô input để chỉnh sửa
+    btnEnable.addEventListener('click', () => {
+        inputs.forEach(i => i.removeAttribute('disabled'));
+    });
+
+    // Khi nhấn “Enable change” — bật chế độ chỉnh sửa
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // chặn submit mặc định để kiểm tra
+
+        const full_name = document.querySelector('#full_name').value.trim();
+        const email = document.querySelector('#email').value.trim();
+        const phone = document.querySelector('#phone').value.trim();
+        const dob = document.querySelector('#dob').value.trim();
+        const address = document.querySelector('#address').value.trim();
+        const bio = document.querySelector('#bio').value.trim();
+
+        // ✅ Kiểm tra rỗng
+        if (!full_name || !email || !phone || !dob || !address || !bio) {
+            alert('Vui lòng điền đầy đủ thông tin.');
+            return;
+        }
+
+        // ✅ Kiểm tra email hợp lệ (regex cơ bản)
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert('Email không hợp lệ.');
+            return;
+        }
+
+        // ✅ Kiểm tra số điện thoại (chỉ số, >= 10 ký tự)
+        if (!/^\d{10,}$/.test(phone)) {
+            alert('Số điện thoại phải có ít nhất 10 chữ số.');
+            return;
+        }
+
+        // ✅ Kiểm tra ngày sinh (ngày hợp lệ, không lớn hơn hôm nay)
+        const birthDate = new Date(dob);
+        const today = new Date();
+        if (isNaN(birthDate.getTime()) || birthDate > today) {
+            alert('Ngày sinh không hợp lệ.');
+            return;
+        }
+
+        // ✅ Nếu tất cả đều hợp lệ -> gửi form thật
+        alert('Thông tin hợp lệ. Dữ liệu sẽ được lưu lại.');
+        event.target.submit();
+    });
+</script>
+{{/section}}
+
+{{/std_profile}}

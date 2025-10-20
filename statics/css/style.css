@@ -1,0 +1,15 @@
+/* Hiển thị dropdown con khi hover */
+.dropdown-submenu {
+  position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -1px;
+}
+
+/* Cho phép hover mở submenu */
+.dropdown-submenu:hover > .dropdown-menu {
+  display: block;
+}

@@ -1,0 +1,61 @@
+{{#> std_profile}}
+
+<div class="card shadow-sm">
+    <div class="card-header fw-semibold">Khóa học của bạn</div>
+    <div class="card-body">
+        <!-- Container dạng hàng ngang, tự xuống dòng -->
+        <div class="d-flex flex-wrap gap-3">
+
+            <!-- 1 course item -->
+            {{#each courses}}
+            <div class="card" style="width: 13rem;">
+
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 delete-btn" aria-label="Close"
+                    data-course-id="{{id}}"></button>
+
+                <img src="/images/{{hero_image_url}}.jpg" class="w-100 h-100 object-fit-cover rounded-top" alt="Ảnh môn học"
+                    loading="lazy">
+                <div class="card-body p-2">
+                    <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
+                    <p class="card-text small text-muted text-truncate">
+                        {{long_desc}}
+                    </p>
+                    <a href="#" class="btn btn-primary btn-sm w-100">View Detail</a>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+{{#section "js"}}
+<script>
+    //là cách mà Handlebars tổ chức các phần code JavaScript riêng biệt (thường nằm ở cuối trang) trong các layout template.
+    // Gắn sự kiện click vào tất cả nút ❌
+    document.querySelectorAll('.delete-btn').forEach(btn => { // Tìm tất cả các nút trong trang có class .delete-btn.
+        btn.addEventListener('click', async () => { // gắn sự kiện khi người dùng click vào.
+            const courseId = btn.dataset.courseId;
+
+            if (!confirm('Bạn có chắc muốn xóa khóa học này khỏi danh sách yêu thích?')) return; //Hiển thị popup xác nhận.
+
+            try {
+                // Gửi request DELETE đến server
+                const res = await fetch(`/student/favor-courses/${courseId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json(); //res ở đây là phản hồi (Response) mà bạn nhận được sau khi fetch()
+                if (data.success) {
+                    // Xóa thẻ card ra khỏi giao diện
+                    btn.closest('.card').remove();
+                } else {
+                    alert(data.message || 'Không thể xóa khóa học.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Có lỗi xảy ra khi xóa khóa học.');
+            }
+        });
+    });
+</script>
+{{/section}}
+{{/std_profile}}

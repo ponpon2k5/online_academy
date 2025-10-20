@@ -1,0 +1,66 @@
+<div class="row">
+    <!-- Cột trái: Filter -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mt-3">
+            <div class="card-header fw-semibold">
+                Bộ lọc khóa học
+            </div>
+            <div class="card-body">
+                <!-- Danh mục -->
+                <h6 class="fw-bold">Danh mục</h6>
+                <select class="form-select mb-3">
+                    <option value="">Tất cả</option>
+                    <option value="web">Lập trình Web</option>
+                    <option value="mobile">Lập trình Mobile</option>
+                    <option value="ai">Trí tuệ nhân tạo</option>
+                </select>
+
+                <!-- Mức giá -->
+                <h6 class="fw-bold">Mức giá</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="free" checked>
+                    <label class="form-check-label" for="free">Miễn phí</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="price" id="paid">
+                    <label class="form-check-label" for="paid">Trả phí</label>
+                </div>
+
+                <!-- Đánh giá -->
+                <h6 class="fw-bold">Đánh giá</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rate5">
+                    <label class="form-check-label" for="rate5">★★★★★ (5 sao)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rate4">
+                    <label class="form-check-label" for="rate4">★★★★☆ trở lên</label>
+                </div>
+
+                <button class="btn btn-primary w-100 mt-3">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Cột trái: Ds khóa học -->
+    <div class="col-lg-8">
+        <div class="d-flex flex-wrap gap-3">
+            {{#each list}}
+            <div class="card" style="width: 15rem;">
+
+                <img src="/images/{{hero_image_url}}.jpg" class="card-img-top" alt="Ảnh môn học" loading="lazy"
+                    style="height: 180px;">
+                <div class="card-body p-2">
+                    <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
+                    <p class="card-text small text-muted text-truncate">
+                        {{short_desc}}
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm flex-fill">View Detail</a>
+                        <a href="/courses/purchase-courses/{{id}}" class="btn btn-primary btn-sm flex-fill">Purchase</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

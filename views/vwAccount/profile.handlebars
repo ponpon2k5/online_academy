@@ -1,0 +1,48 @@
+<div class="card border-0 shadow-lg border-primary mx-auto" style="max-width: 600px;">
+  <div class="card-header bg-white border-0 py-3 text-center">
+    <h4 class="card-title mb-0">Thông tin cá nhân</h4>
+  </div>
+
+  <div class="card-body p-4">
+    <form method="post" id="frmProfile">
+      <div class="mb-3">
+        <label for="txtId" class="form-label fw-medium">ID</label>
+        <input type="text" class="form-control form-control-lg" id="txtId" name="id" value="{{authUser.id}}" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label for="txtUsername" class="form-label fw-medium">Tên đăng nhập</label>
+        <input type="text" class="form-control form-control-lg" id="txtUsername" value="{{authUser.username}}" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label for="txtName" class="form-label fw-medium">Họ và tên</label>
+        <input type="text" class="form-control form-control-lg" id="txtName" name="name" value="{{authUser.name}}" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="txtEmail" class="form-label fw-medium">Email</label>
+        <input type="email" class="form-control form-control-lg" id="txtEmail" name="email" value="{{authUser.email}}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-medium">Phân quyền</label>
+        {{#if (eq authUser.permission 2)}}
+          <input type="text" class="form-control form-control-lg" value="Admin" readonly>
+        {{else if (eq authUser.permission 1)}}
+          <input type="text" class="form-control form-control-lg" value="Giảng viên (Instructor)" readonly>
+        {{else}}
+          <input type="text" class="form-control form-control-lg" value="Học viên (Student)" readonly>
+        {{/if}}
+      </div>
+
+      <hr class="my-4">
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg px-5 fw-bold">
+          <i class="bi bi-check-circle-fill me-2"></i> Lưu thay đổi
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

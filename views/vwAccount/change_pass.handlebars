@@ -1,0 +1,37 @@
+{{#> std_profile}}
+<div class="card mt-3">
+    <div class="card-header">
+        <h5 class="mb-0">Đổi mật khẩu</h5>
+    </div>
+    <div class="card-body">
+        <form id="frmChangePassword" method="post" action="/account/change-password">
+            <!-- Mật khẩu hiện tại -->
+            <div class="mb-3">
+                <label for="txtOldPassword" class="form-label">Mật khẩu hiện tại</label>
+                <input type="password" class="form-control" id="txtOldPassword" name="oldPassword"
+                    placeholder="Nhập mật khẩu hiện tại">
+            </div>
+
+            <!-- Mật khẩu mới -->
+            <div class="mb-3">
+                <label for="txtNewPassword" class="form-label">Mật khẩu mới</label>
+                <input type="password" class="form-control" id="txtNewPassword" name="newPassword"
+                    placeholder="Nhập mật khẩu mới">
+            </div>
+
+            <!-- Xác nhận mật khẩu mới -->
+            <div class="mb-3">
+                <label for="txtConfirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
+                <input type="password" class="form-control" id="txtConfirmPassword" name="confirmPassword"
+                    placeholder="Nhập lại mật khẩu mới">
+            </div>
+
+            <!-- Hàng nút -->
+            <div class="d-flex justify-content-end gap-2">
+                <button type="reset" class="btn btn-secondary">Hủy</button>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+{{/std_profile}}

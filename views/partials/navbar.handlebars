@@ -1,0 +1,71 @@
+<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+  <div class="container-fluid px-4">
+    <!-- Logo -->
+    <a class="navbar-brand" href="/">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Logo_Tr%C6%B0%E1%BB%9Dng_%C4%90%E1%BA%A1i_H%E1%BB%8Dc_S%C6%B0_Ph%E1%BA%A1m_K%E1%BB%B9_Thu%E1%BA%ADt_TP_H%E1%BB%93_Ch%C3%AD_Minh.png" alt="Logo" height="32">
+    </a>
+
+    <!-- Nút toggle cho mobile -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Nội dung Navbar -->
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <!-- Nút Explore -->
+      <!-- Nút Explore có menu 2 cấp -->
+<ul class="navbar-nav me-3">
+  <li class="nav-item dropdown position-static">
+    <a
+      class="nav-link dropdown-toggle fw-semibold"
+      href="#"
+      id="exploreDropdown"
+      role="button"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+      Explore
+    </a>
+
+    <ul class="dropdown-menu shadow p-3" aria-labelledby="exploreDropdown" style="min-width: 250px;">
+      <!-- Category 1 -->
+      <li class="dropdown-submenu">
+        <a class="dropdown-item dropdown-toggle" href="#">Development</a>
+        <ul class="dropdown-menu">
+          <li><a href="/course/web">Web Development</a></li>
+          <li><a href="/course/data-science">Data Science</a></li>
+          <li><a href="/course/mobile-apps">Mobile Apps</a></li>
+        </ul>
+      </li>
+
+      <!-- Category 2 -->
+      <li class="dropdown-submenu">
+        <a class="dropdown-item dropdown-toggle" href="#">Design</a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="/course/uiux">UI/UX</a></li>
+          <li><a class="dropdown-item" href="/course/graphic">Graphic Design</a></li>
+          <li><a class="dropdown-item" href="/course/animation">3D & Animation</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+
+      <!-- Ô tìm kiếm -->
+      <form class="d-flex flex-grow-1 mx-2">
+        <input class="form-control rounded-pill" type="search" placeholder="Tìm kiếm khóa học, chủ đề..." aria-label="Search">
+      </form>
+
+      <!-- Menu bên phải -->
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link" href="#">Udemy Business</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Teach on Udemy</a></li>
+        <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart fs-5"></i></a></li>
+        <li class="nav-item"><a class="btn btn-outline-dark me-2" href="#">Log in</a></li>
+        <li class="nav-item"><a class="btn btn-primary" href="#">Sign up</a></li>
+        <li class="nav-item ms-2"><a class="btn btn-outline-secondary" href="#"><i class="bi bi-globe"></i></a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
