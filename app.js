@@ -5,6 +5,9 @@ import { dirname } from "path";
 import { engine } from "express-handlebars";
 import adminCategories from "./routes/admin.categories.js";
 import session from "express-session";
+import { ensureAuth } from "./middlewares/auth.js";
+import instructorRoutes from "./routes/instructor.js";
+import adminRoutes from "./routes/admin.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -56,6 +59,13 @@ app.get("/debug/me", (req, res) => {
 });
 
 app.use(express.urlencoded({ extended: true }));
+
+// Authentication middleware
+app.use(ensureAuth);
+
+// Routes
+app.use("/instructor", instructorRoutes);
+app.use("/admin", adminRoutes);
 app.use("/admin/categories", adminCategories);
 
 app.listen(3000, () => {
