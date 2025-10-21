@@ -1,6 +1,7 @@
 import express from 'express';
 import userModel from '../models/user.model.js'
 import { checkAuthenticated } from '../middlewares/auth.mdw.js';
+import coursesModel from '../models/courses.model.js';
 const router = express.Router();
 //function
 function getPagination(page, totalItems, limit) {
@@ -33,7 +34,7 @@ router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
     const userId = req.session.authUser.id;
 
     if (!req.session.authUser) {
-        return res.redirect('/account/login'); 
+        return res.redirect('/account/login');
     }
 
     const total = await userModel.countFavoriteCourses(userId); // tổng số khóa học yêu thích
@@ -49,7 +50,7 @@ router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
     });
 });
 //
-router.get('/profile-purchased-courses',checkAuthenticated, async (req, res) => {
+router.get('/profile-purchased-courses', checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
     const userId = req.session.authUser.id;
@@ -71,7 +72,7 @@ router.get('/profile-purchased-courses',checkAuthenticated, async (req, res) => 
     });
 });
 //edit profile
-router.get('/profile-edit',checkAuthenticated, (req, res) => {
+router.get('/profile-edit', checkAuthenticated, (req, res) => {
     res.render('vwStudents/std_edit_profile', { title: 'Hồ sơ cá nhân' });
 });
 router.post('/profile-edit', async (req, res) => {
@@ -95,9 +96,6 @@ router.post('/profile-edit', async (req, res) => {
     res.redirect('/student/profile-favor-courses');
 });
 
-router.get('/profile-process-course', (req, res) => {
-    res.render('vwStudents/std_process_courses', { title: 'Hồ sơ cá nhân' });
-});
 router.get('/profile-purcharsed-courses', (req, res) => {
     res.render('vwStudents/std_purchased_courses', { title: 'Hồ sơ cá nhân' });
 });
@@ -106,7 +104,7 @@ router.get('/change-password', (req, res) => {
     res.render('vwStudents/std_change_pass');
 });
 //delete course
-router.delete('/favor-courses/:id', checkAuthenticated,async (req, res) => {
+router.delete('/favor-courses/:id', checkAuthenticated, async (req, res) => {
     if (!req.session.authUser) { // kiểm tra lại trạng thái đăng nhập
         return res.status(403).json({ success: false, message: 'Bạn cần đăng nhập.' });
     }
@@ -125,5 +123,29 @@ router.delete('/favor-courses/:id', checkAuthenticated,async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi server.' });
     }
 });
+//show progress courses
+router.get('/profile-process-course', async (req, res) => {
+    const user_id = req.session?.authUser?.id;
+    const limit = 6;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * limit;
 
+    const [total, rows] = await Promise.all([
+        coursesModel.countProgress(user_id),
+        coursesModel.showProgressPaged(user_id, limit, offset)
+    ]);
+
+    const progress = rows.map(r => ({
+        ...r,
+        finish_text: r.isCompleted ? 'Hoàn thành khóa học' : 'Chưa hoàn thành khóa học'
+    }));
+
+    const pagination = getPagination(page, total, limit);
+
+    res.render('vwStudents/std_process_courses', {
+        progress,
+        pagination,
+        empty: progress.length === 0
+    });
+});
 export default router;

@@ -1,16 +1,146 @@
-<div class="card mb-3" style="max-width: 540px;">
-    <div class="row g-0">
-        <div class="col-md-4">
-            <img src="/images/{{course.hero_image_url}}.jpg" class="img-fluid rounded-start" alt="...">
-        </div>
-        <div class="col-md-8">
-            <div class="card-body">
-                <h5 class="card-title">{{course.title}}</h5>
-                <p class="card-text small text-muted text-truncate">
-                        {{course.long_desc}}
-                    </p>
-                <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+<main class="container py-3">
+    <!-- Card header: thumbnail + core info -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="row g-0 align-items-stretch">
+            <!-- Image (responsive: full width on mobile, left column on md+) -->
+            <div class="col-12 col-md-5">
+                <div class="ratio ratio-16x9 h-100">
+                    <img src="/images/{{course.hero_image_url}}.jpg" alt="Ảnh khoá học {{course.title}}"
+                        class="img-fluid rounded-start rounded-top-md-0" style="object-fit: cover;" loading="lazy" />
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="col-12 col-md-7">
+                <div class="card-body h-100 d-flex flex-column">
+                    <h1 class="h5 mb-1">{{course.title}}</h1>
+
+                    <!-- Rating + count (nếu có) -->
+                    <div class="d-flex align-items-center mb-2">
+                        {{#if course.rating_avg}}
+                        <span class="me-2 fw-semibold text-warning">{{course.rating_avg}}</span>
+                        <span class="me-2" aria-label="{{course.rating_avg}} stars">
+                            {{!-- Fallback sao bằng ký tự, không cần icon library --}}
+                            {{#each course.stars_filled}}★{{/each}}{{#each course.stars_empty}}☆{{/each}}
+                        </span>
+                        <small class="text-muted">({{course.review_count}} đánh giá)</small>
+                        {{/if}}
+                    </div>
+
+                    <!-- Meta line -->
+                    <div class="small text-muted mb-2">
+                        {{#if course.level}}<span class="me-2">Trình độ: {{course.level}}</span>{{/if}}
+                        {{#if course.language}}<span class="me-2">Ngôn ngữ: {{course.language}}</span>{{/if}}
+                        {{#if course.updated_at}}<span class="me-2">Cập nhật: {{course.updated_at}}</span>{{/if}}
+                    </div>
+
+                    <!-- Badges: categories/tags -->
+                    <div class="mb-2">
+                        {{#each course.categories}}
+                        <span class="badge bg-light text-dark border me-1 mb-1">{{this}}</span>
+                        {{/each}}
+                    </div>
+
+                    <!-- Description (truncate + "Xem thêm") -->
+                    <div class="mb-2">
+                        <p class="text-muted mb-1 text-truncate"
+                            style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{course.long_desc}}
+                        </p>
+                        <a class="small" data-bs-toggle="collapse" href="#descFull" role="button" aria-expanded="false"
+                            aria-controls="descFull">
+                            Xem thêm
+                        </a>
+                        <div class="collapse mt-2" id="descFull">
+                            <p class="text-muted mb-0">{{course.long_desc}}</p>
+                        </div>
+                    </div>
+
+                    <!-- Progress (nếu user đã học) -->
+                    {{#if course.user_enrolled}}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Tiến độ học</span>
+                            <span>{{course.progress}}%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{course.progress}}%;"
+                                aria-valuenow="{{course.progress}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    <!-- Action buttons -->
+                    <div class="mt-auto d-flex flex-wrap gap-2">
+                        {{#if course.user_enrolled}}
+                        <a href="/learn/{{course.id}}" class="btn btn-primary">Tiếp tục học</a>
+                        <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
+                        {{else}}
+                        <a href="/enroll/{{course.id}}" class="btn btn-success">Ghi danh ngay</a>
+                        <form action="/watchlist/add" method="post" class="d-inline">
+                            <input type="hidden" name="course_id" value="{{course.id}}">
+                            <button class="btn btn-outline-secondary" type="submit">Thêm vào Watchlist</button>
+                        </form>
+                        {{/if}}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Quick stats (tuỳ chọn) -->
+    {{#each lessons}}
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Bài học</div>
+                    <div class="h5 mb-0">{{lesson}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Tổng thời lượng</div>
+                    <div class="h5 mb-0">{{duration_seconds}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Giảng viên</div>
+                    <div class="h6 mb-0">{{course.instructor_name}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">Viết phản hồi của bạn</h5>
+                <a class="small" data-bs-toggle="collapse" href="#composeBox" role="button" aria-expanded="true"
+                    aria-controls="composeBox">
+                    Thu gọn/Mở rộng
+                </a>
+            </div>
+
+            <div class="collapse show" id="composeBox">
+                <form action="/courses/course-detail/{{course.id}}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung phản hồi</label>
+                        <textarea name="comment" class="form-control" rows="3"
+                            placeholder="Chia sẻ trải nghiệm học của bạn…" required></textarea>
+                        <div class="invalid-feedback">Không được để trống.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Gửi phản hồi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>

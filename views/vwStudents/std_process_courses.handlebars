@@ -1,60 +1,47 @@
 {{#> std_profile}}
-
 <div class="card shadow-sm">
-                <div class="card-header fw-semibold">Khóa học của bạn</div>
+    <div class="card-header fw-semibold">Khóa học của bạn</div>
+    <div class="card-body">
+
+        {{#if empty}}
+        <div class="text-muted">Chưa có tiến độ nào cho tài khoản này.</div>
+        {{else}}
+        <div class="d-flex flex-wrap gap-3">
+            {{#each progress}}
+            <div class="card mb-3" style="width: 16rem;">
+                <img src="/images/{{course_img}}.jpg" class="card-img-top" alt="{{course_title}}">
                 <div class="card-body">
-                    <!-- Container dạng hàng ngang, tự xuống dòng -->
-                    <div class="d-flex flex-wrap gap-3">
-
-                        <!-- 1 course item -->
-                        <div class="card" style="width: 15rem;">
-                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
-                                loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1 text-truncate">Lập trình Web cơ bản</h6>
-                                <p class="card-text small text-muted text-truncate">
-                                    Học HTML, CSS, JS để xây dựng website đầu tiên.
-                                </p>
-                                <a href="/course/html-css" class="btn btn-primary btn-sm w-100">View Detail</a>
-                            </div>
-                        </div>
-
-                        <div class="card" style="width: 15rem;">
-                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
-                                loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
-                                <p class="card-text small text-muted text-truncate">
-                                    Làm quen cú pháp và DOM manipulation.
-                                </p>
-                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
-                            </div>
-                        </div>
-                        <div class="card" style="width: 15rem;">
-                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
-                                loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
-                                <p class="card-text small text-muted text-truncate">
-                                    Làm quen cú pháp và DOM manipulation.
-                                </p>
-                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
-                            </div>
-                        </div>
-                        <div class="card" style="width: 15rem;">
-                            <img src="https://picsum.photos/320/180" class="card-img-top" alt="Ảnh môn học"
-                                loading="lazy">
-                            <div class="card-body p-2">
-                                <h6 class="card-title mb-1 text-truncate">JavaScript cơ bản</h6>
-                                <p class="card-text small text-muted text-truncate">
-                                    Làm quen cú pháp và DOM manipulation.
-                                </p>
-                                <a href="/course/js" class="btn btn-primary btn-sm w-100">View Detail</a>
-                            </div>
-                        </div>
-
-                        <!-- thêm các card khác -->
-                    </div>
+                    <h6 class="card-title">{{course_title}}</h6>
+                    <div class="small text-muted mb-1">{{lesson_title}}</div>
+                    <div class="small">Tiến độ: {{last_second}}s — {{finish_text}}</div>
                 </div>
             </div>
+            {{/each}}
+        </div>
+
+        {{#if pagination}}
+        <nav aria-label="Pagination">
+            <ul class="pagination justify-content-center">
+                {{#if pagination.hasPrev}}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{pagination.prevPage}}">&laquo;</a>
+                </li>
+                {{/if}}
+                {{#each pagination.pages}}
+                <li class="page-item {{#if active}}active{{/if}}">
+                    <a class="page-link" href="?page={{number}}">{{number}}</a>
+                </li>
+                {{/each}}
+                {{#if pagination.hasNext}}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{pagination.nextPage}}">&raquo;</a>
+                </li>
+                {{/if}}
+            </ul>
+        </nav>
+        {{/if}}
+        {{/if}}
+
+    </div>
+</div>
 {{/std_profile}}

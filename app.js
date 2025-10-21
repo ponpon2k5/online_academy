@@ -18,6 +18,8 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true })); //Giúp Express đọc dữ liệu trong form POST
 app.use(express.json());
+app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+
 //session
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -27,9 +29,8 @@ app.use(session({
     cookie: { secure: false } // secure = true chỉ dùng khi https
 }))
 
-
 app.use(async function (req, res, next) {
-    if(req.session.isAuthenticated){
+    if (req.session.isAuthenticated) {
         res.locals.isAuthenticated = true;
         res.locals.authUser = req.session.authUser;
     }
@@ -38,11 +39,11 @@ app.use(async function (req, res, next) {
 
 //view engine
 app.engine("handlebars", engine({
-  extname: ".handlebars",
-  defaultLayout: "main",
-  layoutsDir: path.join(__dirname, "views", "layouts"),
-  partialsDir: path.join(__dirname, "views", "partials"),
-  helpers: {
+    extname: ".handlebars",
+    defaultLayout: "main",
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    partialsDir: path.join(__dirname, "views", "partials"),
+    helpers: {
         section: hbs_sections(),
         eq: (a, b) => String(a) === String(b),
     }
@@ -127,24 +128,6 @@ passport.use(new FacebookStrategy({
     }
 }));
 
-app.set("view engine", "handlebars");
-app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Thêm để xử lý JSON trong fetch
-app.use('/static', express.static('static'));
-
-app.use("/images", express.static(path.join(__dirname, "statics", "img")));
-
-app.get("/", (req, res) => {
-    if (req.session.isAuthenticated) {
-        console.log('User is authenticated');
-        console.log(req.session.authUser);
-    }
-    res.render('home');
-});
-
-
-
 //router
 //student routes
 import studentRouter from "./routes/student.route.js";
@@ -159,18 +142,17 @@ app.use("/admin/categories", adminRouter);
 
 //test homepage
 app.get("/", (req, res) => {
-  res.render("home", { layout: "main" });
+    res.render("home", { layout: "main" });
 });
 
 //start server
-app.use(express.urlencoded({ extended: true }));
 
 app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+    console.log("Server is running on port 3000");
 });
 
 app.get("/course/:id", (req, res) => {
-  res.render("courseDetail", { layout: "main" });
+    res.render("courseDetail", { layout: "main" });
 });
 
 app.use(function (req, res) {

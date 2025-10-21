@@ -15,3 +15,20 @@ Kiểm tra email có hợp lệ và chưa tồn tại trong database.
 Kiểm tra user_id gửi lên có thật không.
 Kiểm tra role = 'admin' có hợp lệ hay không.
 Xác thực mật khẩu (hash & bcrypt).
+
+------------------------------------------------------------------------------
+thư viện js hữu ích:
+Cleave.js là một thư viện JavaScript nhẹ dùng để định dạng dữ liệu người dùng nhập vào form theo thời gian thực 
+— ví dụ như số điện thoại, ngày tháng, số thẻ ngân hàng, hoặc tiền tệ.
+
+Quill.js là một thư viện JavaScript mạnh mẽ để tạo trình soạn thảo văn bản (rich text editor) — 
+giống như khung soạn thảo mà bạn thấy trong Gmail, Medium, hay Notion, nơi bạn có thể in đậm, 
+in nghiêng, chèn hình, liên kết, tiêu đề, danh sách, trích dẫn, mã code, v.v.
+
+Uppy là một thư viện JavaScript mã nguồn mở giúp bạn tải file lên (file upload) hiện đại, 
+đẹp và dễ dùng, có thể kéo-thả, xem trước ảnh/video, hiển thị tiến trình upload, và hỗ trợ 
+nhiều dịch vụ như AWS S3, Google Drive, Dropbox, Webcam, Instagram…
+
+Multer là middleware cho Express.js dùng để xử lý form có file upload 
+(enctype="multipart/form-data"). Nó parse request, tách phần file và lưu xuống
+ máy chủ (hoặc đẩy sang S3, v.v.), đồng thời cung cấp thông tin file trong req.file / req.files.

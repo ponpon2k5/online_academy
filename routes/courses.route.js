@@ -37,15 +37,36 @@ router.post('/enroll-course', async (req, res) => {
 router.get('/course-detail/:id', async (req, res) => {
     const courseId = req.params.id;
     const course = await coursesModel.view_detail_course(courseId);
+    const lessons = await coursesModel.view_lesson_in_detail(courseId)
     if (course) {
         console.log('Xuất thông tin thành công');
         console.log('Course detail:', course);
     }
     res.render('vwCourses/dis_detailCourse', {
-        course: course
+        course: course,
+        lessons: lessons
     });
 });
+router.post('/course-detail/:id', async (req, res) => {
 
+    const courseId = req.params.id;
+    const userId = req.session.authUser.id;
+    const comment = req.body.comment;                   // ✅ lấy cả rating & comment
+
+    const payload = {
+        course_id: String(courseId),
+        user_id: String(userId),
+        description: comment.trim(),
+    };
+    try {
+        const result = await coursesModel.save_feedback(payload);
+        console.log('Kết quả insert:', result);
+    } catch (e) {
+        console.error('Lỗi khi insert:', e.message, e.detail, e.code);
+    }
+    return res.redirect(`/courses/course-detail/${courseId}#feedback`); // ✅ courseId tồn tại
+
+});
 //purchase course
 router.get('/purchase-courses/:id', async (req, res) => {
     const courseId = req.params.id;
