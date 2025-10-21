@@ -1,0 +1,108 @@
+<div class="card">
+  <div class="card-header">
+    <h3 class="mb-0"><i class="bi bi-play-circle"></i> Thêm bài học mới</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" action="/instructor/courses/{{courseId}}/lessons" enctype="multipart/form-data" class="row g-3" id="lessonForm">
+      <div class="col-md-8">
+        <label class="form-label">Tiêu đề bài học *</label>
+        <input name="lesson" class="form-control" required placeholder="Nhập tiêu đề bài học..."/>
+        <div class="form-text">Tiêu đề rõ ràng giúp học viên hiểu nội dung bài học</div>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Chương</label>
+        <select name="section_id" class="form-select">
+          <option value="">-- Không thuộc chương nào --</option>
+          {{#each sections}}
+            <option value="{{this.id}}">{{this.title}}</option>
+          {{/each}}
+        </select>
+        <div class="form-text">Chọn chương để phân loại bài học</div>
+      </div>
+      
+      <div class="col-12">
+        <label class="form-label">Mô tả bài học</label>
+        <textarea name="description" rows="4" class="form-control" placeholder="Mô tả nội dung, mục tiêu của bài học..."></textarea>
+        <div class="form-text">Mô tả chi tiết giúp học viên hiểu rõ nội dung bài học</div>
+      </div>
+      
+      <div class="col-md-6">
+        <label class="form-label">File video *</label>
+        <input type="file" name="video_file" class="form-control" accept="video/mp4,video/webm,video/ogg" required/>
+        <div class="form-text">Chỉ chấp nhận file MP4, WebM, OGG (tối đa 200MB)</div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Thời lượng (giây)</label>
+        <input type="number" name="duration_seconds" class="form-control" placeholder="0" min="0"/>
+        <div class="form-text">Thời lượng video (tự động tính nếu để trống)</div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Thứ tự</label>
+        <input type="number" name="sort_order" class="form-control" placeholder="0" min="0"/>
+        <div class="form-text">Thứ tự hiển thị trong chương</div>
+      </div>
+      
+      <div class="col-12">
+        <div class="form-check">
+          <input type="checkbox" name="is_preview" class="form-check-input" id="is_preview">
+          <label for="is_preview" class="form-check-label">
+            <strong>Cho phép xem trước</strong>
+          </label>
+          <div class="form-text">Học viên có thể xem bài học này mà không cần mua khóa học</div>
+        </div>
+      </div>
+      
+      <div class="col-12">
+        <hr>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save"></i> Lưu bài học
+        </button>
+        <a href="/instructor/courses/{{courseId}}/sections" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Form validation
+document.getElementById('lessonForm').addEventListener('submit', function(e) {
+  const title = document.querySelector('input[name="lesson"]').value.trim();
+  const videoFile = document.querySelector('input[name="video_file"]').files[0];
+  
+  if (!title) {
+    e.preventDefault();
+    alert('Vui lòng nhập tiêu đề bài học!');
+    return false;
+  }
+  
+  if (!videoFile) {
+    e.preventDefault();
+    alert('Vui lòng chọn file video!');
+    return false;
+  }
+  
+  // Check file size (200MB limit)
+  if (videoFile.size > 200 * 1024 * 1024) {
+    e.preventDefault();
+    alert('File video quá lớn! Kích thước tối đa là 200MB.');
+    return false;
+  }
+  
+  // Check file type
+  const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+  if (!allowedTypes.includes(videoFile.type)) {
+    e.preventDefault();
+    alert('Chỉ chấp nhận file video MP4, WebM hoặc OGG!');
+    return false;
+  }
+});
+
+// Auto-select section from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const sectionId = urlParams.get('section');
+if (sectionId) {
+  document.querySelector('select[name="section_id"]').value = sectionId;
+}
+</script>

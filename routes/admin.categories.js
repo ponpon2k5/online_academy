@@ -2,14 +2,24 @@
 import express from "express";
 import slugify from "slugify";
 import adminModel from "../models/admin.model.js";
+import { isAdmin } from "../middlewares/auth.js";
 
 const router = express.Router();
+
+// Guard all category routes to admin only
+router.use(isAdmin);
 
 //Danh sách category
 router.get("/", async (req, res) => {
   try {
     const rows = await adminModel.getAllCategories();
-    res.render("admin/categories/index", { categories: rows });
+    res.render("admin/categories/index", {
+      layout: "admin",
+      title: "Categories",
+      authUser: req.session.user,
+      currentPage: "categories",
+      categories: rows,
+    });
   } catch (e) {
     console.error("DB ERROR at GET /admin/categories:", e);
     res.status(500).send("Lỗi truy vấn DB: " + e.message);
@@ -20,7 +30,13 @@ router.get("/", async (req, res) => {
 router.get("/new", async (req, res) => {
   try {
     const parents = await adminModel.getParentCategories();
-    res.render("admin/categories/new", { parents });
+    res.render("admin/categories/new", {
+      layout: "admin",
+      title: "New Category",
+      authUser: req.session.user,
+      currentPage: "categories",
+      parents,
+    });
   } catch (e) {
     res.status(500).send("Lỗi truy vấn DB: " + e.message);
   }
