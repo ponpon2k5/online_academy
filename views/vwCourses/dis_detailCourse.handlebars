@@ -1,15 +1,18 @@
 <div class="card mb-3" style="max-width: 540px;">
     <div class="row g-0">
         <div class="col-md-4">
-            <img src="/images/{{course.hero_image_url}}.jpg" class="img-fluid rounded-start" alt="...">
+            <img src="/images/{{course.hero_image_url}}" class="img-fluid rounded-start" alt="...">
         </div>
         <div class="col-md-8">
             <div class="card-body">
                 <h5 class="card-title">{{course.title}}</h5>
                 <p class="card-text small text-muted text-truncate">
-                        {{course.long_desc}}
+                        {{{course.long_desc}}}
                     </p>
                 <p class="card-text"><small class="text-body-secondary">Last updated 3 mins ago</small></p>
+                <div class="d-flex gap-2">
+                        <a href="/courses/purchase-courses/{{course.id}}" class="btn btn-primary btn-sm flex-fill">Purchase</a>
+                    </div>
             </div>
         </div>
     </div>
