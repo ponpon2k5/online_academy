@@ -128,6 +128,12 @@ export default {
             .orderBy('c.title', 'asc')
             .limit(limit)
             .offset(offset);
+    },
+    filter(cat_course){
+        return db('categories as cat')
+        .join('courses as c','c.category_id','cat.id')
+        .select('c.title','c.hero_image_url','short_desc','c.id')
+        .where('cat.name', cat_course)
     }
 
 }

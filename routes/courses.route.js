@@ -173,5 +173,14 @@ router.get('/search', async (req, res) => {
         })
     }
 });
+//filter bar
+router.get('/view-courses', async (req, res) => {
+    const cat_course = req.query.category;
+    const courses = await coursesModel.filter(cat_course);
+    res.render("vwCourses/dis_courses", {
+        courses: courses
+    })
+});
+
 
 export default router;
