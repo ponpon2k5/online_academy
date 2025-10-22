@@ -6,8 +6,10 @@ export default {
     },
     view_detail_course(courseId) {
         return db('courses as c')
+            .join('profiles as p','c.instructor_id', 'p.id')
             .select('c.id', 'c.title', 'c.long_desc', 'c.hero_image_url',
-                'c.price', 'c.rating_avg', 'c.students_count')
+                'c.price', 'c.rating_avg', 'c.students_count',
+                'p.name', 'p.role','p.avatar_url','p.bio')
             .where('c.id', courseId).first();
     },
     view_lesson_in_detail(courseId) {

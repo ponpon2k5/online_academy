@@ -62,7 +62,8 @@
                     <div class="d-flex gap-2">
                         <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm flex-fill">View
                             Detail</a>
-                        <a href="/courses/purchase-courses/{{id}}" class="btn btn-primary btn-sm flex-fill">Purchase</a>
+                        <a href="/courses/purchase-courses-process/{{id}}"
+                            class="btn btn-primary btn-sm flex-fill">Purchase</a>
                     </div>
                 </div>
             </div>
@@ -81,7 +82,9 @@
                     <div class="d-flex gap-2">
                         <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm flex-fill">View
                             Detail</a>
-                        <a href="/courses/purchase-courses/{{id}}" class="btn btn-primary btn-sm flex-fill">Purchase</a>
+                        <form action="/courses/purchase-courses-process/{{id}}" method="POST">
+                            <button type="submit" class="btn btn-success">Purchase</button>
+                        </form>
                     </div>
                 </div>
             </div>

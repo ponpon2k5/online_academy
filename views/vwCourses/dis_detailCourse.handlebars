@@ -49,8 +49,7 @@
                     </div>
 
                     <!-- Description-->
-                    <div class="card-text small text-muted description" 
-                        data-html="{{course.long_desc}}">
+                    <div class="card-text small text-muted description" data-html="{{course.long_desc}}">
                     </div>
 
                     <!-- Progress (nếu user đã học) -->
@@ -73,7 +72,10 @@
                         <a href="/learn/{{course.id}}" class="btn btn-primary">Tiếp tục học</a>
                         <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
                         {{else}}
-                        <a href="/enroll/{{course.id}}" class="btn btn-success">Ghi danh ngay</a>
+
+                        <form action="/courses/purchase-courses-process/{{course.id}}" method="POST">
+                            <button type="submit" class="btn btn-success">Ghi danh ngay</button>
+                        </form>
                         <form action="/watchlist/add" method="post" class="d-inline">
                             <input type="hidden" name="course_id" value="{{course.id}}">
                             <button class="btn btn-outline-secondary" type="submit">Thêm vào Watchlist</button>

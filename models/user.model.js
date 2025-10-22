@@ -70,6 +70,6 @@ export default {
 
 
     patch(id, user) {
-        return db('profile').where('id', id).update(user);
+        return db('profiles').where('id', id).update(user);
     }
 };
