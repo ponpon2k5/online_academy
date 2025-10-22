@@ -1,72 +1,693 @@
-<!-- Slideshow -->
-<div id="homeCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    {{#each featuredCourses}}
-    <div class="carousel-item {{#if @first}}active{{/if}}">
-      <a href="/courses/course-detail/{{this.id}}">
-        <img src="/images/{{this.hero_image_url}}" class="d-block w-100" alt="{{this.title}}" height="400">
-      </a>
-      <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
-        <h5>{{this.title}}</h5>
-        <p>{{this.short_desc}}</p>
-      </div>
-    </div>
-    {{/each}}
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
-</div>
-
-<!-- Khoá học xem nhiều -->
-<section class="mb-5">
-  <h3 class="mb-3">Khoá học xem nhiều</h3>
-  <div class="row">
-    {{#each popularCourses}}
-    <div class="col-md-4 mb-3">
-      <div class="card h-100 shadow-sm">
-        <a href="/courses/course-detail/{{this.id}}">
-          <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}">
-        </a>
-        <div class="card-body">
-          <h5 class="card-title">
-            <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
-              {{this.title}}
-            </a>
-          </h5>
-          <p class="card-text">{{this.short_desc}}</p>
-          <p><i class="bi bi-people"></i> {{this.students_count}} học viên</p>
+<!-- Hero Section with Modern Slideshow -->
+<section class="hero-section position-relative">
+  <div id="homeCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+    <div class="carousel-inner">
+      {{#each featuredCourses}}
+      <div class="carousel-item {{#if @first}}active{{/if}}">
+        <div class="hero-slide position-relative">
+          <div class="hero-bg" style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)), url('/images/{{this.hero_image_url}}');">
+            <div class="container h-100">
+              <div class="row h-100 align-items-center">
+                <div class="col-lg-6">
+                  <div class="hero-content text-white">
+                    <div class="hero-badge mb-4">
+                      <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                        <i class="bi bi-star-fill me-2"></i>Khóa học nổi bật
+                      </span>
+                    </div>
+                    <h1 class="display-2 fw-bold mb-4 lh-1">
+                      {{this.title}}
+                    </h1>
+                    <p class="lead mb-4 opacity-90">
+                      {{this.short_desc}}
+                    </p>
+                    <div class="hero-stats d-flex gap-4 mb-4">
+                      <div class="stat-item">
+                        <div class="stat-number h4 mb-0">{{this.rating_avg}}</div>
+                        <div class="stat-label small opacity-75">Đánh giá</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-number h4 mb-0">{{this.students_count}}</div>
+                        <div class="stat-label small opacity-75">Học viên</div>
+                      </div>
+                    </div>
+                    <div class="hero-actions d-flex gap-3 flex-wrap">
+                      <a href="/courses/course-detail/{{this.id}}" class="btn btn-warning btn-lg px-5 py-3 rounded-pill shadow">
+                        <i class="bi bi-play-circle me-2"></i>Bắt đầu học
+                      </a>
+                      <a href="#featured-courses" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill">
+                        <i class="bi bi-arrow-down me-2"></i>Khám phá thêm
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                  <div class="hero-image-wrapper">
+                    <img src="/images/{{this.hero_image_url}}" alt="{{this.title}}" class="hero-image img-fluid rounded-4 shadow-lg">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      {{/each}}
     </div>
-    {{/each}}
+    
+    <!-- Custom Carousel Controls -->
+    <button class="carousel-control-prev custom-control" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next custom-control" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+    
+    <!-- Custom Indicators -->
+    <div class="carousel-indicators custom-indicators">
+      {{#each featuredCourses}}
+      <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="{{@index}}" 
+              class="{{#if @first}}active{{/if}}" aria-current="{{#if @first}}true{{/if}}"></button>
+      {{/each}}
+    </div>
   </div>
 </section>
 
-<!-- Khoá học mới nhất -->
-<section class="mb-5">
-  <h3 class="mb-3">Khoá học mới nhất</h3>
-  <div class="row">
-    {{#each newestCourses}}
-    <div class="col-md-4 mb-3">
-      <div class="card h-100 shadow-sm">
-        <a href="/courses/course-detail/{{this.id}}">
-          <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}">
-        </a>
-        <div class="card-body">
-          <h5 class="card-title">
-            <a href="/courses/detail/{{this.id}}" class="text-decoration-none text-dark">
-              {{this.title}}
-            </a>
-          </h5>
-          <p class="card-text">{{this.short_desc}}</p>
-          <p><i class="bi bi-calendar"></i> {{this.created_at}}</p>
+<!-- Stats Section -->
+<section class="stats-section py-5 bg-white">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
+          <div class="stat-icon mb-3">
+            <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <i class="bi bi-people-fill display-4 text-primary"></i>
+            </div>
+          </div>
+          <div class="stat-number display-4 fw-bold text-primary mb-2">10,000+</div>
+          <p class="text-muted mb-0 fw-medium">Học viên đã tham gia</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
+          <div class="stat-icon mb-3">
+            <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <i class="bi bi-book-fill display-4 text-success"></i>
+            </div>
+          </div>
+          <div class="stat-number display-4 fw-bold text-success mb-2">500+</div>
+          <p class="text-muted mb-0 fw-medium">Khóa học chất lượng</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
+          <div class="stat-icon mb-3">
+            <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <i class="bi bi-mortarboard-fill display-4 text-warning"></i>
+            </div>
+          </div>
+          <div class="stat-number display-4 fw-bold text-warning mb-2">100+</div>
+          <p class="text-muted mb-0 fw-medium">Giảng viên chuyên nghiệp</p>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
+          <div class="stat-icon mb-3">
+            <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+              <i class="bi bi-star-fill display-4 text-info"></i>
+            </div>
+          </div>
+          <div class="stat-number display-4 fw-bold text-info mb-2">4.8/5</div>
+          <p class="text-muted mb-0 fw-medium">Đánh giá trung bình</p>
         </div>
       </div>
     </div>
-    {{/each}}
   </div>
 </section>
+
+<!-- Categories Section -->
+<section class="categories-section py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="display-4 fw-bold mb-3">Khám phá theo danh mục</h2>
+      <p class="lead text-muted">Tìm khóa học phù hợp với sở thích và mục tiêu của bạn</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="card-body p-4 text-center">
+            <div class="category-icon mb-4">
+              <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                <i class="bi bi-code-slash display-3 text-primary"></i>
+              </div>
+            </div>
+            <h5 class="card-title fw-bold mb-3">Lập trình</h5>
+            <p class="card-text text-muted mb-4">Web, Mobile, AI/ML, Blockchain</p>
+            <a href="/courses?category=programming" class="btn btn-primary rounded-pill px-4 py-2">
+              <i class="bi bi-arrow-right me-2"></i>Khám phá
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="card-body p-4 text-center">
+            <div class="category-icon mb-4">
+              <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                <i class="bi bi-palette display-3 text-success"></i>
+              </div>
+            </div>
+            <h5 class="card-title fw-bold mb-3">Thiết kế</h5>
+            <p class="card-text text-muted mb-4">UI/UX, Graphic, 3D, Animation</p>
+            <a href="/courses?category=design" class="btn btn-success rounded-pill px-4 py-2">
+              <i class="bi bi-arrow-right me-2"></i>Khám phá
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="card-body p-4 text-center">
+            <div class="category-icon mb-4">
+              <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                <i class="bi bi-graph-up display-3 text-warning"></i>
+              </div>
+            </div>
+            <h5 class="card-title fw-bold mb-3">Kinh doanh</h5>
+            <p class="card-text text-muted mb-4">Marketing, Sales, Management</p>
+            <a href="/courses?category=business" class="btn btn-warning rounded-pill px-4 py-2">
+              <i class="bi bi-arrow-right me-2"></i>Khám phá
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="card-body p-4 text-center">
+            <div class="category-icon mb-4">
+              <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                <i class="bi bi-camera display-3 text-info"></i>
+              </div>
+            </div>
+            <h5 class="card-title fw-bold mb-3">Nghệ thuật</h5>
+            <p class="card-text text-muted mb-4">Photography, Music, Writing</p>
+            <a href="/courses?category=arts" class="btn btn-info rounded-pill px-4 py-2">
+              <i class="bi bi-arrow-right me-2"></i>Khám phá
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Courses Section -->
+<section id="featured-courses" class="featured-courses-section py-5 bg-white">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="display-4 fw-bold mb-3">Khóa học nổi bật</h2>
+      <p class="lead text-muted">Những khóa học được đánh giá cao nhất</p>
+    </div>
+    
+    {{#if featuredCourses}}
+    <div class="row g-4">
+      {{#each featuredCourses}}
+      <div class="col-lg-4 col-md-6">
+        <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="course-image position-relative">
+            <a href="/courses/course-detail/{{this.id}}">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+            </a>
+            <div class="course-badge position-absolute top-0 end-0 m-3">
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+              </span>
+            </div>
+            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+              <a href="/courses/course-detail/{{this.id}}" class="btn btn-warning rounded-circle play-btn">
+                <i class="bi bi-play-fill fs-4"></i>
+              </a>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <h5 class="card-title fw-bold mb-3">
+              <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
+                {{this.title}}
+              </a>
+            </h5>
+            <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+            <div class="course-meta d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center text-muted">
+                <i class="bi bi-people me-1"></i>
+                <span class="small">{{this.students_count}} học viên</span>
+              </div>
+              <div class="course-price">
+                <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+      <div class="empty-state">
+        <i class="bi bi-book display-1 text-muted mb-4"></i>
+        <h4 class="text-muted mb-3">Chưa có khóa học nổi bật</h4>
+        <p class="text-muted">Hãy quay lại sau để xem các khóa học mới nhất!</p>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</section>
+
+<!-- Popular Courses Section -->
+<section class="popular-courses-section py-5 bg-light">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="display-4 fw-bold mb-3">Khóa học phổ biến</h2>
+      <p class="lead text-muted">Được nhiều học viên lựa chọn nhất</p>
+    </div>
+    
+    {{#if popularCourses}}
+    <div class="row g-4">
+      {{#each popularCourses}}
+      <div class="col-lg-4 col-md-6">
+        <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="course-image position-relative">
+            <a href="/courses/course-detail/{{this.id}}">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+            </a>
+            <div class="course-badge position-absolute top-0 end-0 m-3">
+              <span class="badge bg-danger rounded-pill px-3 py-2">
+                <i class="bi bi-fire me-1"></i>Hot
+              </span>
+            </div>
+            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+              <a href="/courses/course-detail/{{this.id}}" class="btn btn-danger rounded-circle play-btn">
+                <i class="bi bi-play-fill fs-4"></i>
+              </a>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <h5 class="card-title fw-bold mb-3">
+              <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
+                {{this.title}}
+              </a>
+            </h5>
+            <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+            <div class="course-meta d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center text-muted">
+                <i class="bi bi-people me-1"></i>
+                <span class="small">{{this.students_count}} học viên</span>
+              </div>
+              <div class="course-price">
+                <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+      <div class="empty-state">
+        <i class="bi bi-trophy display-1 text-muted mb-4"></i>
+        <h4 class="text-muted mb-3">Chưa có khóa học phổ biến</h4>
+        <p class="text-muted">Hãy quay lại sau để xem các khóa học được yêu thích!</p>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</section>
+
+<!-- Newest Courses Section -->
+<section class="newest-courses-section py-5 bg-white">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="display-4 fw-bold mb-3">Khóa học mới nhất</h2>
+      <p class="lead text-muted">Những khóa học vừa được cập nhật</p>
+    </div>
+    
+    {{#if newestCourses}}
+    <div class="row g-4">
+      {{#each newestCourses}}
+      <div class="col-lg-4 col-md-6">
+        <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
+          <div class="course-image position-relative">
+            <a href="/courses/course-detail/{{this.id}}">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+            </a>
+            <div class="course-badge position-absolute top-0 end-0 m-3">
+              <span class="badge bg-info rounded-pill px-3 py-2">
+                <i class="bi bi-clock me-1"></i>Mới
+              </span>
+            </div>
+            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+              <a href="/courses/course-detail/{{this.id}}" class="btn btn-info rounded-circle play-btn">
+                <i class="bi bi-play-fill fs-4"></i>
+              </a>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <h5 class="card-title fw-bold mb-3">
+              <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
+                {{this.title}}
+              </a>
+            </h5>
+            <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+            <div class="course-meta d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center text-muted">
+                <i class="bi bi-calendar me-1"></i>
+                <span class="small">{{formatDate this.created_at}}</span>
+              </div>
+              <div class="course-price">
+                <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+      <div class="empty-state">
+        <i class="bi bi-plus-circle display-1 text-muted mb-4"></i>
+        <h4 class="text-muted mb-3">Chưa có khóa học mới</h4>
+        <p class="text-muted">Hãy quay lại sau để xem các khóa học mới nhất!</p>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section py-5 bg-primary text-white position-relative overflow-hidden">
+  <div class="container text-center position-relative">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h2 class="display-4 fw-bold mb-4">Sẵn sàng bắt đầu hành trình học tập?</h2>
+        <p class="lead mb-5 opacity-90">
+          Tham gia cùng hàng nghìn học viên khác và khám phá tiềm năng vô hạn của bạn
+        </p>
+        <div class="cta-actions d-flex gap-3 justify-content-center flex-wrap">
+          {{#if isAuthenticated}}
+          <a href="/courses/view-courses" class="btn btn-warning btn-lg px-5 py-3 rounded-pill shadow">
+            <i class="bi bi-play-circle me-2"></i>Khám phá khóa học
+          </a>
+          {{else}}
+          <a href="/account/signup" class="btn btn-warning btn-lg px-5 py-3 rounded-pill shadow">
+            <i class="bi bi-person-plus me-2"></i>Đăng ký miễn phí
+          </a>
+          <a href="/account/signin" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+          </a>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Custom Styles -->
+<style>
+/* Hero Section */
+.hero-section {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.hero-bg {
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+}
+
+.hero-content {
+  z-index: 2;
+}
+
+.hero-image {
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.hero-image-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-content h1 {
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.hero-content p {
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.hero-stats {
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.hero-actions {
+  animation: fadeInUp 0.8s ease-out 0.8s both;
+}
+
+/* Carousel Controls */
+.custom-control {
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+}
+
+.custom-control:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1);
+}
+
+.custom-control-prev {
+  left: 30px;
+}
+
+.custom-control-next {
+  right: 30px;
+}
+
+.custom-indicators {
+  bottom: 30px;
+}
+
+.custom-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.custom-indicators button.active {
+  background: white;
+  border-color: white;
+}
+
+/* Stats Section */
+.stat-card {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.stat-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+.stat-number {
+  background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Categories Section */
+.category-card {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.category-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+}
+
+.icon-wrapper {
+  transition: all 0.3s ease;
+}
+
+.category-card:hover .icon-wrapper {
+  transform: scale(1.1);
+}
+
+/* Course Cards */
+.course-card {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.course-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+}
+
+.course-image img {
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover .course-image img {
+  transform: scale(1.05);
+}
+
+.course-overlay {
+  background: rgba(0,0,0,0.7);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.course-card:hover .course-overlay {
+  opacity: 1;
+}
+
+.play-btn {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.play-btn:hover {
+  transform: scale(1.1);
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.1;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Section Headers */
+.section-header h2 {
+  position: relative;
+  display: inline-block;
+}
+
+.section-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+/* Empty States */
+.empty-state {
+  padding: 4rem 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 70vh;
+  }
+  
+  .hero-bg {
+    min-height: 70vh;
+    background-attachment: scroll;
+  }
+  
+  .display-2 {
+    font-size: 2.5rem;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .custom-control {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .custom-control-prev {
+    left: 15px;
+  }
+  
+  .custom-control-next {
+    right: 15px;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .hero-actions .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-stats {
+    flex-direction: column;
+    gap: 1rem !important;
+  }
+  
+  .stat-item {
+    text-align: center;
+  }
+}
+</style>

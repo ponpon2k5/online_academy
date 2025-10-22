@@ -115,6 +115,8 @@ app.engine(
       divide: (a, b) => (!b ? 0 : a / b),
       multiply: (a, b) => a * b,
       round: (num) => Math.round(num),
+      add: (a, b) => Number(a) + Number(b),
+      subtract: (a, b) => Number(a) - Number(b),
     },
   })
 );
