@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { isInstructor, requireRole } from "../middlewares/auth.js";
+import { isInstructor, requireRole, ensureAuth } from "../middlewares/auth.js";
 import db from "../utils/db.js";
 
 const r = Router();
 
+r.use(ensureAuth);
 r.use(requireRole("instructor", "admin"));
 r.get("/dashboard", isInstructor, async (req, res) => {
   const me = req.session.user;
