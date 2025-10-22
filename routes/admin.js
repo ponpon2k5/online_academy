@@ -1,9 +1,10 @@
 import db from "../utils/db.js";
-import { isAdmin, requireRole } from "../middlewares/auth.js";
+import { isAdmin, requireRole, ensureAuth } from "../middlewares/auth.js";
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 const r = Router();
 
+r.use(ensureAuth);
 r.use(requireRole("admin"));
 r.get("/dashboard", isAdmin, async (req, res) => {
   console.log("Admin dashboard - Session user:", req.session.user);

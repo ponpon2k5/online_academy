@@ -14,6 +14,7 @@ import userModel from "./models/user.model.js";
 
 // Routes
 import adminCategories from "./routes/admin.categories.js";
+import adminRouter from "./routes/admin.js";
 import studentRouter from "./routes/student.route.js";
 import accountRouter from "./routes/account.route.js";
 import coursesRouter from "./routes/courses.route.js";
@@ -119,7 +120,8 @@ passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "YOUR_GOOGLE_CLIENT_SECRET",
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET || "YOUR_GOOGLE_CLIENT_SECRET",
       callbackURL: "/account/auth/google/callback",
     },
     async (_accessToken, _refreshToken, profile, done) => {
@@ -148,7 +150,8 @@ passport.use(
   new FacebookStrategy(
     {
       clientID: process.env.FACEBOOK_APP_ID || "YOUR_FACEBOOK_APP_ID",
-      clientSecret: process.env.FACEBOOK_APP_SECRET || "YOUR_FACEBOOK_APP_SECRET",
+      clientSecret:
+        process.env.FACEBOOK_APP_SECRET || "YOUR_FACEBOOK_APP_SECRET",
       callbackURL: "/account/auth/facebook/callback",
       profileFields: ["id", "emails", "displayName"],
     },
@@ -164,7 +167,7 @@ passport.use(
             password: "",
             permission: 0,
           };
-            await userModel.add(user);
+          await userModel.add(user);
         }
         done(null, user);
       } catch (err) {
@@ -185,8 +188,9 @@ app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
 app.use("/home", homeRoute);
 // Nếu có adminRoutes/instructorRoutes, import và gắn thêm ở đây:
+app.use("/admin", adminRouter);
+// Nếu có instructorRoutes, import và gắn thêm ở đây:
 // app.use("/instructor", instructorRoutes);
-// app.use("/admin", adminRoutes);
 
 // ---------- 404 ----------
 app.use((req, res) => {
