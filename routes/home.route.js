@@ -1,22 +1,44 @@
-// routes/home.route.js
 import express from "express";
-import * as db from "../utils/fakeData.js"; // nơi chứa dữ liệu giả
+import db from "../utils/db.js"; // file kết nối Supabase qua Knex
+
 const router = express.Router();
 
-// Trang chủ
 router.get("/", async (req, res) => {
-  const featuredCourses = await db.getFeaturedCourses();
-  const popularCourses = await db.getPopularCourses();
-  const newestCourses = await db.getNewestCourses();
-  const hotCategories = await db.getHotCategories();
+  try {
+    const featuredCourses = await db("courses")
+      .where("status", "published")
+      .orderBy("rating_avg", "desc")
+      .limit(6);
 
-  res.render("home", {
-    layout: "main",
-    featuredCourses,
-    popularCourses,
-    newestCourses,
-    hotCategories
-  });
+    const popularCourses = await db("courses")
+      .where("status", "published")
+      .orderBy("students_count", "desc")
+      .limit(6);
+
+    const newestCourses = await db("courses")
+      .where("status", "published")
+      .orderBy("created_at", "desc")
+      .limit(6);
+
+    const hotCategories = await db("courses")
+      .select("category_id")
+      .sum("students_count as total_students")
+      .groupBy("category_id")
+      .orderBy("total_students", "desc")
+      .limit(4);
+
+    res.render("home", {
+      layout: "main",
+      featuredCourses,
+      popularCourses,
+      newestCourses,
+      hotCategories,
+      title: "Online Academy - Học mọi lúc mọi nơi"
+    });
+  } catch (err) {
+    console.error("Lỗi truy vấn dữ liệu:", err);
+    res.status(500).send("Lỗi truy vấn dữ liệu");
+  }
 });
 
 export default router;

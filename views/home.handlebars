@@ -1,34 +1,75 @@
-<div class="py-5 text-center">
-  <h1 class="display-4 fw-bold mb-3">Welcome to Online Academy</h1>
-  <p class="lead mb-4">
-    Discover thousands of courses from top instructors. Learn new skills, advance your career, or explore a new hobby—all in one place.
-  </p>
-  <a href="/courses/view-courses" class="btn btn-primary btn-lg px-4">Browse Courses</a>
+<!-- Slideshow -->
+<div id="homeCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    {{#each featuredCourses}}
+    <div class="carousel-item {{#if @first}}active{{/if}}">
+  <a href="/courses/course-detail/{{this.id}}">
+    <img src="/images/{{this.hero_image_url}}" class="d-block w-100" alt="{{this.title}}" height="400">
+  </a>
+  <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
+    <h5>{{this.title}}</h5>
+    <p>{{this.short_desc}}</p>
+  </div>
 </div>
 
-<div class="row mt-5">
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Learn at Your Own Pace</h5>
-        <p class="card-text">Access courses anytime, anywhere, and learn on your schedule.</p>
-      </div>
-    </div>
+    {{/each}}
   </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Expert Instructors</h5>
-        <p class="card-text">Gain knowledge from industry leaders and experienced educators.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Wide Range of Topics</h5>
-        <p class="card-text">From programming to photography, find courses that match your interests.</p>
-      </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
+
+<!-- Khoá học xem nhiều -->
+<section class="mb-5">
+  <h3 class="mb-3">Khoá học xem nhiều</h3>
+  <div class="row">
+    {{#each popularCourses}}
+    <div class="col-md-4 mb-3">
+  <div class="card h-100 shadow-sm">
+    <a href="/courses/course-detail/{{this.id}}">
+      <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}">
+    </a>
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="/courses/detail/{{this.id}}" class="text-decoration-none text-dark">
+          {{this.title}}
+        </a>
+      </h5>
+      <p class="card-text">{{this.short_desc}}</p>
+      <p><i class="bi bi-people"></i> {{this.students_count}} học viên</p>
     </div>
   </div>
 </div>
+
+    {{/each}}
+  </div>
+</section>
+
+<!-- Khoá học mới nhất -->
+<section class="mb-5">
+  <h3 class="mb-3">Khoá học mới nhất</h3>
+  <div class="row">
+    {{#each newestCourses}}
+    <div class="col-md-4 mb-3">
+  <div class="card h-100 shadow-sm">
+    <a href="/courses/course-detail/{{this.id}}">
+      <img src="/images/{{hero_image_url}}" class="card-img-top" alt="{{this.title}}">
+    </a>
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="/courses/detail/{{this.id}}" class="text-decoration-none text-dark">
+          {{this.title}}
+        </a>
+      </h5>
+      <p class="card-text">{{this.short_desc}}</p>
+      <p><i class="bi bi-calendar"></i> {{this.created_at}}</p>
+    </div>
+  </div>
+</div>
+
+    {{/each}}
+  </div>
+</section>
