@@ -11,12 +11,12 @@
                     <h6 class="fw-bold">Danh mục</h6>
                     <select class="form-select mb-3" name="category">
                         <option value="">Tất cả</option>
-                        <option value="web">Lập trình Web</option>
-                        <option value="mobile">Lập trình Mobile</option>
-                        <option value="ai">Trí tuệ nhân tạo</option>
+                        <option value="Lập trình Web">Lập trình Web</option>
+                        <option value="Lập trình Mobile">Lập trình Mobile</option>
+                        <option value="Trí tuệ nhân tạo">Trí tuệ nhân tạo</option>
                     </select>
 
-                    <!-- Mức giá -->
+                    <!-- Mức giá
                     <h6 class="fw-bold">Mức giá</h6>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="price" id="free" checked>
@@ -26,8 +26,9 @@
                         <input class="form-check-input" type="radio" name="price" id="paid">
                         <label class="form-check-label" for="paid">Trả phí</label>
                     </div>
+                    -->
 
-                    <!-- Đánh giá -->
+                    <!-- Đánh giá
                     <h6 class="fw-bold">Đánh giá</h6>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="rate5">
@@ -37,7 +38,7 @@
                         <input class="form-check-input" type="checkbox" id="rate4">
                         <label class="form-check-label" for="rate4">★★★★☆ trở lên</label>
                     </div>
-
+                    -->
                     <button class="btn btn-primary w-100 mt-3">Áp dụng</button>
                 </form>
             </div>
@@ -66,7 +67,7 @@
                 </div>
             </div>
             {{/each}}
-            {{#else}}
+            {{else}}
             {{#each list}}
             <div class="card" style="width: 15rem;">
 

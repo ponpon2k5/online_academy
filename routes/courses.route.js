@@ -14,9 +14,19 @@ async function totalEnrollment() {
 
 //view courses
 router.get('/view-courses', async (req, res) => {
-    const list = await coursesModel.view_all_courses();
+    const cat_course = req.query.category;
+    let courses;
+    let list;
+
+    if (cat_course) {
+        courses = await coursesModel.filter(cat_course);
+    } else {
+        list = await coursesModel.view_all_courses();
+    }
+    
     res.render('vwCourses/dis_courses', {
-        list: list
+        courses,
+        list
     });
 });
 
@@ -173,14 +183,7 @@ router.get('/search', async (req, res) => {
         })
     }
 });
-//filter bar
-router.get('/view-courses', async (req, res) => {
-    const cat_course = req.query.category;
-    const courses = await coursesModel.filter(cat_course);
-    res.render("vwCourses/dis_courses", {
-        courses: courses
-    })
-});
+
 
 
 export default router;
