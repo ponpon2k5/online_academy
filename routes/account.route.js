@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 import passport from 'passport';
 import userModel from '../models/user.model.js';
 import { checkAuthenticated } from '../middlewares/auth.mdw.js';
-
+import { customAlphabet } from 'nanoid';
 const router = express.Router();
 
 /* =============== Helper: Auth verify (giữ nguyên logic cũ) =============== */
@@ -77,17 +77,12 @@ router.get('/signup', (req, res) => {
     res.render('vwAccount/signup');
 });
 
-/* 
-  Lưu ý:
-  - Nếu bạn dùng OTP flow, KHÔNG add user ở /signup POST.
-  - Giữ /signup POST của bạn nếu còn flow khác cần dùng.
-*/
 
 /* ====================== SIGNOUT ====================== */
 router.post('/signout', (req, res) => {
     req.session.isAuthenticated = false;
     req.session.authUser = null;
-    res.redirect(req.headers.referer || '/');
+    res.redirect('/');
 });
 
 /* ====================== SEND OTP ====================== */
@@ -178,13 +173,13 @@ router.post('/verify-otp', async (req, res) => {
         if (!reg) {
             return res.json({ success: false, message: 'Thiếu dữ liệu đăng ký. Vui lòng thực hiện lại.' });
         }
-        
+
 
         // Tạo user sau khi OTP hợp lệ
-        const id_user = await userModel.totalUser() + 1;
-        const id = "p" + id_user;
+        const makeId = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 10);
+        const id = 'p' + makeId();
         await userModel.add({
-            id:id,
+            id: id,
             username: reg.username,
             password: reg.password,         // đã hash ở bước send-otp
             name: reg.name,

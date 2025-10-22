@@ -1,3 +1,33 @@
+{{#section "js"}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    //lắng nghe tất cả sự kiện submit trên trang.
+    document.addEventListener('submit', function (e) {
+        const form = e.target; //form mà bạn vừa submit.
+        if (form.matches('form[action^="/courses/purchase-courses-process/"]')) { //kiểm tra xem form có action bắt đầu bằng /courses/purchase-courses-process/ hay không.
+            const btn = form.querySelector('button[type="submit"]'); //lấy nút “Purchase” trong form.
+            if (btn) {
+                btn.disabled = true; //vô hiệu hóa nút để người dùng không bấm 2 lần.
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...`;//thay nội dung nút bằng spinner Bootstrap (vòng xoay nhỏ) kèm chữ “Đang xử lý...”.
+            }
+        }
+    });
+
+    // 2) Sau khi server redirect về: đọc query ?toast=...&msg=... để show thông báo
+    const params = new URLSearchParams(location.search); //giúp bạn dễ dàng lấy giá trị của từng tham số:
+    const toast = params.get('toast'); //success / error / warning / info / null
+    const msg = params.get('msg');
+    if (toast && msg) {
+        Swal.fire({
+            icon: toast,
+            title: toast === 'success' ? 'Thành công!' : (toast === 'error' ? 'Lỗi!' : 'Thông báo'),
+            text: msg
+        });
+        // Xoá query khỏi URL để refresh không hiện lại
+        history.replaceState(null, '', location.pathname);
+    }
+</script>
+{{/section}}
 <div class="row">
     <!-- Cột trái: Filter -->
     <div class="col-lg-4">

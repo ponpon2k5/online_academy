@@ -94,15 +94,14 @@ router.post('/purchase-courses-process/:id', async (req, res) => {
     const userId = req.session.authUser.id;
     const enrollID = await totalEnrollment();
     const enrollID_new = "e" + (enrollID + 1);
+
     const course = await userModel.findCourseByID(courseId);
     const result = await userModel.enrollCourse(userId, courseId, enrollID_new, course);
 
     if (result === 0) {
-        return res.render('vwCourses/dis_courses', {
-            error: 'Mua khóa học không thành công'
-        });
+        return res.redirect(`/courses/view-courses?toast=error&msg=${encodeURIComponent('Mua khóa học không thành công')}`);
     }
-    res.redirect('/courses/view-courses');
+    return res.redirect(`/courses/view-courses?toast=success&msg=${encodeURIComponent('Mua khóa học thành công!')}`);
 });
 
 //video courses
