@@ -1,0 +1,49 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="150" r="140" fill="url(#grad1)" opacity="0.1"/>
+  
+  <!-- Laptop -->
+  <rect x="80" y="120" width="120" height="80" rx="8" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+  <rect x="90" y="130" width="100" height="60" rx="4" fill="#667eea" opacity="0.8"/>
+  
+  <!-- Screen content -->
+  <rect x="95" y="135" width="90" height="50" rx="2" fill="white"/>
+  <circle cx="110" cy="150" r="8" fill="#28a745"/>
+  <rect x="125" y="145" width="50" height="3" rx="1" fill="#6c757d"/>
+  <rect x="125" y="155" width="40" height="3" rx="1" fill="#6c757d"/>
+  <rect x="125" y="165" width="45" height="3" rx="1" fill="#6c757d"/>
+  
+  <!-- Books -->
+  <rect x="220" y="100" width="15" height="60" rx="2" fill="#ffc107"/>
+  <rect x="240" y="90" width="15" height="70" rx="2" fill="#dc3545"/>
+  <rect x="260" y="95" width="15" height="65" rx="2" fill="#28a745"/>
+  
+  <!-- Graduation cap -->
+  <path d="M320 80 L300 80 L300 100 L320 100 L320 80 Z" fill="#6f42c1"/>
+  <path d="M310 80 L310 60 L320 60 L320 80 Z" fill="#6f42c1"/>
+  <circle cx="330" cy="70" r="3" fill="#ffc107"/>
+  
+  <!-- Lightbulb -->
+  <circle cx="150" cy="60" r="12" fill="#ffc107"/>
+  <rect x="145" y="72" width="10" height="8" rx="2" fill="#6c757d"/>
+  
+  <!-- Stars -->
+  <path d="M50 50 L55 65 L70 65 L58 75 L63 90 L50 80 L37 90 L42 75 L30 65 L45 65 Z" fill="#ffc107" opacity="0.8"/>
+  <path d="M350 100 L353 108 L361 108 L355 113 L358 121 L350 116 L342 121 L345 113 L339 108 L347 108 Z" fill="#ffc107" opacity="0.6"/>
+  <path d="M60 200 L63 208 L71 208 L65 213 L68 221 L60 216 L52 221 L55 213 L49 208 L57 208 Z" fill="#ffc107" opacity="0.7"/>
+  
+  <!-- Learning path -->
+  <path d="M50 180 Q100 160 150 180 Q200 200 250 180 Q300 160 350 180" stroke="#667eea" stroke-width="3" fill="none" opacity="0.6"/>
+  
+  <!-- Dots on path -->
+  <circle cx="100" cy="170" r="3" fill="#667eea"/>
+  <circle cx="200" cy="190" r="3" fill="#667eea"/>
+  <circle cx="300" cy="170" r="3" fill="#667eea"/>
+</svg>

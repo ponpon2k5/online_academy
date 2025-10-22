@@ -179,16 +179,11 @@ passport.use(
 );
 
 // ---------- Routes ----------
-//app.get("/", (req, res) => {
-//  res.render("home", { layout: "main" });
-//});
-
+app.use("/", homeRoute);
 app.use("/student", studentRouter);
 app.use("/account", accountRouter);
 app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
-app.use("/home", homeRoute);
-// Nếu có adminRoutes/instructorRoutes, import và gắn thêm ở đây:
 app.use("/admin", adminRouter);
 app.use("/instructor", instructorRouter);
 
