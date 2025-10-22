@@ -1,3 +1,10 @@
+{{#section 'js'}}
+<script>
+    document.querySelectorAll(".description").forEach(el => {
+        el.innerHTML = el.dataset.html;  // hiển thị HTML thực
+    });
+</script>
+{{/section}}
 <main class="container py-3">
     <!-- Card header: thumbnail + core info -->
     <div class="card border-0 shadow-sm mb-3">
@@ -41,19 +48,9 @@
                         {{/each}}
                     </div>
 
-                    <!-- Description (truncate + "Xem thêm") -->
-                    <div class="mb-2">
-                        <p class="text-muted mb-1 text-truncate"
-                            style="-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;">
-                            {{course.long_desc}}
-                        </p>
-                        <a class="small" data-bs-toggle="collapse" href="#descFull" role="button" aria-expanded="false"
-                            aria-controls="descFull">
-                            Xem thêm
-                        </a>
-                        <div class="collapse mt-2" id="descFull">
-                            <p class="text-muted mb-0">{{course.long_desc}}</p>
-                        </div>
+                    <!-- Description-->
+                    <div class="card-text small text-muted description" 
+                        data-html="{{course.long_desc}}">
                     </div>
 
                     <!-- Progress (nếu user đã học) -->

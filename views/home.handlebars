@@ -29,17 +29,17 @@
     {{#each popularCourses}}
     <div class="col-md-4 mb-3">
   <div class="card h-100 shadow-sm">
-    <a href="/courses/course-detail/{{this.id}}">
-      <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}">
+    <a href="/courses/course-detail/{{id}}">
+      <img src="/images/{{hero_image_url}}.jpg" class="card-img-top" alt="{{title}}">
     </a>
     <div class="card-body">
       <h5 class="card-title">
-        <a href="/courses/detail/{{this.id}}" class="text-decoration-none text-dark">
-          {{this.title}}
+        <a href="/courses/detail/{{id}}" class="text-decoration-none text-dark">
+          {{title}}
         </a>
       </h5>
-      <p class="card-text">{{this.short_desc}}</p>
-      <p><i class="bi bi-people"></i> {{this.students_count}} học viên</p>
+      <p class="card-text">{{short_desc}}</p>
+      <p><i class="bi bi-people"></i> {{students_count}} học viên</p>
     </div>
   </div>
 </div>

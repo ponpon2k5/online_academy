@@ -17,7 +17,7 @@ import adminCategories from "./routes/admin.categories.js";
 import studentRouter from "./routes/student.route.js";
 import accountRouter from "./routes/account.route.js";
 import coursesRouter from "./routes/courses.route.js";
-// import homeRoute from "./routes/home.route.js"; // nếu có dùng thì mở
+import homeRoute from "./routes/home.route.js"; // nếu có dùng thì mở
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -175,14 +175,15 @@ passport.use(
 );
 
 // ---------- Routes ----------
-app.get("/", (req, res) => {
-  res.render("home", { layout: "main" });
-});
+//app.get("/", (req, res) => {
+//  res.render("home", { layout: "main" });
+//});
 
 app.use("/student", studentRouter);
 app.use("/account", accountRouter);
 app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
+app.use("/home", homeRoute);
 // Nếu có adminRoutes/instructorRoutes, import và gắn thêm ở đây:
 // app.use("/instructor", instructorRoutes);
 // app.use("/admin", adminRoutes);
