@@ -45,7 +45,7 @@ app.get("/images/:name", (req, res) => {
   }
 
   // Nếu không tìm thấy ảnh nào
-  return res.status(404).sendFile(path.join(imageDir, "default.png"));
+  return res.status(404).sendFile(path.join(imageDir, "logo.jpg"));
 });
 
 app.use(express.static(path.join(process.cwd(), "statics")));

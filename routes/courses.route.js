@@ -15,6 +15,7 @@ async function totalEnrollment() {
 //view courses
 router.get('/view-courses', async (req, res) => {
     const cat_course = req.query.category;
+    console.log(cat_course)
     let courses;
     let list;
 
@@ -23,7 +24,7 @@ router.get('/view-courses', async (req, res) => {
     } else {
         list = await coursesModel.view_all_courses();
     }
-    
+
     res.render('vwCourses/dis_courses', {
         courses,
         list
