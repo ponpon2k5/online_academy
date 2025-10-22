@@ -2,28 +2,28 @@ import db from '../utils/db.js'
 import bcrypt from 'bcryptjs'
 export default {
     view_all_courses() {
-  return db('courses as c')
-    .join('profiles as p', 'c.instructor_id', 'p.id')
-    .join('categories as cat', 'c.category_id', 'cat.id')
-    .select(
-      'c.id',
-      'c.title',
-      'c.price',
-      'c.hero_image_url',
-      'c.short_desc',
-      'p.name as instructor_name',
-      'cat.name as category_name',
-      'c.rating_avg',
-      'c.students_count'
-    );
-},
+        return db('courses as c')
+            .join('profiles as p', 'c.instructor_id', 'p.id')
+            .join('categories as cat', 'c.category_id', 'cat.id')
+            .select(
+                'c.id',
+                'c.title',
+                'c.price',
+                'c.hero_image_url',
+                'c.short_desc',
+                'p.name as instructor_name',
+                'cat.name as category_name',
+                'c.rating_avg',
+                'c.students_count'
+            );
+    },
 
     view_detail_course(courseId) {
         return db('courses as c')
-            .join('profiles as p','c.instructor_id', 'p.id')
+            .join('profiles as p', 'c.instructor_id', 'p.id')
             .select('c.id', 'c.title', 'c.long_desc', 'c.hero_image_url',
                 'c.price', 'c.rating_avg', 'c.students_count',
-                'p.name', 'p.role','p.avatar_url','p.bio')
+                'p.name', 'p.role', 'p.avatar_url', 'p.bio')
             .where('c.id', courseId).first();
     },
     view_lesson_in_detail(courseId) {
@@ -77,13 +77,13 @@ export default {
                 user_id,
                 lesson_id,
                 last_second: Math.floor(seconds),
-                isCompleted: !!completed, // đổi thành 'isCompleted' nếu cột của bạn đặt như vậy
+                is_completed: !!completed,
                 update_time: db.fn.now(),
             })
             .onConflict(['user_id', 'lesson_id'])
             .merge({
                 last_second: db.raw('GREATEST(??.??, ?)', [TABLE, 'last_second', Math.floor(seconds)]),
-                isCompleted: db.raw('(??.??) OR ?', [TABLE, 'isCompleted', !!completed]),
+                is_completed: db.raw('(??.??) OR ?', [TABLE, 'is_completed', !!completed]),
                 update_time: db.fn.now(),
             });
     },
@@ -94,7 +94,7 @@ export default {
             .where('vp.user_id', user_id)            // user_id là TEXT (vd 'p6')
             .select(
                 'vp.last_second',
-                db.raw('vp."isCompleted" as "isCompleted"'),  // cột có chữ hoa -> cần quote
+                'vp.is_completed',
                 'l.id as lesson_id',
                 'l.lesson as lesson_title',
                 'c.id as course_id',
@@ -128,7 +128,7 @@ export default {
             .where('vp.user_id', userId)
             .select(
                 'vp.last_second',
-                db.raw('vp."isCompleted" as "isCompleted"'),
+                'vp.is_completed',
                 'vp.update_time',
 
                 'l.id as lesson_id',
@@ -145,13 +145,13 @@ export default {
             .limit(limit)
             .offset(offset);
     },
-    filter(cat_course){
+    filter(cat_course) {
         return db('categories as cat')
-        .join('courses as c','c.category_id','cat.id')
-        .select('c.title','c.hero_image_url','short_desc','c.id')
-        .where('cat.name', cat_course)
+            .joinRaw('JOIN courses AS c ON LEFT(cat.id, 4) = c.category_id')
+            .select('c.title', 'c.hero_image_url', 'short_desc', 'c.id')
+            .where('cat.slug', cat_course);
     },
-     async topCategoriesThisWeek(limit = 5) {
+    async topCategoriesThisWeek(limit = 5) {
         return await db('enrollments as e')
             .join('courses as c', 'e.course_id', 'c.id')
             .join('categories as cat', 'c.category_id', 'cat.id')

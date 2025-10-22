@@ -137,7 +137,7 @@ router.get('/profile-process-course', async (req, res) => {
 
     const progress = rows.map(r => ({
         ...r,
-        finish_text: r.isCompleted ? 'Hoàn thành khóa học' : 'Chưa hoàn thành khóa học'
+        finish_text: r.is_completed ? 'Hoàn thành khóa học' : 'Chưa hoàn thành khóa học'
     }));
 
     const pagination = getPagination(page, total, limit);
