@@ -2,8 +2,22 @@ import db from '../utils/db.js'
 import bcrypt from 'bcryptjs'
 export default {
     view_all_courses() {
-        return db('courses').select('id', 'title', 'price', 'hero_image_url', 'long_desc', 'short_desc');
-    },
+  return db('courses as c')
+    .join('profiles as p', 'c.instructor_id', 'p.id')
+    .join('categories as cat', 'c.category_id', 'cat.id')
+    .select(
+      'c.id',
+      'c.title',
+      'c.price',
+      'c.hero_image_url',
+      'c.short_desc',
+      'p.name as instructor_name',
+      'cat.name as category_name',
+      'c.rating_avg',
+      'c.students_count'
+    );
+},
+
     view_detail_course(courseId) {
         return db('courses as c')
             .join('profiles as p','c.instructor_id', 'p.id')
@@ -136,6 +150,17 @@ export default {
         .join('courses as c','c.category_id','cat.id')
         .select('c.title','c.hero_image_url','short_desc','c.id')
         .where('cat.name', cat_course)
-    }
+    },
+     async topCategoriesThisWeek(limit = 5) {
+        return await db('enrollments as e')
+            .join('courses as c', 'e.course_id', 'c.id')
+            .join('categories as cat', 'c.category_id', 'cat.id')
+            .select('cat.id', 'cat.name')
+            .count('e.id as total_enroll')
+            .where('e.date_enrolled', '>=', db.raw("CURRENT_DATE - INTERVAL '7 days'"))
+            .groupBy('cat.id', 'cat.name')
+            .orderBy('total_enroll', 'desc')
+            .limit(limit);
+    },
 
 }

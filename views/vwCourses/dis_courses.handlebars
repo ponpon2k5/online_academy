@@ -185,35 +185,50 @@
                     </a>
                   </div>
                 </div>
-                <div class="card-body p-4">
-                  <h5 class="card-title fw-bold mb-3">
-                    <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
-                      {{this.title}}
-                    </a>
-                  </h5>
-                  <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
-                  <div class="course-meta d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex align-items-center text-muted">
-                      <i class="bi bi-people me-1"></i>
-                      <span class="small">{{this.students_count}} học viên</span>
-                    </div>
-                    <div class="course-price">
-                      <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
-                    </div>
-                  </div>
-                  <div class="course-actions d-flex gap-2">
-                    <a href="/courses/course-detail/{{this.id}}" class="btn btn-outline-primary flex-fill">
-                      <i class="bi bi-eye me-1"></i>Xem chi tiết
-                    </a>
-                    <form action="/courses/purchase-courses-process/{{this.id}}" method="POST" class="flex-fill">
-                      <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-cart-plus me-1"></i>Mua ngay
-                      </button>
-                    </form>
-                  </div>
-                </div>
+               <div class="card-body p-4">
+  <h5 class="card-title fw-bold mb-3">
+    <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
+      {{this.title}}
+    </a>
+  </h5>
+
+  <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+
+  <div class="instructor-category text-muted mb-3">
+    <p class="mb-1">
+      <i class="bi bi-person-fill me-1"></i> Giảng viên: <span class="fw-semibold">{{this.instructor_name}}</span>
+    </p>
+    <p class="mb-0">
+      <i class="bi bi-bookmark-fill me-1"></i> Lĩnh vực: <span class="fw-semibold">{{this.category_name}}</span>
+    </p>
+  </div>
+
+  <div class="course-meta d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center text-muted">
+      <i class="bi bi-people me-1"></i>
+      <span class="small">{{this.students_count}} học viên</span>
+    </div>
+    <div class="course-price">
+      <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+    </div>
+  </div>
+
+  <div class="course-actions d-flex gap-2">
+    <a href="/courses/course-detail/{{this.id}}" class="btn btn-outline-primary flex-fill">
+      <i class="bi bi-eye me-1"></i>Xem chi tiết
+    </a>
+    <form action="/courses/purchase-courses-process/{{this.id}}" method="POST" class="flex-fill">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-cart-plus me-1"></i>Mua ngay
+      </button>
+    </form>
+  </div>
+</div>
+
+                
               </div>
             </div>
+            
             {{/each}}
           {{else}}
             {{#each list}}
@@ -266,6 +281,21 @@
             {{/each}}
           {{/if}}
         </div>
+        {{#if pages.length}}
+<nav class="mt-10 mb-10 flex justify-center">
+  <ul class="pagination justify-content-center">
+    {{#each pages}}
+      <li class="page-item {{#if this.active}}active{{/if}}">
+        {{#if ../selectedCategory}}
+          <a class="page-link" href="?category={{../selectedCategory}}&page={{this.number}}">{{this.number}}</a>
+        {{else}}
+          <a class="page-link" href="?page={{this.number}}">{{this.number}}</a>
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+</nav>
+{{/if}}
 
         <!-- Empty State -->
         {{#unless courses}}
