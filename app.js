@@ -15,6 +15,7 @@ import userModel from "./models/user.model.js";
 // Routes
 import adminCategories from "./routes/admin.categories.js";
 import adminRouter from "./routes/admin.js";
+import instructorRouter from "./routes/instructor.js";
 import studentRouter from "./routes/student.route.js";
 import accountRouter from "./routes/account.route.js";
 import coursesRouter from "./routes/courses.route.js";
@@ -187,8 +188,7 @@ app.use("/account", accountRouter);
 app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
 app.use("/admin", adminRouter);
-// Nếu có instructorRoutes, import và gắn thêm ở đây:
-// app.use("/instructor", instructorRoutes);
+app.use("/instructor", instructorRouter);
 
 // ---------- 404 ----------
 app.use((req, res) => {
