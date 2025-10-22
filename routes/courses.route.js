@@ -14,22 +14,51 @@ async function totalEnrollment() {
 
 //view courses
 router.get('/view-courses', async (req, res) => {
-    const cat_course = req.query.category;
-    console.log(cat_course)
-    let courses;
-    let list;
+  try {
+    const cat_course = req.query.category || null;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 8;
+    const offset = (page - 1) * limit;
+
+    let courses = [];
+    let totalCount = 0;
 
     if (cat_course) {
-        courses = await coursesModel.filter(cat_course);
+      // Nếu có filter category
+      const filteredCourses = await coursesModel.filter(cat_course);
+      totalCount = filteredCourses.length;
+      courses = filteredCourses.slice(offset, offset + limit);
     } else {
-        list = await coursesModel.view_all_courses();
+      // Lấy tất cả khóa học
+      const allCourses = await coursesModel.view_all_courses();
+      totalCount = allCourses.length;
+      courses = allCourses.slice(offset, offset + limit);
+    }
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Tạo danh sách trang để render
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push({
+        number: i,
+        active: i === page
+      });
     }
 
     res.render('vwCourses/dis_courses', {
-        courses,
-        list
+      courses,
+      currentPage: page,
+      totalPages,
+      pages,
+      selectedCategory: cat_course
     });
+  } catch (err) {
+    console.error('Lỗi khi hiển thị khóa học:', err);
+    res.status(500).send('Lỗi máy chủ');
+  }
 });
+
 
 //enroll course
 router.post('/enroll-course', async (req, res) => {
@@ -182,6 +211,19 @@ router.get('/search', async (req, res) => {
             courses: courses
         })
     }
+});
+router.get('/', async (req, res) => {
+  const featuredCourses = await coursesModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
+  const mostViewed = await coursesModel.getMostViewedCourses(); // top 10
+  const newest = await coursesModel.getNewestCourses(); // top 10
+  const popularCategories = await coursesModel.getPopularCategories(); // lĩnh vực có nhiều người học nhất
+  
+  res.render('vwHome/index', {
+    featuredCourses,
+    mostViewed,
+    newest,
+    popularCategories
+  });
 });
 
 

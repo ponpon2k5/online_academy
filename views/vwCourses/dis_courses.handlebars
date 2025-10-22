@@ -33,93 +33,647 @@
     <div class="col-lg-4">
         <div class="card shadow-sm mt-3">
             <div class="card-header fw-semibold">
-                Bộ lọc khóa học
-            </div>
-            <div class="card-body">
-                <form method="GET" action="/courses/view-courses" id="filterForm">
-                    <!-- Danh mục -->
-                    <h6 class="fw-bold">Danh mục</h6>
-                    <select class="form-select mb-3" name="category">
-                        <option value="">Tất cả</option>
-                        <option value="Web">Lập trình Web</option>
-                        <option value="Mobile">Lập trình Mobile</option>
-                        <option value="AI">Trí tuệ nhân tạo</option>
-                    </select>
+                <!-- Hero Section -->
+                <section class="courses-hero-section py-5 bg-gradient-primary text-white">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="hero-content">
+                                    <h1 class="display-4 fw-bold mb-3">Khám phá khóa học</h1>
+                                    <p class="lead mb-4 opacity-90">
+                                        Tìm kiếm và lựa chọn khóa học phù hợp với mục tiêu học tập của bạn
+                                    </p>
+                                    <div class="search-box">
+                                        <form method="GET" action="/courses/search" class="d-flex">
+                                            <div class="input-group input-group-lg">
+                                                <input type="text" name="q" class="form-control rounded-pill-start"
+                                                    placeholder="Tìm kiếm khóa học..." value="{{query}}">
+                                                <button class="btn btn-warning rounded-pill-end px-4" type="submit">
+                                                    <i class="bi bi-search me-2"></i>Tìm kiếm
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 text-center">
+                                <div class="hero-stats">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <div class="stat-number h3 mb-0">{{#if
+                                                    list}}{{list.length}}{{else}}{{#if
+                                                    courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}</div>
+                                                <div class="stat-label small opacity-75">Khóa học</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <div class="stat-number h3 mb-0">4.8</div>
+                                                <div class="stat-label small opacity-75">Đánh giá TB</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                    <!-- Mức giá
-                    <h6 class="fw-bold">Mức giá</h6>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="free" checked>
-                        <label class="form-check-label" for="free">Miễn phí</label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="radio" name="price" id="paid">
-                        <label class="form-check-label" for="paid">Trả phí</label>
-                    </div>
-                    -->
+                <!-- Main Content -->
+                <section class="courses-main-section py-5">
+                    <div class="container">
+                        <div class="row g-4">
+                            <!-- Filter Sidebar -->
+                            <div class="col-lg-3">
+                                <div class="filter-sidebar">
+                                    <div class="filter-card card border-0 shadow-sm h-100">
+                                        <div class="card-header bg-white border-0 py-4">
+                                            <h5 class="fw-bold mb-0 d-flex align-items-center">
+                                                <i class="bi bi-funnel me-2 text-primary"></i>
+                                                Bộ lọc khóa học
+                                            </h5>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <form method="GET" action="/courses/view-courses" id="filterForm">
+                                                <!-- Danh mục -->
+                                                <div class="filter-group mb-4">
+                                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                        <i class="bi bi-grid-3x3-gap me-2 text-primary"></i>
+                                                        Danh mục
+                                                    </h6>
+                                                    <select class="form-select form-select-lg" name="category">
+                                                        <option value="">Tất cả danh mục</option>
+                                                        <option value="Web" {{#if (eq category "Web" )}}selected{{/if}}>
+                                                            Lập trình Web</option>
+                                                        <option value="Mobile" {{#if (eq category "Mobile"
+                                                            )}}selected{{/if}}>Lập trình Mobile</option>
+                                                        <option value="AI" {{#if (eq category "AI" )}}selected{{/if}}>
+                                                            Trí tuệ nhân tạo</option>
+                                                        <option value="Design" {{#if (eq category "Design"
+                                                            )}}selected{{/if}}>Thiết kế</option>
+                                                        <option value="Business" {{#if (eq category "Business"
+                                                            )}}selected{{/if}}>Kinh doanh</option>
+                                                    </select>
+                                                </div>
 
-                    <!-- Đánh giá
-                    <h6 class="fw-bold">Đánh giá</h6>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="rate5">
-                        <label class="form-check-label" for="rate5">★★★★★ (5 sao)</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="rate4">
-                        <label class="form-check-label" for="rate4">★★★★☆ trở lên</label>
-                    </div>
-                    -->
-                    <button class="btn btn-primary w-100 mt-3">Áp dụng</button>
-                </form>
-            </div>
+                                                <!-- Mức giá -->
+                                                <div class="filter-group mb-4">
+                                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                        <i class="bi bi-currency-dollar me-2 text-primary"></i>
+                                                        Mức giá
+                                                    </h6>
+                                                    <div class="price-filter">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="radio" name="price"
+                                                                id="all-price" value="" checked>
+                                                            <label class="form-check-label" for="all-price">Tất
+                                                                cả</label>
+                                                        </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="radio" name="price"
+                                                                id="free" value="free">
+                                                            <label class="form-check-label" for="free">Miễn phí</label>
+                                                        </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="radio" name="price"
+                                                                id="paid" value="paid">
+                                                            <label class="form-check-label" for="paid">Trả phí</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-        </div>
-    </div>
-    <!-- Cột trái: Ds khóa học -->
-    <div class="col-lg-8">
-        <div class="d-flex flex-wrap gap-3">
-            {{#if courses}}
-            {{#each courses}}
-            <div class="card" style="width: 15rem;">
+                                                <!-- Đánh giá -->
+                                                <div class="filter-group mb-4">
+                                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                                        <i class="bi bi-star me-2 text-primary"></i>
+                                                        Đánh giá
+                                                    </h6>
+                                                    <div class="rating-filter">
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="rate5"
+                                                                name="rating" value="5">
+                                                            <label class="form-check-label" for="rate5">
+                                                                <span class="text-warning">★★★★★</span> (5 sao)
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="rate4"
+                                                                name="rating" value="4">
+                                                            <label class="form-check-label" for="rate4">
+                                                                <span class="text-warning">★★★★☆</span> trở lên
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="checkbox" id="rate3"
+                                                                name="rating" value="3">
+                                                            <label class="form-check-label" for="rate3">
+                                                                <span class="text-warning">★★★☆☆</span> trở lên
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                <img src="/images/{{hero_image_url}}.jpg" class="card-img-top" alt="Ảnh môn học" loading="lazy"
-                    style="height: 180px;">
-                <div class="card-body p-2">
-                    <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
-                    <p class="card-text small text-muted text-truncate">
-                        {{short_desc}}
-                    </p>
-                    <div class="d-flex gap-2">
-                        <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm flex-fill">View
-                            Detail</a>
-                        <a href="/courses/purchase-courses-process/{{id}}"
-                            class="btn btn-primary btn-sm flex-fill">Purchase</a>
-                    </div>
-                </div>
-            </div>
-            {{/each}}
-            {{else}}
-            {{#each list}}
-            <div class="card" style="width: 15rem;">
+                                                <button class="btn btn-primary w-100 btn-lg rounded-pill" type="submit">
+                                                    <i class="bi bi-funnel me-2"></i>Áp dụng bộ lọc
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                <img src="/images/{{hero_image_url}}.jpg" class="card-img-top" alt="Ảnh môn học" loading="lazy"
-                    style="height: 180px;">
-                <div class="card-body p-2">
-                    <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
-                    <p class="card-text small text-muted text-truncate">
-                        {{short_desc}}
-                    </p>
-                    <div class="d-flex gap-2">
-                        <a href="/courses/course-detail/{{id}}" class="btn btn-outline-primary btn-sm flex-fill">View
-                            Detail</a>
-                        <form action="/courses/purchase-courses-process/{{id}}" method="POST">
-                            <button type="submit" class="btn btn-success">Purchase</button>
-                        </form>
+                            <!-- Courses Grid -->
+                            <div class="col-lg-9">
+                                <div class="courses-header mb-4">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h3 class="fw-bold mb-1">Danh sách khóa học</h3>
+                                            <p class="text-muted mb-0">
+                                                {{#if courses}}
+                                                Tìm thấy {{courses.length}} khóa học
+                                                {{else}}
+                                                {{#if list}}
+                                                Hiển thị {{list.length}} khóa học
+                                                {{else}}
+                                                Không có khóa học nào
+                                                {{/if}}
+                                                {{/if}}
+                                            </p>
+                                        </div>
+                                        <div class="view-options">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary active"
+                                                    id="gridView">
+                                                    <i class="bi bi-grid-3x3-gap"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary" id="listView">
+                                                    <i class="bi bi-list"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Courses Grid -->
+                                <div class="courses-grid" id="coursesContainer">
+                                    {{#if courses}}
+                                    {{#each courses}}
+                                    <div class="course-card-wrapper">
+                                        <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
+                                            <div class="course-image position-relative">
+                                                <a href="/courses/course-detail/{{this.id}}">
+                                                    <img src="/images/{{this.hero_image_url}}.jpg" class="card-img-top"
+                                                        alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+                                                </a>
+                                                <div class="course-badge position-absolute top-0 end-0 m-3">
+                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="btn btn-warning rounded-circle play-btn">
+                                                        <i class="bi bi-play-fill fs-4"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-4">
+                                                <h5 class="card-title fw-bold mb-3">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="text-decoration-none text-dark">
+                                                        {{this.title}}
+                                                    </a>
+                                                </h5>
+
+                                                <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+
+                                                <div class="instructor-category text-muted mb-3">
+                                                    <p class="mb-1">
+                                                        <i class="bi bi-person-fill me-1"></i> Giảng viên: <span
+                                                            class="fw-semibold">{{this.instructor_name}}</span>
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <i class="bi bi-bookmark-fill me-1"></i> Lĩnh vực: <span
+                                                            class="fw-semibold">{{this.category_name}}</span>
+                                                    </p>
+                                                </div>
+
+                                                <div
+                                                    class="course-meta d-flex justify-content-between align-items-center mb-3">
+                                                    <div class="d-flex align-items-center text-muted">
+                                                        <i class="bi bi-people me-1"></i>
+                                                        <span class="small">{{this.students_count}} học viên</span>
+                                                    </div>
+                                                    <div class="course-price">
+                                                        <span class="fw-bold text-primary fs-5">{{formatCurrency
+                                                            this.price}}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="course-actions d-flex gap-2">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="btn btn-outline-primary flex-fill">
+                                                        <i class="bi bi-eye me-1"></i>Xem chi tiết
+                                                    </a>
+                                                    <form action="/courses/purchase-courses-process/{{this.id}}"
+                                                        method="POST" class="flex-fill">
+                                                        <button type="submit" class="btn btn-primary w-100">
+                                                            <i class="bi bi-cart-plus me-1"></i>Mua ngay
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                    {{/each}}
+                                    {{else}}
+                                    {{#each list}}
+                                    <div class="course-card-wrapper">
+                                        <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
+                                            <div class="course-image position-relative">
+                                                <a href="/courses/course-detail/{{this.id}}">
+                                                    <img src="/images/{{this.hero_image_url}}.jpg" class="card-img-top"
+                                                        alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+                                                </a>
+                                                <div class="course-badge position-absolute top-0 end-0 m-3">
+                                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="btn btn-warning rounded-circle play-btn">
+                                                        <i class="bi bi-play-fill fs-4"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="card-body p-4">
+                                                <h5 class="card-title fw-bold mb-3">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="text-decoration-none text-dark">
+                                                        {{this.title}}
+                                                    </a>
+                                                </h5>
+                                                <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+                                                <div
+                                                    class="course-meta d-flex justify-content-between align-items-center mb-3">
+                                                    <div class="d-flex align-items-center text-muted">
+                                                        <i class="bi bi-people me-1"></i>
+                                                        <span class="small">{{this.students_count}} học viên</span>
+                                                    </div>
+                                                    <div class="course-price">
+                                                        <span class="fw-bold text-primary fs-5">{{formatCurrency
+                                                            this.price}}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="course-actions d-flex gap-2">
+                                                    <a href="/courses/course-detail/{{this.id}}"
+                                                        class="btn btn-outline-primary flex-fill">
+                                                        <i class="bi bi-eye me-1"></i>Xem chi tiết
+                                                    </a>
+                                                    <form action="/courses/purchase-courses-process/{{this.id}}"
+                                                        method="POST" class="flex-fill">
+                                                        <button type="submit" class="btn btn-primary w-100">
+                                                            <i class="bi bi-cart-plus me-1"></i>Mua ngay
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {{/each}}
+                                    {{/if}}
+                                </div>
+                                {{#if pages.length}}
+                                <nav class="mt-10 mb-10 flex justify-center">
+                                    <ul class="pagination justify-content-center">
+                                        {{#each pages}}
+                                        <li class="page-item {{#if this.active}}active{{/if}}">
+                                            {{#if ../selectedCategory}}
+                                            <a class="page-link"
+                                                href="?category={{../selectedCategory}}&page={{this.number}}">{{this.number}}</a>
+                                            {{else}}
+                                            <a class="page-link" href="?page={{this.number}}">{{this.number}}</a>
+                                            {{/if}}
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </nav>
+                                {{/if}}
+
+                                <!-- Empty State -->
+                                {{#unless courses}}
+                                {{#unless list}}
+                                <div class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="bi bi-book display-1 text-muted mb-4"></i>
+                                        <h4 class="text-muted mb-3">Không tìm thấy khóa học</h4>
+                                        <p class="text-muted mb-4">Hãy thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa
+                                            khác</p>
+                                        <a href="/courses/view-courses" class="btn btn-primary rounded-pill px-4">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Xem tất cả khóa học
+                                        </a>
+                                    </div>
+                                </div>
+                                {{/unless}}
+                                {{/unless}}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            {{/each}}
-            {{/if}}
-        </div>
-    </div>
-</div>
+                </section>
+
+                <!-- Custom Styles -->
+                <style>
+                    /* Hero Section */
+                    .courses-hero-section {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .courses-hero-section::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                        opacity: 0.1;
+                    }
+
+                    .hero-content {
+                        position: relative;
+                        z-index: 2;
+                    }
+
+                    .search-box .input-group {
+                        max-width: 500px;
+                    }
+
+                    .search-box .form-control {
+                        border: none;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .search-box .btn {
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .hero-stats {
+                        position: relative;
+                        z-index: 2;
+                    }
+
+                    .stat-item {
+                        text-align: center;
+                        padding: 1rem;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 15px;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                    }
+
+                    /* Filter Sidebar */
+                    .filter-card {
+                        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                        border-radius: 20px;
+                        overflow: hidden;
+                    }
+
+                    .filter-group {
+                        border-bottom: 1px solid #e9ecef;
+                        padding-bottom: 1.5rem;
+                    }
+
+                    .filter-group:last-child {
+                        border-bottom: none;
+                        padding-bottom: 0;
+                    }
+
+                    .form-select {
+                        border: 2px solid #e9ecef;
+                        border-radius: 10px;
+                        transition: all 0.3s ease;
+                    }
+
+                    .form-select:focus {
+                        border-color: #667eea;
+                        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+                    }
+
+                    .form-check-input:checked {
+                        background-color: #667eea;
+                        border-color: #667eea;
+                    }
+
+                    /* Course Cards */
+                    .courses-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 2rem;
+                    }
+
+                    .course-card-wrapper {
+                        transition: all 0.3s ease;
+                    }
+
+                    .course-card {
+                        transition: all 0.3s ease;
+                        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                        border-radius: 20px;
+                        overflow: hidden;
+                    }
+
+                    .course-card:hover {
+                        transform: translateY(-10px);
+                        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+                    }
+
+                    .course-image img {
+                        transition: transform 0.3s ease;
+                    }
+
+                    .course-card:hover .course-image img {
+                        transform: scale(1.05);
+                    }
+
+                    .course-overlay {
+                        background: rgba(0, 0, 0, 0.7);
+                        opacity: 0;
+                        transition: opacity 0.3s ease;
+                    }
+
+                    .course-card:hover .course-overlay {
+                        opacity: 1;
+                    }
+
+                    .play-btn {
+                        width: 60px;
+                        height: 60px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.3s ease;
+                    }
+
+                    .play-btn:hover {
+                        transform: scale(1.1);
+                    }
+
+                    .course-actions .btn {
+                        border-radius: 10px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                    }
+
+                    .course-actions .btn:hover {
+                        transform: translateY(-2px);
+                    }
+
+                    /* View Options */
+                    .view-options .btn-group .btn {
+                        border-radius: 10px;
+                        margin: 0 2px;
+                    }
+
+                    .view-options .btn.active {
+                        background-color: #667eea;
+                        border-color: #667eea;
+                        color: white;
+                    }
+
+                    /* Empty State */
+                    .empty-state {
+                        padding: 4rem 2rem;
+                    }
+
+                    /* Responsive Design */
+                    @media (max-width: 768px) {
+                        .courses-grid {
+                            grid-template-columns: 1fr;
+                            gap: 1.5rem;
+                        }
+
+                        .hero-stats {
+                            margin-top: 2rem;
+                        }
+
+                        .stat-item {
+                            padding: 0.75rem;
+                        }
+
+                        .search-box .input-group {
+                            flex-direction: column;
+                        }
+
+                        .search-box .form-control {
+                            border-radius: 10px !important;
+                            margin-bottom: 1rem;
+                        }
+
+                        .search-box .btn {
+                            border-radius: 10px !important;
+                        }
+                    }
+
+                    @media (max-width: 576px) {
+                        .courses-hero-section {
+                            padding: 3rem 0;
+                        }
+
+                        .display-4 {
+                            font-size: 2rem;
+                        }
+
+                        .filter-sidebar {
+                            margin-bottom: 2rem;
+                        }
+
+                        .courses-header {
+                            text-align: center;
+                        }
+
+                        .view-options {
+                            margin-top: 1rem;
+                        }
+                    }
+
+                    /* List View Styles */
+                    .courses-grid.list-view {
+                        display: block;
+                    }
+
+                    .courses-grid.list-view .course-card-wrapper {
+                        margin-bottom: 1.5rem;
+                    }
+
+                    .courses-grid.list-view .course-card {
+                        display: flex;
+                        flex-direction: row;
+                        max-height: 200px;
+                    }
+
+                    .courses-grid.list-view .course-image {
+                        width: 300px;
+                        flex-shrink: 0;
+                    }
+
+                    .courses-grid.list-view .course-image img {
+                        height: 200px;
+                        object-fit: cover;
+                    }
+
+                    .courses-grid.list-view .card-body {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                    }
+
+                    .courses-grid.list-view .course-actions {
+                        margin-top: auto;
+                    }
+
+                    @media (max-width: 768px) {
+                        .courses-grid.list-view .course-card {
+                            flex-direction: column;
+                            max-height: none;
+                        }
+
+                        .courses-grid.list-view .course-image {
+                            width: 100%;
+                        }
+
+                        .courses-grid.list-view .course-image img {
+                            height: 240px;
+                        }
+                    }
+                </style>
+
+                <!-- JavaScript for View Toggle -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const gridViewBtn = document.getElementById('gridView');
+                        const listViewBtn = document.getElementById('listView');
+                        const coursesContainer = document.getElementById('coursesContainer');
+
+                        gridViewBtn.addEventListener('click', function () {
+                            coursesContainer.classList.remove('list-view');
+                            gridViewBtn.classList.add('active');
+                            listViewBtn.classList.remove('active');
+                        });
+
+                        listViewBtn.addEventListener('click', function () {
+                            coursesContainer.classList.add('list-view');
+                            listViewBtn.classList.add('active');
+                            gridViewBtn.classList.remove('active');
+                        });
+                    });
+                </script>
