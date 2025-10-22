@@ -9,6 +9,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import "dotenv/config";
+import fs from "fs";
 
 import userModel from "./models/user.model.js";
 
@@ -30,6 +31,23 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+// --------- Xử lý tự động đuôi ảnh ----------
+app.get("/images/:name", (req, res) => {
+  const imageDir = path.join(__dirname, "statics", "img");
+  const baseName = req.params.name;
+  const extensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+
+  for (const ext of extensions) {
+    const fullPath = path.join(imageDir, baseName + ext);
+    if (fs.existsSync(fullPath)) {
+      return res.sendFile(fullPath);
+    }
+  }
+
+  // Nếu không tìm thấy ảnh nào
+  return res.status(404).sendFile(path.join(imageDir, "default.png"));
+});
+
 app.use(express.static(path.join(process.cwd(), "statics")));
 
 // (Nếu bạn cần route động cho ảnh, nhớ đóng ngoặc đầy đủ)
