@@ -86,8 +86,41 @@ document.querySelector('input[name="title"]').addEventListener('input', function
   document.querySelector('input[name="slug"]').value = slug;
 });
 
-// Form validation
+</script>
+
+<!-- TinyMCE CDN -->
+<script src="https://cdn.tiny.cloud/1/tu2jfktfy9yrqap3g5gi2p1ljg4a7fe3apl675beevn0ox4o/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script>
+// Initialize TinyMCE
+tinymce.init({
+  selector: '#long_desc',
+  height: 400,
+  menubar: false,
+  plugins: [
+    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+  ],
+  toolbar: 'undo redo | blocks | ' +
+    'bold italic forecolor | alignleft aligncenter ' +
+    'alignright alignjustify | bullist numlist outdent indent | ' +
+    'removeformat | help',
+  content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
+  setup: function (editor) {
+    editor.on('change', function () {
+      editor.save();
+    });
+  }
+});
+
+// Update form validation to work with TinyMCE
 document.getElementById('courseForm').addEventListener('submit', function(e) {
+  // Sync TinyMCE content before validation
+  if (tinymce.get('long_desc')) {
+    tinymce.get('long_desc').save();
+  }
+  
   const title = document.querySelector('input[name="title"]').value.trim();
   const slug = document.querySelector('input[name="slug"]').value.trim();
   const category = document.querySelector('select[name="category_id"]').value;
