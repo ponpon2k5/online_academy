@@ -10,7 +10,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import "dotenv/config";
 import fs from "fs";
-
+import moment from 'moment';
 import userModel from "./models/user.model.js";
 
 // Routes
@@ -117,6 +117,14 @@ app.engine(
       round: (num) => Math.round(num),
       add: (a, b) => Number(a) + Number(b),
       subtract: (a, b) => Number(a) - Number(b),
+      formatDateForCheckCourse: (date) => moment(date).format('DD/MM/YYYY'),
+      isRecentCourse: (date) => {
+        if (!date) return false;
+        const createdAt = moment(date);
+        const now = moment();
+        return now.diff(createdAt, 'days') <= 3; // ✅ 3 ngày gần nhất
+      },
+      isBestSeller: (students) => students >= 1000
     },
   })
 );

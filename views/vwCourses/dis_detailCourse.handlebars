@@ -17,6 +17,7 @@
                 </div>
             </div>
 
+
             <!-- Details -->
             <div class="col-12 col-md-7">
                 <div class="card-body h-100 d-flex flex-column">
@@ -30,42 +31,47 @@
                             {{!-- Fallback sao bằng ký tự, không cần icon library --}}
                             {{#each course.stars_filled}}★{{/each}}{{#each course.stars_empty}}☆{{/each}}
                         </span>
-                        <small class="text-muted">({{course.review_count}} đánh giá)</small>
+                        <small class="text-muted">({{course.review_count}}★ đánh giá) - {{course.rating_count}} lượt
+                            đánh giá</small>
                         {{/if}}
                     </div>
+                    <!-- Giảng viên -->
+                    <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
+                            class="fw-semibold">{{course.instructor_name}}</span></p>
+                    
+                    <!--Số lượng học viên-->
+                    <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Số lượng học viên: <span
+                            class="fw-semibold">{{course.students_count}}</span></p>
 
-                    <!-- Meta line -->
-                    <div class="small text-muted mb-2">
-                        {{#if course.level}}<span class="me-2">Trình độ: {{course.level}}</span>{{/if}}
-                        {{#if course.language}}<span class="me-2">Ngôn ngữ: {{course.language}}</span>{{/if}}
-                        {{#if course.updated_at}}<span class="me-2">Cập nhật: {{course.updated_at}}</span>{{/if}}
-                    </div>
-
-                    <!-- Badges: categories/tags -->
-                    <div class="mb-2">
-                        {{#each course.categories}}
-                        <span class="badge bg-light text-dark border me-1 mb-1">{{this}}</span>
-                        {{/each}}
-                    </div>
-
-                    <!-- Description-->
-                    <div class="card-text small text-muted description" data-html="{{course.long_desc}}">
-                    </div>
-
-                    <!-- Progress (nếu user đã học) -->
-                    {{#if course.user_enrolled}}
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small mb-1">
-                            <span>Tiến độ học</span>
-                            <span>{{course.progress}}%</span>
-                        </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar" role="progressbar" style="width: {{course.progress}}%;"
-                                aria-valuenow="{{course.progress}}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                    <!-- Cập nhật -->
+                    {{#if course.updated_at}}
+                    <div class="small text-muted mb-3">
+                        Cập nhật: {{formatDate course.updated_at}}
                     </div>
                     {{/if}}
+                    <!-- Mô tả dài (HTML) -->
+                    <!-- Mô tả ngắn -->
+                    <div class="card-text text-secondary small fst-italic mb-2">
+                        <i class="bi bi-info-circle me-1 text-primary"></i>
+                        {{{course.short_desc}}}
+                    </div>
 
+                    <!-- Mô tả dài -->
+                    <div class="card-text text-dark small lh-sm mb-3">
+                        <i class="bi bi-align-left me-1 text-success"></i>
+                        {{{course.long_desc}}}
+                    </div>
+
+
+                    <!-- Giá -->
+                    <div class="mb-3">
+                        {{#if course.promo_price}}
+                        <span class="fs-5 fw-bold text-primary me-2">{{formatCurrency course.promo_price}}</span>
+                        <span class="text-muted text-decoration-line-through">{{formatCurrency course.price}}</span>
+                        {{else}}
+                        <span class="fs-5 fw-bold text-primary">{{formatCurrency course.price}}</span>
+                        {{/if}}
+                    </div>
                     <!-- Action buttons -->
                     <div class="mt-auto d-flex flex-wrap gap-2">
                         {{#if course.user_enrolled}}
@@ -139,6 +145,113 @@
                         <button class="btn btn-primary" type="submit">Gửi phản hồi</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    <!-- Feedback list -->
+    {{#if feedbacks}}
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-body">
+            <h5 class="card-title mb-4">
+                <i class="bi bi-chat-dots-fill text-primary me-2"></i>
+                Phản hồi từ học viên
+            </h5>
+
+            {{#each feedbacks}}
+            <div class="border-bottom pb-3 mb-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong class="text-dark">{{name}} - {{role}}</strong>
+                    </div>
+                    {{#if this.rating}}
+                    <div class="text-warning small">
+                        {{#times this.rating}}★{{/times}}{{#times (subtract 5 this.rating)}}☆{{/times}}
+                    </div>
+                    {{/if}}
+                </div>
+                <p class="mb-0 mt-2">{{des}}</p>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-4 text-muted mb-5">
+        <i class="bi bi-emoji-smile display-6 d-block mb-2"></i>
+        Chưa có phản hồi nào cho khóa học này.
+    </div>
+    {{/if}}
+    {{#if relatedCourses.length}}
+    <section class="related-courses-section py-5 bg-white">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold mb-0">Khoá học cùng lĩnh vực</h3>
+                <small class="text-muted">Top 5 được mua nhiều</small>
+            </div>
+
+            <div class="row g-4">
+                {{#each relatedCourses}}
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border-0 shadow-sm position-relative">
+                        <a href="/courses/course-detail/{{this.id}}">
+                            <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+                                style="height:180px;object-fit:cover;">
+                        </a>
+
+                        <!-- Badge Hot nếu muốn (tuỳ sẵn helper isBestSeller) -->
+                        {{#if (isBestSeller this.students_count)}}
+                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">Hot</span>
+                        {{/if}}
+
+                        <div class="card-body">
+                            <h6 class="card-title mb-2">
+                                <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
+                                    {{this.title}}
+                                </a>
+                            </h6>
+
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="small text-muted">
+                                    <i class="bi bi-people me-1"></i>{{this.students_count}}
+                                </span>
+                                <span class="small text-muted">
+                                    <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}} ({{this.rating_count}})
+                                </span>
+                            </div>
+
+                            <!-- Giá -->
+                            {{#if this.promo_price}}
+                            <div>
+                                <span class="text-muted text-decoration-line-through me-2">{{formatCurrency
+                                    this.price}}</span>
+                                <span class="fw-bold text-danger">{{formatCurrency this.promo_price}}</span>
+                            </div>
+                            {{else}}
+                            <div>
+                                <span class="fw-bold text-primary">{{formatCurrency this.price}}</span>
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+    {{/if}}
+    <h3 class="fw-bold mb-0">Thông Tin Về Giảng Viên</h3>
+    
+    <div class="card mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="/images/{{instructor.avatar_url}}.jpg" class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h4 class="fw-bold mb-1">{{instructor.name}}</h4>
+                            <p class="text-primary small mb-2">{{instructor.specialization}}</p>
+                            <p class="text-muted small mb-3">Kinh nghiệm: {{instructor.experience_years}} năm</p>
+                            <p class="text-muted small mb-0">{{{instructor.bio}}}</p>
+                </div>
             </div>
         </div>
     </div>

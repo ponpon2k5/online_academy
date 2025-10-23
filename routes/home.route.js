@@ -1,44 +1,20 @@
 import express from "express";
-import db from "../utils/db.js"; // file kết nối Supabase qua Knex
+import homeModel from "../models/home.model.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
-  try {
-    const featuredCourses = await db("courses")
-      .where("status", "published")
-      .orderBy("rating_avg", "desc")
-      .limit(6);
-
-    const popularCourses = await db("courses")
-      .where("status", "published")
-      .orderBy("students_count", "desc")
-      .limit(6);
-
-    const newestCourses = await db("courses")
-      .where("status", "published")
-      .orderBy("created_at", "desc")
-      .limit(6);
-
-    const hotCategories = await db("courses")
-      .select("category_id")
-      .sum("students_count as total_students")
-      .groupBy("category_id")
-      .orderBy("total_students", "desc")
-      .limit(4);
-
-    res.render("home", {
-      layout: "main",
-      featuredCourses,
-      popularCourses,
-      newestCourses,
-      hotCategories,
-      title: "Online Academy - Học mọi lúc mọi nơi",
+router.get('/', async (req, res) => {
+    const featuredCourses = await homeModel.getFeaturedCoursesThisWeek(); // 3-4 khóa học nổi bật trong tuần
+    const mostViewed = await homeModel.getMostViewedCourses(); // 
+    const newest = await homeModel.getNewestCourses(); // 
+    const popularCategories = await homeModel.getHotCategories(); // lĩnh vực có nhiều người học nhất
+    console.log(popularCategories);
+    res.render('home', {
+        featuredCourses, // khóa học nổi bật nhất tuần qua
+        newest, // khóa học mới
+        mostViewed, // khóa học được xem nhiều nhất 
+        popularCategories,
     });
-  } catch (err) {
-    console.error("Lỗi truy vấn dữ liệu:", err);
-    res.status(500).send("Lỗi truy vấn dữ liệu");
-  }
 });
 
 export default router;

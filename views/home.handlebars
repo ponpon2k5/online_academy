@@ -5,7 +5,8 @@
       {{#each featuredCourses}}
       <div class="carousel-item {{#if @first}}active{{/if}}">
         <div class="hero-slide">
-          <div class="hero-bg" style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('/images/{{this.hero_image_url}}');">
+          <div class="hero-bg"
+            style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('/images/{{this.hero_image_url}}');">
             <div class="container">
               <div class="row align-items-center min-vh-75">
                 <div class="col-lg-6">
@@ -32,7 +33,8 @@
                       </div>
                     </div>
                     <div class="hero-actions d-flex gap-3 flex-wrap">
-                      <a href="/courses/course-detail/{{this.id}}" class="btn btn-warning btn-lg px-4 py-2 rounded-pill shadow">
+                      <a href="/courses/course-detail/{{this.id}}"
+                        class="btn btn-warning btn-lg px-4 py-2 rounded-pill shadow">
                         <i class="bi bi-play-circle me-2"></i>Bắt đầu học
                       </a>
                       <a href="#featured-courses" class="btn btn-outline-light btn-lg px-4 py-2 rounded-pill">
@@ -43,7 +45,8 @@
                 </div>
                 <div class="col-lg-6 text-center">
                   <div class="hero-image-wrapper">
-                    <img src="/images/{{this.hero_image_url}}" alt="{{this.title}}" class="hero-image img-fluid rounded-4 shadow-lg">
+                    <img src="/images/{{this.hero_image_url}}" alt="{{this.title}}"
+                      class="hero-image img-fluid rounded-4 shadow-lg">
                   </div>
                 </div>
               </div>
@@ -53,28 +56,25 @@
       </div>
       {{/each}}
     </div>
-    
+
     <!-- Custom Carousel Controls -->
-    <button class="carousel-control-prev custom-nav-btn" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+    <button class="carousel-control-prev custom-nav-btn" type="button" data-bs-target="#homeCarousel"
+      data-bs-slide="prev">
       <i class="bi bi-chevron-left"></i>
       <span class="visually-hidden">Previous</span>
     </button>
-    <button class="carousel-control-next custom-nav-btn" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+    <button class="carousel-control-next custom-nav-btn" type="button" data-bs-target="#homeCarousel"
+      data-bs-slide="next">
       <i class="bi bi-chevron-right"></i>
       <span class="visually-hidden">Next</span>
     </button>
-    
+
     <!-- Custom Indicators -->
     <div class="carousel-indicators d-flex justify-content-center gap-2 mt-3">
       {{#each featuredCourses}}
-      <button
-        type="button"
-        data-bs-target="#homeCarousel"
-        data-bs-slide-to="{{@index}}"
+      <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="{{@index}}"
         class="indicator-dot btn btn-light rounded-circle shadow-sm border-0 opacity-50 {{#if @first}}active opacity-100{{/if}}"
-        aria-current="{{#if @first}}true{{/if}}"
-        aria-label="Slide {{add @index 1}}"
-      ></button>
+        aria-current="{{#if @first}}true{{/if}}" aria-label="Slide {{add @index 1}}"></button>
       {{/each}}
     </div>
   </div>
@@ -87,7 +87,9 @@
       <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
           <div class="stat-icon mb-3">
-            <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+            <div
+              class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+              style="width: 80px; height: 80px;">
               <i class="bi bi-people-fill display-4 text-primary"></i>
             </div>
           </div>
@@ -98,7 +100,9 @@
       <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
           <div class="stat-icon mb-3">
-            <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+            <div
+              class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+              style="width: 80px; height: 80px;">
               <i class="bi bi-book-fill display-4 text-success"></i>
             </div>
           </div>
@@ -109,7 +113,9 @@
       <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
           <div class="stat-icon mb-3">
-            <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+            <div
+              class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+              style="width: 80px; height: 80px;">
               <i class="bi bi-mortarboard-fill display-4 text-warning"></i>
             </div>
           </div>
@@ -120,7 +126,9 @@
       <div class="col-lg-3 col-md-6">
         <div class="stat-card text-center p-4 rounded-4 border-0 shadow-sm h-100">
           <div class="stat-icon mb-3">
-            <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+            <div
+              class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+              style="width: 80px; height: 80px;">
               <i class="bi bi-star-fill display-4 text-info"></i>
             </div>
           </div>
@@ -144,7 +152,9 @@
         <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
           <div class="card-body p-4 text-center d-flex flex-column">
             <div class="category-icon mb-4">
-              <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+              <div
+                class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                style="width: 100px; height: 100px;">
                 <i class="bi bi-code-slash display-3 text-primary"></i>
               </div>
             </div>
@@ -162,7 +172,9 @@
         <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
           <div class="card-body p-4 text-center d-flex flex-column">
             <div class="category-icon mb-4">
-              <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+              <div
+                class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                style="width: 100px; height: 100px;">
                 <i class="bi bi-palette display-3 text-success"></i>
               </div>
             </div>
@@ -180,7 +192,9 @@
         <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
           <div class="card-body p-4 text-center d-flex flex-column">
             <div class="category-icon mb-4">
-              <div class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+              <div
+                class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                style="width: 100px; height: 100px;">
                 <i class="bi bi-graph-up display-3 text-warning"></i>
               </div>
             </div>
@@ -198,7 +212,9 @@
         <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
           <div class="card-body p-4 text-center d-flex flex-column">
             <div class="category-icon mb-4">
-              <div class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+              <div
+                class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                style="width: 100px; height: 100px;">
                 <i class="bi bi-camera display-3 text-info"></i>
               </div>
             </div>
@@ -220,10 +236,10 @@
 <section id="featured-courses" class="featured-courses-section py-5 bg-white">
   <div class="container">
     <div class="section-header text-center mb-5">
-      <h2 class="display-4 fw-bold mb-3">Khóa học nổi bật</h2>
-      <p class="lead text-muted">Những khóa học được đánh giá cao nhất</p>
+      <h2 class="display-4 fw-bold mb-3">Khóa học nổi bật nhất trong tuần</h2>
+      <p class="lead text-muted">Những khóa học được đánh giá cao và lượt mua nhiều nhất</p>
     </div>
-    
+
     {{#if featuredCourses}}
     <div class="row g-4">
       {{#each featuredCourses}}
@@ -231,14 +247,16 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+                style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">
               <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
                 <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
               </span>
             </div>
-            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+            <div
+              class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
               <a href="/courses/course-detail/{{this.id}}" class="btn btn-warning rounded-circle play-btn">
                 <i class="bi bi-play-fill fs-4"></i>
               </a>
@@ -277,29 +295,31 @@
   </div>
 </section>
 
-<!-- Popular Courses Section -->
+<!-- Most viewed Courses Section -->
 <section class="popular-courses-section py-5 bg-light">
   <div class="container">
     <div class="section-header text-center mb-5">
-      <h2 class="display-4 fw-bold mb-3">Khóa học phổ biến</h2>
-      <p class="lead text-muted">Được nhiều học viên lựa chọn nhất</p>
+      <h2 class="display-4 fw-bold mb-3">Khóa học được xem nhiều nhất</h2>
+      <p class="lead text-muted">Được nhiều học viên xem nhiều nhất</p>
     </div>
-    
-    {{#if popularCourses}}
+
+    {{#if mostViewed}}
     <div class="row g-4">
-      {{#each popularCourses}}
+      {{#each mostViewed}}
       <div class="col-lg-4 col-md-6">
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+                style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">
               <span class="badge bg-danger rounded-pill px-3 py-2">
                 <i class="bi bi-fire me-1"></i>Hot
               </span>
             </div>
-            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+            <div
+              class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
               <a href="/courses/course-detail/{{this.id}}" class="btn btn-danger rounded-circle play-btn">
                 <i class="bi bi-play-fill fs-4"></i>
               </a>
@@ -345,22 +365,24 @@
       <h2 class="display-4 fw-bold mb-3">Khóa học mới nhất</h2>
       <p class="lead text-muted">Những khóa học vừa được cập nhật</p>
     </div>
-    
-    {{#if newestCourses}}
+
+    {{#if newest}}
     <div class="row g-4">
-      {{#each newestCourses}}
+      {{#each newest}}
       <div class="col-lg-4 col-md-6">
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}" style="height: 240px; object-fit: cover;">
+              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+                style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">
               <span class="badge bg-info rounded-pill px-3 py-2">
                 <i class="bi bi-clock me-1"></i>Mới
               </span>
             </div>
-            <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+            <div
+              class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
               <a href="/courses/course-detail/{{this.id}}" class="btn btn-info rounded-circle play-btn">
                 <i class="bi bi-play-fill fs-4"></i>
               </a>
@@ -398,7 +420,57 @@
     {{/if}}
   </div>
 </section>
+<!-- Most enrolled category -->
+<section class="hot-categories-section py-5 bg-white">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <h2 class="display-6 fw-bold mb-2">Lĩnh vực được đăng ký nhiều nhất</h2>
+      <p class="text-muted">Top lĩnh vực có nhiều lượt đăng ký trong 7 ngày qua</p>
+    </div>
 
+    {{#if popularCategories}}
+    <div class="row g-4">
+      {{#each popularCategories}}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-start gap-3">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center border"
+              style="width:44px;height:44px;">
+              <i class="bi bi-collection fs-5"></i>
+            </div>
+
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <h5 class="card-title mb-1">
+                  <p class="text-decoration-none text-dark">
+                    {{this.name}}
+                  </p>
+                </h5>
+                
+              </div>
+
+              <p class="mb-2 text-muted small">Đăng ký tuần qua</p>
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="fw-bold">{{this.weekly_enrollments}}</div>
+                <a href="/courses/search?q={{this.name}}" class="btn btn-sm btn-outline-primary">
+                  Xem khóa học
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+      <i class="bi bi-bar-chart display-4 text-muted d-block mb-3"></i>
+      <h5 class="text-muted mb-1">Chưa có thống kê trong tuần qua</h5>
+      <p class="text-muted">Quay lại sau để xem lĩnh vực đang “hot”.</p>
+    </div>
+    {{/if}}
+  </div>
+</section>
 <!-- CTA Section -->
 <section class="cta-section py-5 bg-primary text-white position-relative overflow-hidden">
   <div class="container text-center position-relative">
@@ -429,414 +501,417 @@
 
 <!-- Custom Styles -->
 <style>
-/* Hero Section */
-.hero-section {
-  min-height: 80vh;
-  overflow: hidden;
-}
-
-.hero-bg {
-  min-height: 80vh;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.min-vh-75 {
-  min-height: 75vh;
-}
-
-.hero-content {
-  z-index: 2;
-  position: relative;
-}
-
-.hero-image {
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.hero-image-wrapper {
-  position: relative;
-  z-index: 2;
-}
-
-.hero-badge {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.hero-content h1 {
-  animation: fadeInUp 0.8s ease-out 0.2s both;
-}
-
-.hero-content p {
-  animation: fadeInUp 0.8s ease-out 0.4s both;
-}
-
-.hero-stats {
-  animation: fadeInUp 0.8s ease-out 0.6s both;
-}
-
-.hero-actions {
-  animation: fadeInUp 0.8s ease-out 0.8s both;
-}
-
-/* Carousel Controls */
-.custom-nav-btn {
-  width: 60px;
-  height: 60px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 50%;
-  backdrop-filter: blur(15px);
-  border: 2px solid rgba(255,255,255,0.2);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
-}
-
-.custom-nav-btn:hover {
-  background: rgba(255,255,255,0.25);
-  border-color: rgba(255,255,255,0.4);
-  transform: translateY(-50%) scale(1.1);
-  opacity: 1;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-}
-
-.custom-nav-btn:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.custom-nav-btn i {
-  font-size: 24px;
-  color: white;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.carousel-control-prev {
-  left: 30px;
-}
-
-.carousel-control-next {
-  right: 30px;
-}
-
-/* Carousel Indicators */
-.carousel-indicators {
-  bottom: 30px;
-  margin-bottom: 0;
-  gap: 12px;
-}
-
-.indicator-dot {
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  min-height: 16px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255,255,255,0.4) !important;
-  background: rgba(255,255,255,0.2) !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.indicator-dot:hover {
-  border-color: rgba(255,255,255,0.7) !important;
-  background: rgba(255,255,255,0.3) !important;
-  transform: scale(1.1) !important;
-}
-
-.indicator-dot.active {
-  background: white !important;
-  border-color: white !important;
-  transform: scale(1.3) !important;
-  box-shadow: 0 4px 15px rgba(255,255,255,0.4) !important;
-  opacity: 1 !important;
-}
-
-.indicator-progress {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: linear-gradient(45deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.indicator-dot.active .indicator-progress {
-  opacity: 1;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Stats Section */
-.stat-card {
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-}
-
-.stat-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
-}
-
-.stat-number {
-  background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Categories Section */
-.category-card {
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-}
-
-.category-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
-}
-
-.icon-wrapper {
-  transition: all 0.3s ease;
-}
-
-.category-card:hover .icon-wrapper {
-  transform: scale(1.1);
-}
-
-/* Course Cards */
-.course-card {
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-}
-
-.course-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
-}
-
-.course-image img {
-  transition: transform 0.3s ease;
-}
-
-.course-card:hover .course-image img {
-  transform: scale(1.05);
-}
-
-.course-overlay {
-  background: rgba(0,0,0,0.7);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.course-card:hover .course-overlay {
-  opacity: 1;
-}
-
-.play-btn {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.play-btn:hover {
-  transform: scale(1.1);
-}
-
-/* CTA Section */
-.cta-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-}
-
-.cta-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-  opacity: 0.1;
-}
-
-/* Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 40px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Section Headers */
-.section-header h2 {
-  position: relative;
-  display: inline-block;
-}
-
-.section-header h2::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 4px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 2px;
-}
-
-/* Empty States */
-.empty-state {
-  padding: 4rem 2rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
+  /* Hero Section */
   .hero-section {
-    min-height: 60vh;
+    min-height: 80vh;
+    overflow: hidden;
   }
-  
+
   .hero-bg {
-    min-height: 60vh;
-    background-attachment: scroll;
-  }
-  
-  .min-vh-75 {
-    min-height: 60vh;
-  }
-  
-  .display-4 {
-    font-size: 2.5rem;
-  }
-  
-  .custom-nav-btn {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .custom-nav-btn i {
-    font-size: 20px;
-  }
-  
-  .carousel-control-prev {
-    left: 20px;
-  }
-  
-  .carousel-control-next {
-    right: 20px;
-  }
-  
-  .hero-actions {
-    flex-direction: column;
+    min-height: 80vh;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
     align-items: center;
+    position: relative;
   }
-  
-  .hero-actions .btn {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  .hero-image {
-    max-height: 300px;
-    margin-top: 2rem;
-  }
-}
 
-@media (max-width: 576px) {
-  .hero-section {
-    min-height: 50vh;
-  }
-  
-  .hero-bg {
-    min-height: 50vh;
-  }
-  
   .min-vh-75 {
-    min-height: 50vh;
+    min-height: 75vh;
   }
-  
-  .display-4 {
-    font-size: 2rem;
+
+  .hero-content {
+    z-index: 2;
+    position: relative;
   }
-  
+
+  .hero-image {
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-image-wrapper {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-badge {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .hero-content h1 {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+
+  .hero-content p {
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
+
   .hero-stats {
-    flex-direction: column;
-    gap: 1rem !important;
+    animation: fadeInUp 0.8s ease-out 0.6s both;
   }
-  
-  .stat-item {
-    text-align: center;
+
+  .hero-actions {
+    animation: fadeInUp 0.8s ease-out 0.8s both;
   }
-  
+
+  /* Carousel Controls */
   .custom-nav-btn {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
   }
-  
+
+  .custom-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) scale(1.1);
+    opacity: 1;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .custom-nav-btn:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
   .custom-nav-btn i {
-    font-size: 18px;
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
-  
+
   .carousel-control-prev {
-    left: 15px;
+    left: 30px;
   }
-  
+
   .carousel-control-next {
-    right: 15px;
+    right: 30px;
   }
-  
+
+  /* Carousel Indicators */
   .carousel-indicators {
-    bottom: 20px;
-    gap: 8px;
+    bottom: 30px;
+    margin-bottom: 0;
+    gap: 12px;
   }
-  
+
   .indicator-dot {
-    width: 12px !important;
-    height: 12px !important;
-    min-width: 12px !important;
-    min-height: 12px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    border-radius: 50% !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
-}
+
+  .indicator-dot:hover {
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+  }
+
+  .indicator-dot.active {
+    background: white !important;
+    border-color: white !important;
+    transform: scale(1.3) !important;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.4) !important;
+    opacity: 1 !important;
+  }
+
+  .indicator-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .indicator-dot.active .indicator-progress {
+    opacity: 1;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Stats Section */
+  .stat-card {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .stat-number {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Categories Section */
+  .category-card {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  }
+
+  .category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .icon-wrapper {
+    transition: all 0.3s ease;
+  }
+
+  .category-card:hover .icon-wrapper {
+    transform: scale(1.1);
+  }
+
+  /* Course Cards */
+  .course-card {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  }
+
+  .course-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .course-image img {
+    transition: transform 0.3s ease;
+  }
+
+  .course-card:hover .course-image img {
+    transform: scale(1.05);
+  }
+
+  .course-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .course-card:hover .course-overlay {
+    opacity: 1;
+  }
+
+  .play-btn {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .play-btn:hover {
+    transform: scale(1.1);
+  }
+
+  /* CTA Section */
+  .cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.1;
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 40px, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /* Section Headers */
+  .section-header h2 {
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 2px;
+  }
+
+  /* Empty States */
+  .empty-state {
+    padding: 4rem 2rem;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .hero-section {
+      min-height: 60vh;
+    }
+
+    .hero-bg {
+      min-height: 60vh;
+      background-attachment: scroll;
+    }
+
+    .min-vh-75 {
+      min-height: 60vh;
+    }
+
+    .display-4 {
+      font-size: 2.5rem;
+    }
+
+    .custom-nav-btn {
+      width: 50px;
+      height: 50px;
+    }
+
+    .custom-nav-btn i {
+      font-size: 20px;
+    }
+
+    .carousel-control-prev {
+      left: 20px;
+    }
+
+    .carousel-control-next {
+      right: 20px;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-actions .btn {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .hero-image {
+      max-height: 300px;
+      margin-top: 2rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero-section {
+      min-height: 50vh;
+    }
+
+    .hero-bg {
+      min-height: 50vh;
+    }
+
+    .min-vh-75 {
+      min-height: 50vh;
+    }
+
+    .display-4 {
+      font-size: 2rem;
+    }
+
+    .hero-stats {
+      flex-direction: column;
+      gap: 1rem !important;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .custom-nav-btn {
+      width: 45px;
+      height: 45px;
+    }
+
+    .custom-nav-btn i {
+      font-size: 18px;
+    }
+
+    .carousel-control-prev {
+      left: 15px;
+    }
+
+    .carousel-control-next {
+      right: 15px;
+    }
+
+    .carousel-indicators {
+      bottom: 20px;
+      gap: 8px;
+    }
+
+    .indicator-dot {
+      width: 12px !important;
+      height: 12px !important;
+      min-width: 12px !important;
+      min-height: 12px !important;
+    }
+  }
 </style>

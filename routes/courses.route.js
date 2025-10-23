@@ -1,6 +1,7 @@
 import express from 'express';
 import coursesModel from '../models/courses.model.js'
 import userModel from '../models/user.model.js'
+import homeModel from '../models/home.model.js';
 import db from '../utils/db.js'
 
 //const player = new Plyr('#player');
@@ -15,55 +16,50 @@ async function totalEnrollment() {
 //view courses
 router.get('/view-courses', async (req, res) => {
     try {
-        let cat_course = req.query.category || null;
-
-        //if (cat_course && cat_course.length > 4) {
-        //    cat_course = cat_course.slice(0, -2); // bỏ 2 ký tự cuối
-        //}
-        console.log(cat_course)
-        const page = parseInt(req.query.page) || 1;
-        const limit = 8;
+        const categorySlug = req.query.category || null;
+        console.log(categorySlug);
+        const sort = req.query.sort || null;
+        const page = Math.max(parseInt(req.query.page) || 1, 1);
+        const limit = 6;
         const offset = (page - 1) * limit;
 
-        let courses = [];
-        let totalCount = 0;
+        // Đếm tổng số khóa học (có filter nếu có category)
+        const countResult = await coursesModel.count_all_courses({ categorySlug });
+        const totalCount = Number(countResult.total) || 0;
+        const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
 
-        if (cat_course) {
-            // Nếu có filter category
-            const filteredCourses = await coursesModel.filter(cat_course);
-            totalCount = filteredCourses.length;
-            courses = filteredCourses.slice(offset, offset + limit);
-        } else {
-            // Lấy tất cả khóa học
-            const allCourses = await coursesModel.view_all_courses();
-            totalCount = allCourses.length;
-            courses = allCourses.slice(offset, offset + limit);
-        }
+        // Lấy danh sách khóa học cho trang hiện tại
+        const courses = await coursesModel.view_all_courses(
+            categorySlug,
+            sort,
+            limit,
+            offset,
+        );
+        console.log(courses)
 
-        const totalPages = Math.ceil(totalCount / limit);
-
-        // Tạo danh sách trang để render
+        // ✅ Tạo danh sách các trang để render
         const pages = [];
         for (let i = 1; i <= totalPages; i++) {
             pages.push({
                 number: i,
-                active: i === page
+                active: i === page,
             });
         }
 
+        // ✅ Render view
         res.render('vwCourses/dis_courses', {
             courses,
+            pages,                // để template {{#each pages}} hoạt động
             currentPage: page,
             totalPages,
-            pages,
-            selectedCategory: cat_course
+            selectedCategory: categorySlug,
+            selectedSort: sort,
         });
     } catch (err) {
         console.error('Lỗi khi hiển thị khóa học:', err);
         res.status(500).send('Lỗi máy chủ');
     }
 });
-
 
 //enroll course
 router.post('/enroll-course', async (req, res) => {
@@ -82,14 +78,18 @@ router.post('/enroll-course', async (req, res) => {
 router.get('/course-detail/:id', async (req, res) => {
     const courseId = req.params.id;
     const course = await coursesModel.view_detail_course(courseId);
-    const lessons = await coursesModel.view_lesson_in_detail(courseId)
-    if (course) {
-        console.log('Xuất thông tin thành công');
-        console.log('Course detail:', course);
-    }
+    const lessons = await coursesModel.view_lesson_in_detail(courseId);
+    const feedback = await coursesModel.getFeedback(courseId);
+    const sameCourseCategory = await coursesModel.view_courses_same_category(courseId);
+    
+    const instructor_id = course.instructor_id;
+    const instructor = await coursesModel.getInstructorProfile(instructor_id);
     res.render('vwCourses/dis_detailCourse', {
         course: course,
-        lessons: lessons
+        lessons: lessons,
+        feedbacks: feedback,
+        relatedCourses: sameCourseCategory,
+        instructor:instructor
     });
 });
 router.post('/course-detail/:id', async (req, res) => {
@@ -203,14 +203,14 @@ router.get('/search', async (req, res) => {
     const courses = await coursesModel.findCourseByQuery(terms);
     if (query.length === 0) {
         console.log("Không có khóa học nào");
-        res.render("vwCourses/search_courses", {
+        res.render("vwCourses/dis_courses", {
             q: query,
             empty: true
         })
     }
     else {
         console.log("Đã tìm thấy khóa học nào");
-        res.render("vwCourses/search_courses", {
+        res.render("vwCourses/dis_courses", {
             q: query,
             empty: false,
             courses: courses
@@ -218,18 +218,26 @@ router.get('/search', async (req, res) => {
     }
 });
 router.get('/', async (req, res) => {
-    const featuredCourses = await coursesModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
-    const mostViewed = await coursesModel.getMostViewedCourses(); // top 10
-    const newest = await coursesModel.getNewestCourses(); // top 10
-    const popularCategories = await coursesModel.getPopularCategories(); // lĩnh vực có nhiều người học nhất
-
-    res.render('vwHome/index', {
+    const featuredCourses = await homeModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
+    const mostViewed = await coursesModel.getMostViewedCourses(); // 
+    const newest = await homeModel.getNewestCourses(); // 
+    if (newest) {
+        console.log("có dữ liệu")
+    }
+    else {
+        console.log("ko có dữ liệu")
+    }
+    const popularCategories = await homeModel.getHotCategories(); // lĩnh vực có nhiều người học nhất
+    const popularCourses = await homeModel.getPopularCourses();
+    res.render('home', {
         featuredCourses,
         mostViewed,
         newest,
-        popularCategories
+        popularCategories,
+        popularCourses
     });
 });
+//feedback
 
 
 

@@ -317,7 +317,7 @@
                         Tìm kiếm và lựa chọn khóa học phù hợp với mục tiêu học tập của bạn
                     </p>
                     <div class="search-box">
-                        <form method="GET" action="/courses/search" class="d-flex">
+                        <form method="GET" action="/courses/search?q={{query}}" class="d-flex">
                             <div class="input-group input-group-lg">
                                 <input type="text" name="q" class="form-control rounded-pill-start"
                                     placeholder="Tìm kiếm khóa học..." value="{{query}}">
@@ -370,78 +370,39 @@
                     </div>
                     <div class="card-body p-4">
                         <form method="GET" action="/courses/view-courses" id="filterForm">
-
-                            <div class="filter-group">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                    <i class="bi bi-grid-3x3-gap me-2 text-primary"></i>
-                                    Danh mục
+                            <!-- Danh mục -->
+                            <div class="filter-group mb-3">
+                                <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                    <i class="bi bi-grid-3x3-gap me-2 text-primary"></i>Danh mục
                                 </h6>
                                 <select class="form-select form-select-lg" name="category">
                                     <option value="">Tất cả danh mục</option>
-                                    <option value="lap-trinh-web" {{#if (eq category "Web" )}}selected{{/if}}>Lập trình Web
-                                    </option>
-                                    <option value="lap-trinh-di-dong" {{#if (eq category "Mobile" )}}selected{{/if}}>Lập trình
-                                        Mobile</option>
-                                    <option value="tri-tue-nhan-tao" {{#if (eq category "AI" )}}selected{{/if}}>Trí tuệ nhân tạo
-                                    </option>
-                                    <option value="thiet-ke-do-hoa" {{#if (eq category "Design" )}}selected{{/if}}>Thiết kế
-                                    </option>
-                                    <option value="marketing" {{#if (eq category "Business" )}}selected{{/if}}>Kinh doanh
-                                    </option>
+                                    <option value="lap-trinh-web" {{#if (eq selectedCategory "lap-trinh-web"
+                                        )}}selected{{/if}}>Lập trình Web</option>
+                                    <option value="lap-trinh-di-dong" {{#if (eq selectedCategory "lap-trinh-di-dong"
+                                        )}}selected{{/if}}>Lập trình di động</option>
+                                    <option value="tri-tue-nhan-tao" {{#if (eq selectedCategory "tri-tue-nhan-tao"
+                                        )}}selected{{/if}}>Trí tuệ nhân tạo</option>
+                                    <option value="thiet-ke-do-hoa" {{#if (eq selectedCategory "thiet-ke-do-hoa"
+                                        )}}selected{{/if}}>Thiết kế đồ hoạ</option>
+                                    <option value="marketing" {{#if (eq selectedCategory "marketing" )}}selected{{/if}}>
+                                        Marketing</option>
                                 </select>
                             </div>
-                            {{!-- Courses (col-9) 
-                            <div class="filter-group">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                    <i class="bi bi-currency-dollar me-2 text-primary"></i>
-                                    Mức giá
-                                </h6>
-                                <div class="price-filter">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="radio" name="price" id="all-price"
-                                            value="" checked>
-                                        <label class="form-check-label" for="all-price">Tất cả</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="radio" name="price" id="free"
-                                            value="free">
-                                        <label class="form-check-label" for="free">Miễn phí</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="radio" name="price" id="paid"
-                                            value="paid">
-                                        <label class="form-check-label" for="paid">Trả phí</label>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="filter-group">
-                                <h6 class="fw-bold mb-3 d-flex align-items-center">
-                                    <i class="bi bi-star me-2 text-primary"></i>
-                                    Đánh giá
+                            <!-- Sắp xếp -->
+                            <div class="filter-group mb-4">
+                                <h6 class="fw-bold mb-2 d-flex align-items-center">
+                                    <i class="bi bi-sort-down me-2 text-primary"></i>Sắp xếp theo
                                 </h6>
-                                <div class="rating-filter">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="rate5" name="rating"
-                                            value="5">
-                                        <label class="form-check-label" for="rate5"><span
-                                                class="text-warning">★★★★★</span> (5 sao)</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="rate4" name="rating"
-                                            value="4">
-                                        <label class="form-check-label" for="rate4"><span
-                                                class="text-warning">★★★★☆</span> trở lên</label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" id="rate3" name="rating"
-                                            value="3">
-                                        <label class="form-check-label" for="rate3"><span
-                                                class="text-warning">★★★☆☆</span> trở lên</label>
-                                    </div>
-                                </div>
+                                <select class="form-select form-select-lg" name="sort">
+                                    <option value="">Mặc định</option>
+                                    <option value="rating_desc" {{#if (eq selectedSort "rating_desc" )}}selected{{/if}}>
+                                        Điểm đánh giá giảm dần</option>
+                                    <option value="price_asc" {{#if (eq selectedSort "price_asc" )}}selected{{/if}}>Giá
+                                        tăng dần</option>
+                                </select>
                             </div>
-                            --}}
 
                             <button class="btn btn-primary w-100 btn-lg rounded-pill" type="submit">
                                 <i class="bi bi-funnel me-2"></i>Áp dụng bộ lọc
@@ -480,7 +441,7 @@
                     </div>
                 </div>
 
-                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" id="coursesContainer">
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-3 g-3" id="coursesContainer">
                     {{#if courses}}
                     {{#each courses}}
                     <div class="col d-flex">
@@ -492,10 +453,23 @@
                                             class="w-100 h-100 object-fit-cover rounded-top">
                                     </a>
                                 </div>
+                                {{#if (isRecentCourse this.created_at)}}
                                 <div class="course-badge position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    <span class="badge bg-info rounded-pill px-3 py-2">
+                                        <i class="bi bi-clock me-1"></i>Mới
                                     </span>
+                                </div>
+                                {{else}}
+                                {{#if (isBestSeller this.students_count)}}
+                                <div class="course-badge position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="bi bi-fire me-1"></i>Hot
+                                    </span>
+                                </div>
+                                {{/if}}
+                                {{/if}}
+                                <div class="course-badge position-absolute top-0 end-0 m-3">
+
                                 </div>
                                 <div class="course-overlay">
                                     <a href="/courses/course-detail/{{this.id}}"
@@ -519,14 +493,22 @@
                                     <p class="mb-0"><i class="bi bi-bookmark-fill me-1"></i> Lĩnh vực: <span
                                             class="fw-semibold">{{this.category_name}}</span></p>
                                 </div>
-
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                    <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    <p>Số lượng học viên đánh giá {{this.rating_count}}</p>
+                                </span>
                                 <div class="course-meta d-flex justify-content-between align-items-center mb-3">
                                     <div class="d-flex align-items-center text-muted">
                                         <i class="bi bi-people me-1"></i><span class="small">{{this.students_count}} học
                                             viên</span>
                                     </div>
                                     <div class="course-price">
-                                        <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+
+                                        <span class="fs-5 fw-bold text-primary me-2">
+                                            {{formatCurrency this.promo_price}}</span>
+                                        <span class="text-muted text-decoration-line-through">
+                                            {{formatCurrency this.this.price}}</span>
+
                                     </div>
                                 </div>
 
@@ -725,6 +707,7 @@
                 {{/unless}}
                 {{/unless}}
             </div>
+
 
         </div>
     </div>

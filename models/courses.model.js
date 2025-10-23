@@ -1,30 +1,104 @@
 import db from '../utils/db.js'
 import bcrypt from 'bcryptjs'
 export default {
-    view_all_courses() {
-        return db('courses as c')
-            .join('profiles as p', 'c.instructor_id', 'p.id')
+    count_all_courses({ categorySlug = null } = {}) {
+        const q = db('courses as c')
             .join('categories as cat', 'c.category_id', 'cat.id')
+            .whereRaw("c.status = ?::course_status", ['published'])
+            .count({ total: '*' });
+
+        if (categorySlug) q.andWhere('cat.slug', categorySlug);
+        return q.first();
+    },
+    view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
+        const q = db('courses as c')
+            .join('profiles as p', 'c.instructor_id', 'p.id')
+            // Join danh mục CẤP 1
+            .join('categories as parent', 'c.category_id', 'parent.id')
+            .where('c.status', 'published')
             .select(
+                db.raw('LEFT(parent.id, 4) as cat_prefix'), // 4 ký tự đầu của ID cấp 1 (cat1, cat2,…)
                 'c.id',
                 'c.title',
                 'c.price',
+                'c.promo_price',
+                db.raw('COALESCE(c.promo_price, c.price) AS effective_price'),
                 'c.hero_image_url',
                 'c.short_desc',
                 'p.name as instructor_name',
-                'cat.name as category_name',
+                'parent.name as category_name',
+                'parent.slug as category_slug',
                 'c.rating_avg',
-                'c.students_count'
+                'c.rating_count',
+                'c.students_count',
+                'c.created_at'
             );
+
+        // Lọc theo slug: chấp nhận cả slug cấp 1 (parent) lẫn slug cấp 2 (leaf)
+        if (categorySlug) {
+            q.andWhere(function () {
+                this.where('parent.slug', categorySlug)
+                    .orWhereExists(function () {
+                        this.select(db.raw('1'))
+                            .from('categories as leaf')
+                            .whereRaw('leaf.parent_id = parent.id')
+                            .andWhere('leaf.slug', categorySlug);
+                    });
+            });
+        }
+
+        // Sắp xếp
+        if (sort) {
+            switch (sort) {
+                case 'rating_desc':
+                    q.orderBy('c.rating_avg', 'desc').orderBy('c.rating_count', 'desc');
+                    break;
+                case 'price_asc':
+                    q.orderBy('effective_price', 'asc').orderBy('c.id', 'desc');
+                    break;
+            }
+        } else {
+            q.orderBy('c.created_at', 'desc').orderBy('c.id', 'desc');
+        }
+
+        return q.limit(limit).offset(offset);
     },
+
 
     view_detail_course(courseId) {
         return db('courses as c')
             .join('profiles as p', 'c.instructor_id', 'p.id')
+
             .select('c.id', 'c.title', 'c.long_desc', 'c.hero_image_url',
-                'c.price', 'c.rating_avg', 'c.students_count',
-                'p.name', 'p.role', 'p.avatar_url', 'p.bio')
+                'c.price', 'c.rating_avg', 'c.students_count', 'c.promo_price', 'c.students_count',
+                'c.created_at', 'c.updated_at', 'c.short_desc', 'c.rating_count',
+                'p.name as instructor_name', 'p.role', 'p.avatar_url', 'p.bio', 'p.id as instructor_id')
             .where('c.id', courseId).first();
+    },
+    getInstructorProfile(instructorId) {
+        return db('profiles')
+            .where('id', instructorId)
+            .first();
+    },
+    view_courses_same_category(courseId) {
+        return db('courses as c')
+            .join('enrollments as e', 'c.id', 'e.course_id')
+            .join('courses as target', 'c.category_id', 'target.category_id')
+            .where('target.id', courseId)
+            .andWhere('c.id', '!=', courseId)
+            .andWhereRaw("c.status = ?::course_status", ['published'])
+            .groupBy('c.id')
+            .select(
+                'c.id',
+                'c.title',
+                'c.hero_image_url',
+                'c.price',
+                'c.promo_price',
+                'c.students_count',
+                db.raw('COUNT(e.id) as total_enrollments')
+            )
+            .orderBy('total_enrollments', 'desc')
+            .limit(5);
     },
     view_lesson_in_detail(courseId) {
         return db('lessons as l')
@@ -162,5 +236,10 @@ export default {
             .orderBy('total_enroll', 'desc')
             .limit(limit);
     },
-
+    getFeedback(course_id) {
+        return db('course_reviews as c')
+            .join('profiles as p', 'p.id', 'c.user_id')
+            .where('course_id', course_id)
+            .select('c.description as des', 'p.name as name', 'p.role as role');
+    }
 }

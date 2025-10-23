@@ -2,37 +2,64 @@
 import db from "../utils/db.js";
 
 export default {
-    // Các khoá học nổi bật (xếp theo rating cao nhất)
-    async getFeaturedCourses() {
-        return db("courses")
-            .where("status", "published")
-            .orderBy("rating_avg", "desc")
-            .limit(6);
-    },
-
-    // Các khoá học phổ biến (xếp theo số lượng học viên)
-    async getPopularCourses() {
-        return db("courses")
-            .where("status", "published")
-            .orderBy("students_count", "desc")
-            .limit(6);
-    },
-
-    // Các khoá học mới nhất
-    async getNewestCourses() {
-        return db("courses")
-            .where("status", "published")
-            .orderBy("created_at", "desc")
-            .limit(6);
-    },
-
-    // Các danh mục hot (dựa vào tổng học viên)
-    async getHotCategories() {
-        return db("courses")
-            .select("category_id")
-            .sum("students_count as total_students")
-            .groupBy("category_id")
-            .orderBy("total_students", "desc")
+    getFeaturedCoursesThisWeek() {
+        return db('enrollments as e')
+            .join('courses as c', 'e.course_id', 'c.id')
+            .whereRaw("e.purchased_at >= NOW() - INTERVAL '7 days'")
+            .andWhereRaw("c.status = ?::course_status", ["published"])
+            .select(
+                'c.id',
+                'c.title',
+                'c.hero_image_url',
+                'c.price',
+                'c.students_count',
+                'c.rating_avg',
+                'c.short_desc',
+                'c.students_count',
+                db.raw('COUNT(e.id) AS weekly_purchases')
+            )
+            .groupBy('c.id', 'c.title', 'c.hero_image_url', 'c.price')
+            .orderBy('weekly_purchases', 'desc')
             .limit(4);
+    },
+    getMostViewedCourses() {
+        return db('course_views as v')
+            .join('courses as c', 'v.course_id', 'c.id')
+            .where('c.status', 'published')
+            .select(
+                'c.id',
+                'c.title',
+                'c.hero_image_url',
+                'c.price',
+                'c.students_count',
+                'c.rating_avg',
+                'c.short_desc',
+                'c.students_count',
+                db.raw('COUNT(v.id) AS view_count')
+            )
+            .groupBy('c.id', 'c.title', 'c.hero_image_url')
+            .orderBy('view_count', 'desc')
+            .limit(10);
+    },
+
+
+    getNewestCourses() {
+        return db("courses")
+            .where("status", "published")
+            .orderByRaw("COALESCE(last_published_at, updated_at, created_at) DESC NULLS LAST")
+            .limit(10);
+    },
+
+    getHotCategories() {
+        return db('enrollments as e')
+            .join('courses as c', 'e.course_id', 'c.id')
+            .join('categories as cat', 'cat.id', 'c.category_id')
+            .whereRaw("e.purchased_at >= NOW() - INTERVAL '7 days'")
+            .andWhereRaw("c.status = ?::course_status", ['published'])
+            .select('cat.id', 'cat.name')
+            .count({ weekly_enrollments: 'e.id' })
+            .groupBy('cat.id', 'cat.name')
+            .orderBy('weekly_enrollments', 'desc')
+            .limit(6);
     }
 };
