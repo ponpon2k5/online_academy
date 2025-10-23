@@ -38,7 +38,7 @@
                     <!-- Giảng viên -->
                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
                             class="fw-semibold">{{course.instructor_name}}</span></p>
-                    
+
                     <!--Số lượng học viên-->
                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Số lượng học viên: <span
                             class="fw-semibold">{{course.students_count}}</span></p>
@@ -82,8 +82,7 @@
                         <form action="/courses/purchase-courses-process/{{course.id}}" method="POST">
                             <button type="submit" class="btn btn-success">Ghi danh ngay</button>
                         </form>
-                        <form action="/watchlist/add" method="post" class="d-inline">
-                            <input type="hidden" name="course_id" value="{{course.id}}">
+                        <form action="/student/add-favor-courses/{{course.id}}" method="post" class="d-inline">
                             <button class="btn btn-outline-secondary" type="submit">Thêm vào Watchlist</button>
                         </form>
                         {{/if}}
@@ -122,6 +121,7 @@
         </div>
     </div>
     {{/each}}
+    {{#if existed}}
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -131,7 +131,6 @@
                     Thu gọn/Mở rộng
                 </a>
             </div>
-
             <div class="collapse show" id="composeBox">
                 <form action="/courses/course-detail/{{course.id}}" method="POST" class="needs-validation" novalidate>
                     <div class="mb-3">
@@ -148,6 +147,11 @@
             </div>
         </div>
     </div>
+    {{else}}
+    <h5 class="card-title mb-0">Hãy mua khóa học trước khi viết phản hồi của bạn</h5>
+    {{/if}}
+
+
     <!-- Feedback list -->
     {{#if feedbacks}}
     <div class="card border-0 shadow-sm mb-5">
@@ -239,7 +243,7 @@
     </section>
     {{/if}}
     <h3 class="fw-bold mb-0">Thông Tin Về Giảng Viên</h3>
-    
+
     <div class="card mb-3" style="max-width: 540px;">
         <div class="row g-0">
             <div class="col-md-4">
@@ -248,9 +252,9 @@
             <div class="col-md-8">
                 <div class="card-body">
                     <h4 class="fw-bold mb-1">{{instructor.name}}</h4>
-                            <p class="text-primary small mb-2">{{instructor.specialization}}</p>
-                            <p class="text-muted small mb-3">Kinh nghiệm: {{instructor.experience_years}} năm</p>
-                            <p class="text-muted small mb-0">{{{instructor.bio}}}</p>
+                    <p class="text-primary small mb-2">{{instructor.specialization}}</p>
+                    <p class="text-muted small mb-3">Kinh nghiệm: {{instructor.experience_years}} năm</p>
+                    <p class="text-muted small mb-0">{{{instructor.bio}}}</p>
                 </div>
             </div>
         </div>

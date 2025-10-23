@@ -49,6 +49,30 @@ router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
         pagination,
     });
 });
+router.post('/add-favor-courses/:id', async (req, res) => {
+    try {
+        if (!req.session?.authUser?.id) return res.redirect('/auth/signin');
+
+        const userId = req.session.authUser.id;
+        const courseId = req.params.id || req.body.course_id || req.query.q;
+
+        if (!courseId) return res.status(400).send('Thiếu course_id');
+
+        await userModel.addFavoriteCourse(userId, courseId);
+
+        const back = req.get('Referer') || `/courses/course-detail/${courseId}`;
+        return res.redirect(back);
+
+    } catch (err) {
+        if (err.code === '23505') { // mã lỗi UNIQUE_violation của PostgreSQL
+            console.warn('Khoá học đã tồn tại trong watchlist');
+            return res.status(400).send('❗ Khóa học này đã có trong danh sách yêu thích của bạn.');
+        }
+
+        console.error('Lỗi thêm vào watchlist:', err);
+        return res.status(500).send('Lỗi máy chủ, không thể thêm vào danh sách yêu thích.');
+    }
+});
 //
 router.get('/profile-purchased-courses', checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang

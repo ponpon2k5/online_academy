@@ -1,7 +1,13 @@
-import { get } from 'http';
 import db from '../utils/db.js'
-import bcrypt from 'bcryptjs'
 export default {
+    addFavoriteCourse(userId, courseId) {
+        return db('watchlist')
+            .insert({
+                user_id: userId,
+                course_id: courseId,
+                created_at: db.fn.now(),
+            })
+    },
     countFavoriteCourses(userId) {
         return db('watchlist').where('user_id', userId).count('course_id as total').first().then(row => row.total);
     },
