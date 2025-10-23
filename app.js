@@ -3,7 +3,6 @@ import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
-<<<<<<< HEAD
 import session from "express-session";
 import hbs_sections from "express-handlebars-sections";
 import passport from "passport";
@@ -22,24 +21,12 @@ import studentRouter from "./routes/student.route.js";
 import accountRouter from "./routes/account.route.js";
 import coursesRouter from "./routes/courses.route.js";
 import homeRoute from "./routes/home.route.js"; // nếu có dùng thì mở
-=======
-import { dirname } from "path";
-import session from 'express-session';
-import hbs_sections from 'express-handlebars-sections';
-import passport from 'passport';
-import GoogleStrategy from 'passport-google-oauth20';
-import GitHubStrategy from 'passport-github2';
-// import FacebookStrategy from 'passport-facebook';
-import userModel from './models/user.model.js';
-import 'dotenv/config';
->>>>>>> origin/signin/signup
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-<<<<<<< HEAD
 // ---------- Static & Body Parsers ----------
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -80,49 +67,6 @@ app.use(
     cookie: { secure: false },
   })
 );
-=======
-app.use(express.urlencoded({ extended: true })); //Giúp Express đọc dữ liệu trong form POST
-app.use(express.json());
-app.use("/images", express.static(path.join(__dirname, "statics", "img")));
-
-//session
-app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-    secret: 'duybodoi',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,          // dùng true nếu HTTPS
-        httpOnly: false,        // cho phép JS đọc
-        sameSite: 'lax'
-    } // secure = true chỉ dùng khi https
-}))
-
-// app.use(async function (req, res, next) {
-//     if (req.session.isAuthenticated) {
-//         res.locals.isAuthenticated = true;
-//         res.locals.authUser = req.session.authUser;
-//     }
-//     next();
-// });
-
-//view engine
-app.engine("handlebars", engine({
-    extname: ".handlebars",
-    defaultLayout: "main",
-    layoutsDir: path.join(__dirname, "views", "layouts"),
-    partialsDir: path.join(__dirname, "views", "partials"),
-    helpers: {
-        section: hbs_sections(),
-        eq: (a, b) => String(a) === String(b),
-    }
-}));
-app.set("view engine", "handlebars");
-app.set("views", path.join(__dirname, "views"));
-
-//static files
-app.use("/images", express.static(path.join(__dirname, "statics", "img")));
->>>>>>> origin/signin/signup
 
 // Đồng bộ thông tin đăng nhập ra locals
 app.use(async (req, res, next) => {
@@ -215,29 +159,6 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-<<<<<<< HEAD
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID",
-      clientSecret:
-        process.env.GOOGLE_CLIENT_SECRET || "YOUR_GOOGLE_CLIENT_SECRET",
-      callbackURL: "/account/auth/google/callback",
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      try {
-        const email = profile.emails?.[0]?.value;
-        let user = email ? await userModel.findByEmail(email) : null;
-        if (!user) {
-          user = {
-            username: profile.id,
-            email,
-            name: profile.displayName,
-            password: "",
-            permission: 0,
-          };
-          await userModel.add(user);
-=======
 // Cấu hình Google Strategy
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -259,7 +180,6 @@ passport.use(new GoogleStrategy({
                 permission: 0
             };
             await userModel.add(user);
->>>>>>> origin/signin/signup
         }
         done(null, user);
       } catch (err) {
@@ -269,30 +189,6 @@ passport.use(new GoogleStrategy({
   )
 );
 
-<<<<<<< HEAD
-passport.use(
-  new FacebookStrategy(
-    {
-      clientID: process.env.FACEBOOK_APP_ID || "YOUR_FACEBOOK_APP_ID",
-      clientSecret:
-        process.env.FACEBOOK_APP_SECRET || "YOUR_FACEBOOK_APP_SECRET",
-      callbackURL: "/account/auth/facebook/callback",
-      profileFields: ["id", "emails", "displayName"],
-    },
-    async (_accessToken, _refreshToken, profile, done) => {
-      try {
-        const email = profile.emails?.[0]?.value;
-        let user = email ? await userModel.findByEmail(email) : null;
-        if (!user) {
-          user = {
-            username: profile.id,
-            email,
-            name: profile.displayName,
-            password: "",
-            permission: 0,
-          };
-          await userModel.add(user);
-=======
 // Cấu hình Facebook Strategy
 // passport.use(new FacebookStrategy({
 //     clientID: process.env.FACEBOOK_CLIENT_ID,
@@ -360,14 +256,12 @@ passport.use(new GitHubStrategy({
                 permission: 0
             };
             await userModel.add(user);
->>>>>>> origin/signin/signup
         }
         done(null, user);
       } catch (err) {
         done(err, null);
       }
     }
-<<<<<<< HEAD
   )
 );
 
@@ -384,32 +278,8 @@ app.use("/instructor", instructorRouter);
 app.use((req, res) => {
   res.status(404).render("404", { layout: "main" });
 });
-=======
-}));
-//router
-
-
-import accountRouter from "./routes/account.route.js";
-app.use("/account", accountRouter);
-
-//test homepage
-app.get("/", (req, res) => {
-    res.render("home", { layout: "main" });
-});
-
-//start server
->>>>>>> origin/signin/signup
 
 // ---------- Start server ----------
 app.listen(3000, () => {
-<<<<<<< HEAD
   console.log("Server is running on port 3000");
 });
-=======
-    console.log("Server is running on port 3000");
-});
-
-app.use(function (req, res) {
-    res.status(404).render('404');
-});
->>>>>>> origin/signin/signup
