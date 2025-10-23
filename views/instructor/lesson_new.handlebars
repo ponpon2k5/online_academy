@@ -3,7 +3,7 @@
     <h3 class="mb-0"><i class="bi bi-play-circle"></i> Thêm bài học mới</h3>
   </div>
   <div class="card-body">
-    <form method="post" action="/instructor/courses/{{courseId}}/lessons" enctype="multipart/form-data" class="row g-3" id="lessonForm">
+    <form method="post" action="/instructor/courses/{{courseId}}/lessons" class="row g-3" id="lessonForm">
       <div class="col-md-8">
         <label class="form-label">Tiêu đề bài học *</label>
         <input name="lesson" class="form-control" required placeholder="Nhập tiêu đề bài học..."/>
@@ -27,9 +27,9 @@
       </div>
       
       <div class="col-md-6">
-        <label class="form-label">File video *</label>
-        <input type="file" name="video_file" class="form-control" accept="video/mp4,video/webm,video/ogg" required/>
-        <div class="form-text">Chỉ chấp nhận file MP4, WebM, OGG (tối đa 200MB)</div>
+        <label class="form-label">Link YouTube *</label>
+        <input type="url" name="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required/>
+        <div class="form-text">Dán link YouTube của video bài học</div>
       </div>
       <div class="col-md-3">
         <label class="form-label">Thời lượng (giây)</label>
@@ -69,7 +69,7 @@
 // Form validation
 document.getElementById('lessonForm').addEventListener('submit', function(e) {
   const title = document.querySelector('input[name="lesson"]').value.trim();
-  const videoFile = document.querySelector('input[name="video_file"]').files[0];
+  const youtubeUrl = document.querySelector('input[name="youtube_url"]').value.trim();
   
   if (!title) {
     e.preventDefault();
@@ -77,24 +77,17 @@ document.getElementById('lessonForm').addEventListener('submit', function(e) {
     return false;
   }
   
-  if (!videoFile) {
+  if (!youtubeUrl) {
     e.preventDefault();
-    alert('Vui lòng chọn file video!');
+    alert('Vui lòng nhập link YouTube!');
     return false;
   }
   
-  // Check file size (200MB limit)
-  if (videoFile.size > 200 * 1024 * 1024) {
+  // Validate YouTube URL
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+  if (!youtubeRegex.test(youtubeUrl)) {
     e.preventDefault();
-    alert('File video quá lớn! Kích thước tối đa là 200MB.');
-    return false;
-  }
-  
-  // Check file type
-  const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
-  if (!allowedTypes.includes(videoFile.type)) {
-    e.preventDefault();
-    alert('Chỉ chấp nhận file video MP4, WebM hoặc OGG!');
+    alert('Vui lòng nhập link YouTube hợp lệ! (VD: https://www.youtube.com/watch?v=...)');
     return false;
   }
 });

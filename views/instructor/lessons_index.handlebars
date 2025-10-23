@@ -1,0 +1,116 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0"><i class="bi bi-play-circle"></i> Bài học trong chương: {{section.title}}</h3>
+  <a href="/instructor/courses/{{course.id}}/sections" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Quay lại
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">Khóa học: {{course.title}}</h5>
+  </div>
+  <div class="card-body">
+    {{#if lessons.length}}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Thứ tự</th>
+            <th>Tên bài học</th>
+            <th>Thời lượng</th>
+            <th>Xem trước</th>
+            <th>Mô tả</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each lessons}}
+          <tr>
+            <td>
+              <span class="badge bg-primary">{{this.sort_order}}</span>
+            </td>
+            <td>
+              <strong>{{this.lesson}}</strong>
+            </td>
+            <td>
+              {{#if this.duration_seconds}}
+                {{formatDuration this.duration_seconds}}
+              {{else}}
+                <span class="text-muted">Chưa xác định</span>
+              {{/if}}
+            </td>
+            <td>
+              {{#if this.is_preview}}
+                <span class="badge bg-success">Có</span>
+              {{else}}
+                <span class="badge bg-secondary">Không</span>
+              {{/if}}
+            </td>
+            <td>
+              {{#if this.description}}
+                <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{this.description}}">
+                  {{this.description}}
+                </span>
+              {{else}}
+                <span class="text-muted">Không có mô tả</span>
+              {{/if}}
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm" role="group">
+                <a href="/courses/preview-lessons/{{../course.id}}?lesson={{this.id}}" 
+                   class="btn btn-outline-primary" 
+                   target="_blank"
+                   title="Xem bài học">
+                  <i class="bi bi-play-circle"></i>
+                </a>
+                <button class="btn btn-outline-secondary" 
+                        onclick="editLesson('{{this.id}}')"
+                        title="Sửa bài học">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger" 
+                        onclick="deleteLesson('{{this.id}}', '{{this.lesson}}')"
+                        title="Xóa bài học">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="text-center py-5">
+      <i class="bi bi-play-circle display-4 text-muted"></i>
+      <h5 class="mt-3 text-muted">Chưa có bài học nào</h5>
+      <p class="text-muted">Thêm bài học đầu tiên cho chương này</p>
+      <a href="/instructor/courses/{{course.id}}/lessons/new?section={{section.id}}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Thêm bài học
+      </a>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Nút thêm bài học mới -->
+<div class="mt-3">
+  <a href="/instructor/courses/{{course.id}}/lessons/new?section={{section.id}}" class="btn btn-success">
+    <i class="bi bi-plus-circle"></i> Thêm bài học mới
+  </a>
+</div>
+
+<script>
+function editLesson(lessonId) {
+  // TODO: Implement edit lesson functionality
+  alert('Chức năng sửa bài học sẽ được thêm sau');
+}
+
+function deleteLesson(lessonId, lessonTitle) {
+  if (confirm(`Bạn có chắc chắn muốn xóa bài học "${lessonTitle}"?`)) {
+    // TODO: Implement delete lesson functionality
+    alert('Chức năng xóa bài học sẽ được thêm sau');
+  }
+}
+
+</script>
