@@ -117,6 +117,7 @@ app.engine(
       round: (num) => Math.round(num),
       add: (a, b) => Number(a) + Number(b),
       subtract: (a, b) => Number(a) - Number(b),
+<<<<<<< HEAD
       formatDateForCheckCourse: (date) => moment(date).format('DD/MM/YYYY'),
       isRecentCourse: (date) => {
         if (!date) return false;
@@ -125,6 +126,22 @@ app.engine(
         return now.diff(createdAt, 'days') <= 3; // ✅ 3 ngày gần nhất
       },
       isBestSeller: (students) => students >= 1000
+=======
+      formatDuration: (seconds) => {
+        if (!seconds) return "0:00";
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hours > 0) {
+          return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
+            .toString()
+            .padStart(2, "0")}`;
+        } else {
+          return `${minutes}:${secs.toString().padStart(2, "0")}`;
+        }
+      },
+>>>>>>> f66befd0d5422fc06c77bfbd76cd4a991eb07b50
     },
   })
 );
