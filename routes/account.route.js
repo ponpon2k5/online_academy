@@ -310,5 +310,100 @@ router.post('/change-pwd', checkAuthenticated, async (req, res) => {
     req.session.authUser.password = hash_password;
     res.redirect('/account/profile');
 });
+// --- : HIỂN THỊ TRANG GIỎ HÀNG ---
+router.get('/shopping-cart', async (req, res) => {
+    // 1. Kiểm tra đăng nhập
+    if (!req.session.authUser) {
+        return res.redirect('/account/signin');
+    }
 
+    try {
+        const userId = req.session.authUser.id;
+        
+        // 2. Gọi model để lấy các khóa học trong giỏ
+        const coursesInCart = await coursesModel.getCartItems(userId);
+
+        // 3. Kiểm tra giỏ hàng rỗng hay không
+        const isEmpty = !coursesInCart || coursesInCart.length === 0;
+
+        // 4. Render view 'shopping-cart.handlebars'
+        // Truyền biến 'isEmpty' và 'coursesInCart' [cite: 24, 31, 38]
+        res.render('vwAccount/shopping-cart', {
+            title: 'Giỏ hàng',
+            isEmpty: isEmpty,
+            coursesInCart: coursesInCart
+        });
+
+    } catch (err) {
+        console.error('Lỗi khi lấy giỏ hàng:', err);
+        res.status(500).send('Lỗi máy chủ');
+    }
+});
+
+// --- XỬ LÝ XÓA KHỎI GIỎ HÀNG ---
+router.post('/shopping-cart/delete', async (req, res) => {
+    // 1. Kiểm tra đăng nhập
+    if (!req.session.authUser) {
+        return res.status(401).send('Bạn cần đăng nhập');
+    }
+    
+    try {
+        const userId = req.session.authUser.id;
+        const { courseId } = req.body; // Lấy courseId từ input hidden [cite: 49]
+
+        if (!courseId) {
+            return res.status(400).send('Thiếu ID khóa học');
+        }
+
+        // 2. Gọi model để xóa
+        await coursesModel.removeCartItem(userId, courseId);
+
+        // 3. Chuyển hướng người dùng TRỞ LẠI trang giỏ hàng
+        res.redirect('/account/shopping-cart');
+
+    } catch (err) {
+        console.error('Lỗi khi xóa khỏi giỏ hàng:', err);
+        res.status(500).send('Lỗi máy chủ');
+    }
+});
+
+// ---  XỬ LÝ THANH TOÁN ---
+router.post('/checkout', async (req, res) => {
+    // 1. Kiểm tra đăng nhập
+    if (!req.session.authUser) {
+        return res.status(401).send('Bạn cần đăng nhập');
+    }
+
+    try {
+        const userId = req.session.authUser.id;
+        
+        // 2. Lấy danh sách courseIds từ form (nhờ JS ở bước 1)
+        let { courseIds } = req.body;
+
+        // 3. Kiểm tra dữ liệu đầu vào
+        if (!courseIds) {
+            // Nếu không có JS hoặc user bỏ tick tất cả
+            const msg = encodeURIComponent('Vui lòng chọn ít nhất một khóa học.');
+            return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
+        }
+
+        // Nếu chỉ có 1 item, nó sẽ là string, cần chuyển thành array
+        if (!Array.isArray(courseIds)) {
+            courseIds = [courseIds];
+        }
+
+        // 4. Gọi model để xử lý transaction
+        await coursesModel.checkout(userId, courseIds);
+
+        // 5. Thông báo thành công và chuyển hướng
+        // (Bạn có thể chuyển hướng đến trang "Khóa học của tôi")
+        const msg = encodeURIComponent('Thanh toán thành công! Khóa học đã được thêm vào tài khoản của bạn.');
+        return res.redirect(`/student/profile-favor-courses?toast=success&msg=${msg}`); // (Hoặc /account/shopping-cart)
+
+    } catch (err) {
+        console.error('Lỗi khi thanh toán:', err);
+        const msg = encodeURIComponent('Có lỗi xảy ra trong quá trình thanh toán, vui lòng thử lại.');
+        return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
+    }
+});
 export default router;

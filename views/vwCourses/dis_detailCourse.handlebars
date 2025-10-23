@@ -1,0 +1,207 @@
+{{#section 'js'}}
+<script>
+  document.querySelectorAll(".description").forEach(el => {
+    el.innerHTML = el.dataset.html;
+  });
+
+  // --- Xử lý thêm vào giỏ hàng bằng AJAX + SweetAlert ---
+  const btnAdd = document.getElementById('btnAddToCart');
+  if (btnAdd) {
+    btnAdd.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const courseId = btnAdd.dataset.courseId;
+
+      try {
+        const res = await fetch('/courses/add-to-cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ course_id: courseId })
+        });
+
+        if (!res.ok) {
+          throw new Error('Lỗi kết nối máy chủ');
+        }
+
+        const text = await res.text(); // server hiện đang redirect, nên ta chỉ nhận text
+        if (res.redirected) {
+          // Nếu server redirect về /account/signin -> user chưa đăng nhập
+          if (res.url.includes('/account/signin')) {
+            Swal.fire({
+              title: 'Cần đăng nhập!',
+              text: 'Vui lòng đăng nhập để thêm khóa học vào giỏ hàng.',
+              icon: 'warning',
+              confirmButtonText: 'Đăng nhập ngay'
+            }).then(() => window.location.href = '/account/signin');
+            return;
+          }
+        }
+
+        // Nếu không redirect, hiện thông báo thành công
+        Swal.fire({
+          title: 'Thành công!',
+          text: 'Khóa học đã được thêm vào giỏ hàng của bạn.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+
+      } catch (err) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', err);
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Đã xảy ra lỗi khi thêm vào giỏ hàng. Vui lòng thử lại.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+  }
+</script>
+{{/section}}
+<main class="container py-3">
+    <!-- Card header: thumbnail + core info -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="row g-0 align-items-stretch">
+            <!-- Image (responsive: full width on mobile, left column on md+) -->
+            <div class="col-12 col-md-5">
+                <div class="ratio ratio-16x9 h-100">
+                    <img src="/images/{{course.hero_image_url}}.jpg" alt="Ảnh khoá học {{course.title}}"
+                        class="img-fluid rounded-start rounded-top-md-0" style="object-fit: cover;" loading="lazy" />
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="col-12 col-md-7">
+                <div class="card-body h-100 d-flex flex-column">
+                    <h1 class="h5 mb-1">{{course.title}}</h1>
+
+                    <!-- Rating + count (nếu có) -->
+                    <div class="d-flex align-items-center mb-2">
+                        {{#if course.rating_avg}}
+                        <span class="me-2 fw-semibold text-warning">{{course.rating_avg}}</span>
+                        <span class="me-2" aria-label="{{course.rating_avg}} stars">
+                            {{!-- Fallback sao bằng ký tự, không cần icon library --}}
+                            {{#each course.stars_filled}}★{{/each}}{{#each course.stars_empty}}☆{{/each}}
+                        </span>
+                        <small class="text-muted">({{course.review_count}} đánh giá)</small>
+                        {{/if}}
+                    </div>
+
+                    <!-- Meta line -->
+                    <div class="small text-muted mb-2">
+                        {{#if course.level}}<span class="me-2">Trình độ: {{course.level}}</span>{{/if}}
+                        {{#if course.language}}<span class="me-2">Ngôn ngữ: {{course.language}}</span>{{/if}}
+                        {{#if course.updated_at}}<span class="me-2">Cập nhật: {{course.updated_at}}</span>{{/if}}
+                    </div>
+
+                    <!-- Badges: categories/tags -->
+                    <div class="mb-2">
+                        {{#each course.categories}}
+                        <span class="badge bg-light text-dark border me-1 mb-1">{{this}}</span>
+                        {{/each}}
+                    </div>
+
+                    <!-- Description-->
+                    <div class="card-text small text-muted description" data-html="{{course.long_desc}}">
+                    </div>
+
+                    <!-- Progress (nếu user đã học) -->
+                    {{#if course.user_enrolled}}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Tiến độ học</span>
+                            <span>{{course.progress}}%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{course.progress}}%;"
+                                aria-valuenow="{{course.progress}}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    {{/if}}
+
+                    <!-- Action buttons -->
+                    <div class="mt-auto d-flex flex-wrap gap-2">
+                        {{#if course.user_enrolled}}
+                        <a href="/learn/{{course.id}}" class="btn btn-primary">Tiếp tục học</a>
+                        <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
+                        {{else}}
+
+                        <form action="/courses/purchase-courses-process/{{course.id}}" method="POST">
+                            <button type="submit" class="btn btn-success">Ghi danh ngay</button>
+                        </form>
+                        <form action="/watchlist/add" method="post" class="d-inline">
+                            <input type="hidden" name="course_id" value="{{course.id}}">
+                            <button class="btn btn-outline-secondary" type="submit">Thêm vào Watchlist</button>
+                        </form>
+                        <button id="btnAddToCart" data-course-id="{{course.id}}"
+                            class="btn btn-outline-primary rounded-pill px-3">
+                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ hàng
+                        </button>
+                        <form action="/courses/buy-now" method="POST" class="d-inline">
+                            <input type="hidden" name="course_id" value="{{course.id}}">
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">
+                                <i class="bi bi-wallet2 me-1"></i>Mua ngay
+                            </button>
+                        </form>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick stats (tuỳ chọn) -->
+    {{#each lessons}}
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Bài học</div>
+                    <div class="h5 mb-0">{{lesson}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Tổng thời lượng</div>
+                    <div class="h5 mb-0">{{duration_seconds}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="small text-muted mb-1">Giảng viên</div>
+                    <div class="h6 mb-0">{{course.instructor_name}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">Viết phản hồi của bạn</h5>
+                <a class="small" data-bs-toggle="collapse" href="#composeBox" role="button" aria-expanded="true"
+                    aria-controls="composeBox">
+                    Thu gọn/Mở rộng
+                </a>
+            </div>
+
+            <div class="collapse show" id="composeBox">
+                <form action="/courses/course-detail/{{course.id}}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung phản hồi</label>
+                        <textarea name="comment" class="form-control" rows="3"
+                            placeholder="Chia sẻ trải nghiệm học của bạn…" required></textarea>
+                        <div class="invalid-feedback">Không được để trống.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Gửi phản hồi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>

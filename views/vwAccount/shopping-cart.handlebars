@@ -1,0 +1,209 @@
+{{! File: views/shopping-cart.handlebars }}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4 fw-bold">Giỏ Hàng</h1>
+        </div>
+    </div>
+
+    {{#if isEmpty}}
+        {{! --- TRƯỜNG HỢP GIỎ HÀNG RỖNG --- }}
+        {{! Giao diện này tương tự như hình ảnh bạn đã cung cấp }}
+        <div class="row">
+            <div class="col-12">
+                <div class="container d-flex flex-column justify-content-center align-items-center text-center" style="min-height: 60vh; border: 1px dashed #ddd; border-radius: 10px; background-color: #fcfcfc;">
+                    
+                    {{! Sử dụng icon giỏ hàng từ Bootstrap Icons đã được import trong main.handlebars  }}
+                    <i class="bi bi-cart3 text-muted" style="font-size: 8rem; opacity: 0.7;"></i>
+                    
+                    <h3 class="my-3 text-muted">Giỏ hàng của bạn còn trống</h3>
+                    <p class="text-muted fs-5">Hãy tìm kiếm và thêm các khóa học bạn yêu thích vào đây nhé!</p>
+                    
+                    {{! Nút "MUA NGAY" trỏ về trang xem khóa học }}
+                    <a href="/courses/view-courses" class="btn btn-primary rounded-pill px-5 py-2 fw-semibold mt-3 fs-5">
+                        MUA NGAY
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    {{else}}
+        {{! --- TRƯỜNG HỢP CÓ SẢN PHẨM --- }}
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive shadow-sm rounded">
+                    <table class="table align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;" class="ps-3">
+                                    {{! Checkbox "Chọn tất cả" }}
+                                    <input class="form-check-input" type="checkbox" value="" id="check-all" title="Chọn tất cả">
+                                </th>
+                                <th>Tên khoá học</th>
+                                <th style="width: 15%;">Đơn giá</th>
+                                <th style="width: 10%;" class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{! Bắt đầu vòng lặp 
+                                (Tôi giả sử controller của bạn sẽ truyền vào một array tên là 'coursesInCart')
+                                (Và mỗi object có 'id', 'name', 'image_url', 'instructor_name', 'price')
+                            }}
+                            {{#each coursesInCart}}
+                            <tr>
+                                <td class="ps-3">
+                                    {{! Checkbox cho từng mục, lưu giá tiền vào data-price để JS tính tổng }}
+                                    <input class="form-check-input item-check" type="checkbox" value="{{this.id}}" data-price="{{this.price}}">
+                                </td>
+                                <td>
+                                    {{! Hiển thị thông tin khóa học }}
+                                    <div class="d-flex align-items-center py-2">
+                                        <img src="{{this.image_url}}" alt="{{this.name}}" class="img-fluid rounded me-3" style="width: 120px; height: 70px; object-fit: cover;">
+                                        <div>
+                                            <h6 class="fw-bold mb-0">{{this.name}}</h6>
+                                            <small class="text-muted">Giảng viên: {{this.instructor_name}}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{! Sử dụng helper 'formatCurrency' từ app.js }}
+                                    <span class="fw-semibold fs-5">{{formatCurrency this.price}}</span>
+                                </td>
+                                <td class="text-center">
+                                    {{! Nút Xóa (sẽ POST tới backend) }}
+                                    <form action="/account/shopping-cart/delete" method="POST" class="d-inline">
+                                        <input type="hidden" name="courseId" value="{{this.id}}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle" title="Xóa khỏi giỏ hàng">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{/each}}
+                            {{! Kết thúc vòng lặp }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{! --- PHẦN TỔNG CỘNG VÀ THANH TOÁN --- }}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-end align-items-center p-3 bg-light rounded shadow-sm">
+                    <h4 class="me-md-3 mb-2 mb-md-0">
+                        Tổng cộng: 
+                        {{! ID 'total-price' này sẽ được JS cập nhật }}
+                        <span id="total-price" class="fw-bold text-danger ms-2" style="font-size: 1.8rem;">0 đ</span>
+                    </h4>
+                    
+                    {{! Nút Mua hàng (sẽ POST tới backend) }}
+                    <form action="/account/checkout" method="POST" id="checkout-form">
+                        {{! JS có thể thêm các input hidden cho các course được tick vào đây }}
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-semibold">
+                            Tiến hành Mua hàng
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {{/if}}
+</div>
+
+
+{{! Thêm JS để tính tổng tiền cho các mục được tick }}
+{{! Đoạn code này sẽ được chèn vào vị trí {{{_sections.js}}} trong file main.handlebars  }}
+{{#section 'js'}}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Chỉ chạy script này nếu các phần tử tồn tại (nghĩa là giỏ hàng không rỗng)
+        const checkAll = document.getElementById('check-all');
+        const itemChecks = document.querySelectorAll('.item-check');
+        const totalPriceEl = document.getElementById('total-price');
+        
+        const checkoutForm = document.getElementById('checkout-form'); // 
+        
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function(e) {
+                // 1. Ngăn form gửi đi ngay lập tức
+                e.preventDefault();
+
+                // 2. Tìm tất cả các checkbox ĐÃ ĐƯỢC TICK
+                const checkedItems = document.querySelectorAll('.item-check:checked');
+
+                // 3. Nếu không tick gì, báo lỗi
+                if (checkedItems.length === 0) {
+                    alert('Bạn vui lòng chọn ít nhất một khóa học để thanh toán.');
+                    return; // Dừng lại
+                }
+
+                // 4. Xóa các input 'courseIds[]' cũ (nếu có)
+                this.querySelectorAll('input[name="courseIds[]"]').forEach(inp => inp.remove());
+
+                // 5. Thêm các input hidden mới vào form
+                checkedItems.forEach(item => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'courseIds[]'; // Tên là mảng 'courseIds'
+                    input.value = item.value;   // Giá trị là ID của khóa học [cite: 40]
+                    this.appendChild(input);
+                });
+
+                // 6. Gửi form đi
+                this.submit();
+            });
+        }
+        // Kiểm tra nếu giỏ hàng không rỗng
+        if (checkAll && itemChecks.length > 0 && totalPriceEl) {
+            
+            // Helper function để format tiền tệ phía client
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(amount || 0);
+            }
+
+            // Hàm cập nhật tổng tiền
+            function updateTotal() {
+                let total = 0;
+                let allChecked = true;
+
+                itemChecks.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        // Lấy giá từ 'data-price'
+                        total += parseFloat(checkbox.dataset.price || 0);
+                    } else {
+                        allChecked = false; // Nếu 1 cái chưa check, thì "check-all" là false
+                    }
+                });
+
+                // Cập nhật text tổng tiền
+                totalPriceEl.textContent = formatCurrency(total);
+                
+                // Cập nhật ô "check-all"
+                checkAll.checked = allChecked;
+            }
+
+            // Thêm sự kiện 'change' cho từng checkbox "item-check"
+            itemChecks.forEach(checkbox => {
+                checkbox.addEventListener('change', updateTotal);
+            });
+
+            // Thêm sự kiện 'change' cho checkbox "check-all"
+            checkAll.addEventListener('change', () => {
+                const isChecked = checkAll.checked;
+                itemChecks.forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                updateTotal(); // Cập nhật lại tổng tiền sau khi check/uncheck tất cả
+            });
+
+            // Tự động tick tất cả và tính tổng khi tải trang
+            checkAll.checked = true;
+            checkAll.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{{/section}}
