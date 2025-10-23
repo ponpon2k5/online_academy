@@ -41,6 +41,16 @@
           <h6 class="card-title mb-0">{{this.title}}</h6>
           <span class="badge bg-primary">{{this.sort_order}}</span>
         </div>
+        <div class="mb-2">
+          <small class="text-muted">
+            <i class="bi bi-play-circle"></i> 
+            {{#if this.lessonCount}}
+              {{this.lessonCount}} bài học
+            {{else}}
+              Chưa có bài học
+            {{/if}}
+          </small>
+        </div>
         <div class="d-grid gap-2">
           <a href="/instructor/courses/{{../course.id}}/lessons/new?section={{this.id}}" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-plus-circle"></i> Thêm bài học
@@ -62,9 +72,95 @@
 </div>
 {{/if}}
 
+<!-- Bài học không thuộc chương nào -->
+{{#if lessonsWithoutSection.length}}
+<div class="mt-4">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="bi bi-play-circle"></i> Bài học không thuộc chương</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Thứ tự</th>
+              <th>Tên bài học</th>
+              <th>Thời lượng</th>
+              <th>Xem trước</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each lessonsWithoutSection}}
+            <tr>
+              <td>
+                <span class="badge bg-secondary">{{this.sort_order}}</span>
+              </td>
+              <td>
+                <strong>{{this.lesson}}</strong>
+              </td>
+              <td>
+                {{#if this.duration_seconds}}
+                  {{formatDuration this.duration_seconds}}
+                {{else}}
+                  <span class="text-muted">Chưa xác định</span>
+                {{/if}}
+              </td>
+              <td>
+                {{#if this.is_preview}}
+                  <span class="badge bg-success">Có</span>
+                {{else}}
+                  <span class="badge bg-secondary">Không</span>
+                {{/if}}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="/courses/preview-lessons/{{../course.id}}?lesson={{this.id}}" 
+                     class="btn btn-outline-primary" 
+                     target="_blank"
+                     title="Xem bài học">
+                    <i class="bi bi-play-circle"></i>
+                  </a>
+                  <button class="btn btn-outline-secondary" 
+                          onclick="editLesson('{{this.id}}')"
+                          title="Sửa bài học">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-outline-danger" 
+                          onclick="deleteLesson('{{this.id}}', '{{this.lesson}}')"
+                          title="Xóa bài học">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{{/if}}
+
 <!-- Nút thêm bài học trực tiếp (không thuộc chương nào) -->
 <div class="mt-4">
   <a href="/instructor/courses/{{course.id}}/lessons/new" class="btn btn-success">
     <i class="bi bi-plus-circle"></i> Thêm bài học (không thuộc chương)
   </a>
 </div>
+
+<script>
+function editLesson(lessonId) {
+  // TODO: Implement edit lesson functionality
+  alert('Chức năng sửa bài học sẽ được thêm sau');
+}
+
+function deleteLesson(lessonId, lessonTitle) {
+  if (confirm(`Bạn có chắc chắn muốn xóa bài học "${lessonTitle}"?`)) {
+    // TODO: Implement delete lesson functionality
+    alert('Chức năng xóa bài học sẽ được thêm sau');
+  }
+}
+</script>

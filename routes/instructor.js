@@ -246,13 +246,36 @@ r.get("/courses/:courseId/sections", isInstructor, async (req, res) => {
     .where("course_id", courseId)
     .orderBy("sort_order", "asc");
 
+  // Lấy tất cả bài học trong khóa học (bao gồm cả bài học không thuộc section nào)
+  const allLessons = await db("lessons")
+    .where("course_id", courseId)
+    .orderBy("sort_order", "asc");
+
+  // Lấy bài học không thuộc section nào
+  const lessonsWithoutSection = allLessons.filter(
+    (lesson) => !lesson.section_id
+  );
+
+  // Thêm số lượng bài học cho mỗi section
+  const sectionsWithLessonCount = sections.map((section) => {
+    const lessonCount = allLessons.filter(
+      (lesson) => lesson.section_id === section.id
+    ).length;
+    return {
+      ...section,
+      lessonCount,
+    };
+  });
+
   res.render("instructor/sections_index", {
     layout: "admin",
     title: `Sections - ${course.title}`,
     authUser: req.session.user,
     currentPage: "courses",
     course,
-    sections,
+    sections: sectionsWithLessonCount,
+    allLessons,
+    lessonsWithoutSection,
   });
 });
 
