@@ -19,6 +19,10 @@
         <input type="password" class="form-control form-control-lg" id="txtPassword" name="password" placeholder="Nhập mật khẩu">
       </div>
 
+      <div class="text-end mb-3">
+        <a href="/account/forgot-password">Quên mật khẩu?</a>
+      </div>
+
       <hr class="my-4">
       
       <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fw-bold mb-3">
@@ -33,8 +37,12 @@
         <a href="/account/auth/google" class="btn btn-danger btn-lg">
           <i class="bi bi-google me-2"></i> Đăng nhập bằng Google
         </a>
-        <a href="/account/auth/facebook" class="btn btn-primary btn-lg">
+        {{!-- Đang gặp vấn đề ( có thể xoá ) --}}
+        {{!-- <a href="/account/auth/facebook" class="btn btn-primary btn-lg">
           <i class="bi bi-facebook me-2"></i> Đăng nhập bằng Facebook
+        </a> --}}
+        <a href="/account/auth/github" class="btn btn-dark btn-lg">
+          <i class="bi bi-github me-2"></i> Đăng nhập bằng GitHub
         </a>
       </div>
     </div>

@@ -1,0 +1,67 @@
+
+<div class="card border-0 shadow-lg border-primary mx-auto" style="max-width: 500px;">
+  <div class="card-header bg-white border-0 py-3">
+    <h4 class="card-title mb-0 text-center">Khôi phục mật khẩu</h4>
+  </div>
+  <div class="card-body p-4">
+
+    {{#if error}}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      <strong>Lỗi!</strong> {{error}}
+    </div>
+    {{/if}}
+
+    {{#if showVerifyForm}}
+    {{! TRẠNG THÁI 2: NHẬP OTP VÀ MẬT KHẨU MỚI }}
+    <form action="/account/forgot-password/reset" method="post" id="frmReset">
+      <p class="text-center text-muted">
+        Chúng tôi đã gửi một mã OTP đến email <b>{{email}}</b>.
+        Vui lòng nhập mã OTP và mật khẩu mới của bạn.
+      </p>
+
+      <div class="mb-3">
+        <label for="txtOtp" class="form-label fw-medium">Mã OTP</label>
+        <input type="text" class="form-control form-control-lg" id="txtOtp" name="otp" placeholder="Nhập 6 số OTP" required autofocus>
+      </div>
+
+      <div class="mb-3">
+        <label for="txtNewPassword" class="form-label fw-medium">Mật khẩu mới</label>
+        <input type="password" class="form-control form-control-lg" id="txtNewPassword" name="newPassword" placeholder="Ít nhất 6 ký tự" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="txtConfirmPassword" class="form-label fw-medium">Xác nhận mật khẩu mới</label>
+        <input type="password" class="form-control form-control-lg" id="txtConfirmPassword" name="confirmPassword" placeholder="Nhập lại mật khẩu mới" required>
+      </div>
+
+      <hr class="my-4">
+      
+      <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fw-bold mb-3">
+        <i class="bi bi-key me-2"></i> ĐẶT LẠI MẬT KHẨU
+      </button>
+    </form>
+    
+    {{else}}
+    {{! TRẠNG THÁI 1: NHẬP EMAIL }}
+    <form action="/account/forgot-password/send-otp" method="post" id="frmSendOtp">
+      <p class="text-center text-muted">
+        Vui lòng nhập địa chỉ email bạn đã dùng để đăng ký. Chúng tôi sẽ gửi cho bạn một mã OTP để đặt lại mật khẩu.
+      </p>
+      <div class="mb-3">
+        <label for="txtEmail" class="form-label fw-medium">Email</label>
+        <input type="email" class="form-control form-control-lg" id="txtEmail" name="email" placeholder="Nhập email của bạn" required autofocus>
+      </div>
+
+      <hr class="my-4">
+      
+      <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fw-bold mb-3">
+        <i class="bi bi-send me-2"></i> GỬI MÃ OTP
+      </button>
+    {{/if}}
+
+    <div class="text-center">
+      <a href="/account/signin">Quay lại trang Đăng nhập</a>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,7 @@
 import db from '../utils/db.js'
+import { get } from 'http'
+import bcrypt from 'bcryptjs'
+
 export default {
     addFavoriteCourse(userId, courseId) {
         return db('watchlist')

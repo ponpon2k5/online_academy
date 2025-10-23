@@ -241,5 +241,79 @@ export default {
             .join('profiles as p', 'p.id', 'c.user_id')
             .where('course_id', course_id)
             .select('c.description as des', 'p.name as name', 'p.role as role');
+    },
+    // THÊM KHOÁ HỌC VÀO GIỎ HÀNG
+    addToCart(userId, courseId) {
+        return db('shopping_cart_items')
+            .insert({
+                user_id: userId,
+                course_id: courseId
+            })
+            .onConflict(['user_id', 'course_id'])
+            .ignore();
+    },
+    // --- LẤY TẤT CẢ KHÓA HỌC TRONG GIỎ CỦA USER ---
+    // (Query này join 3 bảng để lấy đủ thông tin cho template)
+    getCartItems(userId) {
+        return db('shopping_cart_items as sci')
+            .join('courses as c', 'sci.course_id', 'c.id')
+            .join('profiles as p', 'c.instructor_id', 'p.id') // Join để lấy tên giảng viên
+            .where('sci.user_id', userId)
+            .select(
+                'c.id',
+                'c.title as name',                      // Đổi tên 'title' thành 'name'
+                'c.price',
+                'c.hero_image_url as image_url',    // Đổi tên 'hero_image_url' thành 'image_url'
+                'p.name as instructor_name'         // Lấy tên giảng viên
+            );
+            // Các tên 'name', 'image_url', 'instructor_name'
+            [cite_start]// khớp với template shopping-cart.handlebars [cite: 42, 43, 44]
+    },
+
+    // --- XÓA 1 KHÓA HỌC KHỎI GIỎ HÀNG ---
+    removeCartItem(userId, courseId) {
+        return db('shopping_cart_items')
+            .where('user_id', userId)
+            .andWhere('course_id', courseId)
+            .del();
+    },
+    // ---XỬ LÝ THANH TOÁN (CHECKOUT) ---
+    checkout(userId, courseIds) {
+        // Bắt đầu một transaction
+        return db.transaction(async (trx) => {
+            try {
+                // 1. Lấy thông tin (đặc biệt là giá) của các khóa học
+                const courses = await trx('courses')
+                    .whereIn('id', courseIds)
+                    .select('id', 'price');
+
+                // 2. Chuẩn bị dữ liệu để insert vào 'enrollments'
+                const enrollmentsData = courses.map(course => ({
+                    user_id: userId,
+                    course_id: course.id,
+                    price_paid: course.price, // Lấy giá từ bảng 'courses'
+                    // id, purchased_at, refunded sẽ dùng giá trị default
+                }));
+
+                // 3. Insert vào bảng enrollments
+                // Dùng onConflict...ignore để bỏ qua nếu user đã lỡ mua rồi
+                await trx('enrollments')
+                    .insert(enrollmentsData)
+                    .onConflict(['user_id', 'course_id'])
+                    .ignore();
+
+                // 4. Xóa các khóa học đó khỏi giỏ hàng
+                await trx('shopping_cart_items')
+                    .where('user_id', userId)
+                    .whereIn('course_id', courseIds)
+                    .del();
+                
+                // (Transaction sẽ tự động commit nếu không có lỗi)
+            } catch (error) {
+                // Nếu có lỗi, transaction sẽ tự động rollback
+                console.error('Lỗi trong quá trình transaction checkout:', error);
+                throw error; // Ném lỗi để route có thể bắt được
+            }
+        });
     }
 }

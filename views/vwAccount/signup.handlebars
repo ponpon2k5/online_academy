@@ -82,7 +82,11 @@
           return false;
         }
 
+<<<<<<< HEAD
         // ✅ Trả về dữ liệu hợp lệ
+=======
+        // Trả về dữ liệu hợp lệ
+>>>>>>> origin/signin/signup
         return {
           username,
           password,
@@ -112,7 +116,12 @@
         const response = await fetch('/account/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+<<<<<<< HEAD
           body: JSON.stringify(data)
+=======
+          body: JSON.stringify(data),
+          credentials: 'include'
+>>>>>>> origin/signin/signup
         });
         const result = await response.json();
         if (result.success) {
@@ -151,7 +160,12 @@
         const response = await fetch('/account/send-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+<<<<<<< HEAD
           body: JSON.stringify(data)
+=======
+          body: JSON.stringify(data),
+          credentials: 'include'
+>>>>>>> origin/signin/signup
         });
         const result = await response.json();
         if (result.success) {
@@ -197,7 +211,12 @@
         const response = await fetch('/account/verify-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+<<<<<<< HEAD
           body: JSON.stringify({ otp })
+=======
+          body: JSON.stringify({ otp }),
+          credentials: 'include'
+>>>>>>> origin/signin/signup
         });
         const result = await response.json();
         if (result.success) {
