@@ -77,7 +77,7 @@ router.post("/enroll-course", async (req, res) => {
 //course detail
 router.get("/course-detail/:id", async (req, res) => {
   const courseId = req.params.id;
-  const userId = req.session.authUser.id;
+  const userId = req.session.authUser?.id; // Sử dụng optional chaining để tránh lỗi
   console.log(courseId);
   console.log(userId);
   const course = await coursesModel.view_detail_course(courseId);
@@ -86,7 +86,7 @@ router.get("/course-detail/:id", async (req, res) => {
   const sameCourseCategory = await coursesModel.view_courses_same_category(
     courseId
   );
-  const existed = await isEnrolled(userId, courseId);
+  const existed = userId ? await isEnrolled(userId, courseId) : false; // Chỉ kiểm tra enrollment nếu user đã đăng nhập
   console.log(existed);
   const instructor_id = course.instructor_id;
   const instructor = await coursesModel.getInstructorProfile(instructor_id);
@@ -100,6 +100,13 @@ router.get("/course-detail/:id", async (req, res) => {
   });
 });
 router.post("/course-detail/:id", async (req, res) => {
+  // Kiểm tra xem user đã đăng nhập chưa
+  if (!req.session.authUser) {
+    return res.redirect(
+      `/account/signin?redirect=/courses/course-detail/${req.params.id}`
+    );
+  }
+
   const courseId = req.params.id;
   const userId = req.session.authUser.id;
   const comment = req.body.comment; // ✅ lấy cả rating & comment
@@ -130,6 +137,13 @@ router.get("/purchase-courses/:id", async (req, res) => {
 
 router.post("/purchase-courses-process/:id", async (req, res) => {
   try {
+    // Kiểm tra xem user đã đăng nhập chưa
+    if (!req.session.authUser) {
+      return res.redirect(
+        `/account/signin?redirect=/courses/purchase-courses/${req.params.id}`
+      );
+    }
+
     const courseId = req.params.id;
     const userId = req.session.authUser.id;
 
@@ -170,6 +184,13 @@ router.post("/purchase-courses-process/:id", async (req, res) => {
 
 //video courses
 router.get("/preview-lessons/:id", async (req, res) => {
+  // Kiểm tra xem user đã đăng nhập chưa
+  if (!req.session.authUser) {
+    return res.redirect(
+      `/account/signin?redirect=/courses/preview-lessons/${req.params.id}`
+    );
+  }
+
   const courseId = req.params.id;
   const userId = req.session.authUser.id;
   //const lessonId = req.query.lesson;
@@ -223,6 +244,11 @@ router.get("/preview-lessons/:id", async (req, res) => {
   });
 });
 router.post("/save-progress", express.json(), async (req, res) => {
+  // Kiểm tra xem user đã đăng nhập chưa
+  if (!req.session.authUser) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   const user_id = req.session.authUser.id;
   const { lesson_id, seconds, completed } = req.body || {};
   console.log(
