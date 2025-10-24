@@ -8,6 +8,8 @@ import hbs_sections from "express-handlebars-sections";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
+import GitHubStrategy from 'passport-github2';
+
 import "dotenv/config";
 import fs from "fs";
 import moment from 'moment';

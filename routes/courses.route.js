@@ -77,7 +77,7 @@ router.post("/enroll-course", async (req, res) => {
 //course detail
 router.get('/course-detail/:id', async (req, res) => {
     const courseId = req.params.id;
-    const userId= req.session.authUser.id;
+    const userId = req.session.authUser.id;
     console.log(courseId)
     console.log(userId)
     const course = await coursesModel.view_detail_course(courseId);
@@ -292,5 +292,21 @@ router.get('/', async (req, res) => {
         newest,
         popularCategories,
     });
+});
+// THÊM KHÓA HỌC VÀO GIỎ HÀNG
+router.post('/add-to-cart', async (req, res) => {
+    if (!req.session.authUser) {
+        return res.status(401).json({ success: false, message: 'Bạn cần đăng nhập' });
+    }
+
+    try {
+        const userId = req.session.authUser.id;
+        const courseId = req.body.course_id;
+        await coursesModel.addToCart(userId, courseId);
+        return res.json({ success: true, message: 'Đã thêm vào giỏ hàng thành công!' });
+    } catch (err) {
+        console.error('Lỗi khi thêm vào giỏ hàng:', err);
+        return res.status(500).json({ success: false, message: 'Lỗi khi thêm vào giỏ hàng' });
+    }
 });
 export default router;

@@ -7,6 +7,7 @@ import passport from 'passport';
 import userModel from '../models/user.model.js';
 import { checkAuthenticated } from '../middlewares/auth.mdw.js';
 import { customAlphabet } from 'nanoid';
+import coursesModel from '../models/courses.model.js';
 const router = express.Router();
 
 /* =============== Helper: Auth verify (giữ nguyên logic cũ) =============== */
@@ -393,7 +394,7 @@ router.post('/checkout', async (req, res) => {
         // 5. Thông báo thành công và chuyển hướng
         // (Bạn có thể chuyển hướng đến trang "Khóa học của tôi")
         const msg = encodeURIComponent('Thanh toán thành công! Khóa học đã được thêm vào tài khoản của bạn.');
-        return res.redirect(`/student/profile-favor-courses?toast=success&msg=${msg}`); // (Hoặc /account/shopping-cart)
+        return res.redirect(`/student/profile-purchased-courses?toast=success&msg=${msg}`); // (Hoặc /account/shopping-cart)
 
     } catch (err) {
         console.error('Lỗi khi thanh toán:', err);

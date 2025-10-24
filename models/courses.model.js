@@ -254,22 +254,7 @@ export default {
     },
     // --- LẤY TẤT CẢ KHÓA HỌC TRONG GIỎ CỦA USER ---
     // (Query này join 3 bảng để lấy đủ thông tin cho template)
-    getCartItems(userId) {
-        return db('shopping_cart_items as sci')
-            .join('courses as c', 'sci.course_id', 'c.id')
-            .join('profiles as p', 'c.instructor_id', 'p.id') // Join để lấy tên giảng viên
-            .where('sci.user_id', userId)
-            .select(
-                'c.id',
-                'c.title as name',                      // Đổi tên 'title' thành 'name'
-                'c.price',
-                'c.hero_image_url as image_url',    // Đổi tên 'hero_image_url' thành 'image_url'
-                'p.name as instructor_name'         // Lấy tên giảng viên
-            );
-            // Các tên 'name', 'image_url', 'instructor_name'
-            [cite_start]// khớp với template shopping-cart.handlebars [cite: 42, 43, 44]
-    },
-
+    
     // --- XÓA 1 KHÓA HỌC KHỎI GIỎ HÀNG ---
     removeCartItem(userId, courseId) {
         return db('shopping_cart_items')
@@ -315,5 +300,20 @@ export default {
                 throw error; // Ném lỗi để route có thể bắt được
             }
         });
+    },
+    getCartItems(userId) {
+        return db('shopping_cart_items as sci')
+            .join('courses as c', 'sci.course_id', 'c.id')
+            .join('profiles as p', 'c.instructor_id', 'p.id') // Join để lấy tên giảng viên
+            .where('sci.user_id', userId)
+            .select(
+                'c.id',
+                'c.title as name',                      // Đổi tên 'title' thành 'name'
+                'c.price',
+                'c.hero_image_url as image_url',    // Đổi tên 'hero_image_url' thành 'image_url'
+                'p.name as instructor_name'         // Lấy tên giảng viên
+            );
+            // Các tên 'name', 'image_url', 'instructor_name'
+            [cite_start]// khớp với template shopping-cart.handlebars [cite: 42, 43, 44]
     }
 }
