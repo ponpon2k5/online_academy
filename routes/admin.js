@@ -100,6 +100,22 @@ r.post("/courses/:courseId/remove", isAdmin, async (req, res) => {
   res.redirect("/admin/courses");
 });
 
+r.post("/courses/:courseId/draft", isAdmin, async (req, res) => {
+  const { courseId } = req.params;
+  await db("courses")
+    .where("id", courseId)
+    .update({ status: "draft", updated_at: db.fn.now() });
+  res.redirect("/admin/courses");
+});
+
+r.post("/courses/:courseId/publish", isAdmin, async (req, res) => {
+  const { courseId } = req.params;
+  await db("courses")
+    .where("id", courseId)
+    .update({ status: "published", updated_at: db.fn.now() });
+  res.redirect("/admin/courses");
+});
+
 r.get("/users", isAdmin, async (req, res) => {
   const rows = await db("profiles")
     .select("id", "name", "role", "email", "created_at")
