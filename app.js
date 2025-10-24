@@ -8,11 +8,11 @@ import hbs_sections from "express-handlebars-sections";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
-import GitHubStrategy from 'passport-github2';
+import GitHubStrategy from "passport-github2";
 
 import "dotenv/config";
 import fs from "fs";
-import moment from 'moment';
+import moment from "moment";
 import userModel from "./models/user.model.js";
 
 // Routes
@@ -75,6 +75,19 @@ app.use(async (req, res, next) => {
       role: req.session.authUser.role,
       email: req.session.authUser.email,
     };
+
+    // Lấy số lượng sản phẩm trong giỏ hàng
+    try {
+      const coursesModel = (await import("./models/courses.model.js")).default;
+      res.locals.cartCount = await coursesModel.getCartCount(
+        req.session.authUser.id
+      );
+    } catch (error) {
+      console.error("Error getting cart count:", error);
+      res.locals.cartCount = 0;
+    }
+  } else {
+    res.locals.cartCount = 0;
   }
   next();
 });
@@ -112,12 +125,12 @@ app.engine(
       round: (num) => Math.round(num),
       add: (a, b) => Number(a) + Number(b),
       subtract: (a, b) => Number(a) - Number(b),
-      formatDateForCheckCourse: (date) => moment(date).format('DD/MM/YYYY'),
+      formatDateForCheckCourse: (date) => moment(date).format("DD/MM/YYYY"),
       isRecentCourse: (date) => {
         if (!date) return false;
         const createdAt = moment(date);
         const now = moment();
-        return now.diff(createdAt, 'days') <= 3; // ✅ 3 ngày gần nhất
+        return now.diff(createdAt, "days") <= 3; // ✅ 3 ngày gần nhất
       },
       isBestSeller: (students) => students >= 1000,
       formatDuration: (seconds) => {
@@ -155,26 +168,29 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // Cấu hình Google Strategy
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/account/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/account/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
         let user = await userModel.findByEmail(profile.emails[0].value);
         if (!user) {
-            let total = await userModel.totalUser();
-            const id = "p" + (Number(total) + 1);
+          let total = await userModel.totalUser();
+          const id = "p" + (Number(total) + 1);
 
-            user = {
-                id,
-                username: profile.id,
-                email: profile.emails?.[0]?.value || '',
-                name: profile.displayName || 'Unknown',
-                password: '',
-                permission: 0
-            };
-            await userModel.add(user);
+          user = {
+            id,
+            username: profile.id,
+            email: profile.emails?.[0]?.value || "",
+            name: profile.displayName || "Unknown",
+            password: "",
+            permission: 0,
+          };
+          await userModel.add(user);
         }
         done(null, user);
       } catch (err) {
@@ -216,41 +232,44 @@ passport.use(new GoogleStrategy({
 //     }
 // }));
 // Cấu hình Github Strategy
-passport.use(new GitHubStrategy({
-    clientID: process.env.GITHUB_CLIENT_ID,
-    clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: '/account/auth/github/callback',
-    scope: ['user:email'] // Yêu cầu quyền truy cập email
-}, async (accessToken, refreshToken, profile, done) => {
-    try {
+passport.use(
+  new GitHubStrategy(
+    {
+      clientID: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      callbackURL: "/account/auth/github/callback",
+      scope: ["user:email"], // Yêu cầu quyền truy cập email
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
         // GitHub có thể trả về email trong nhiều trường
         let email = null;
         if (profile.emails && profile.emails.length > 0) {
-            // Tìm email chính (nếu có)
-            const primaryEmail = profile.emails.find(e => e.primary);
-            email = (primaryEmail || profile.emails[0]).value;
+          // Tìm email chính (nếu có)
+          const primaryEmail = profile.emails.find((e) => e.primary);
+          email = (primaryEmail || profile.emails[0]).value;
         }
 
         // Fallback nếu không có email (ví dụ: email để private)
         // Chúng ta sẽ dùng một email placeholder dựa trên username
         if (!email) {
-            email = `${profile.username}@github.com`; 
+          email = `${profile.username}@github.com`;
         }
 
         let user = await userModel.findByEmail(email);
         if (!user) {
-            let total = await userModel.totalUser();
-            const id = "p" + (Number(total) + 1);
+          let total = await userModel.totalUser();
+          const id = "p" + (Number(total) + 1);
 
-            user = {
-                id,
-                username: profile.id, // Dùng profile.id giống Google/Facebook
-                email: email,
-                name: profile.displayName || profile.username || 'Unknown', // Lấy tên hiển thị hoặc username
-                password: '', // Không có mật khẩu cho OAuth
-                permission: 0
-            };
-            await userModel.add(user);
+          user = {
+            id,
+            username: profile.id, // Dùng profile.id giống Google/Facebook
+            email: email,
+            name: profile.displayName || profile.username || "Unknown", // Lấy tên hiển thị hoặc username
+            password: "", // Không có mật khẩu cho OAuth
+            permission: 0,
+          };
+          await userModel.add(user);
         }
         done(null, user);
       } catch (err) {

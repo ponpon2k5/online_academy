@@ -1,8 +1,8 @@
-import express from 'express';
-import coursesModel from '../models/courses.model.js'
-import userModel from '../models/user.model.js'
-import homeModel from '../models/home.model.js';
-import db from '../utils/db.js'
+import express from "express";
+import coursesModel from "../models/courses.model.js";
+import userModel from "../models/user.model.js";
+import homeModel from "../models/home.model.js";
+import db from "../utils/db.js";
 
 //const player = new Plyr('#player');
 const router = express.Router();
@@ -13,7 +13,7 @@ async function totalEnrollment() {
     return Number(row?.cnt ?? 0);
 }
 async function isEnrolled(userId, courseId) {
-    const row = await db('enrollments')
+    const row = await db("enrollments")
         .where({ user_id: userId, course_id: courseId })
         .first();
     return !!row;
@@ -21,7 +21,7 @@ async function isEnrolled(userId, courseId) {
 //view courses
 router.get('/view-courses', async (req, res) => {
     try {
-        const cate= await coursesModel.get_category();
+        const cate = await coursesModel.get_category();
         const categorySlug = req.query.category || null;
         const sort = req.query.sort || null;
         const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -99,6 +99,13 @@ router.get('/course-detail/:id', async (req, res) => {
     });
 });
 router.post("/course-detail/:id", async (req, res) => {
+    // Kiểm tra xem user đã đăng nhập chưa
+    if (!req.session.authUser) {
+        return res.redirect(
+            `/account/signin?redirect=/courses/course-detail/${req.params.id}`
+        );
+    }
+
     const courseId = req.params.id;
     const userId = req.session.authUser.id;
     const comment = req.body.comment; // ✅ lấy cả rating & comment
@@ -129,6 +136,13 @@ router.get("/purchase-courses/:id", async (req, res) => {
 
 router.post("/purchase-courses-process/:id", async (req, res) => {
     try {
+        // Kiểm tra xem user đã đăng nhập chưa
+        if (!req.session.authUser) {
+            return res.redirect(
+                `/account/signin?redirect=/courses/purchase-courses/${req.params.id}`
+            );
+        }
+
         const courseId = req.params.id;
         const userId = req.session.authUser.id;
 
@@ -143,8 +157,8 @@ router.post("/purchase-courses-process/:id", async (req, res) => {
         }
 
         // 2) (Tuỳ) sinh enrollID — khuyên dùng DEFAULT/UUID thay vì đếm thủ công
-        const enrollID = await totalEnrollment();           // nếu bạn vẫn cần
-        const enrollID_new = "e" + (enrollID + 1);         // tránh race condition bằng sequence/uuid
+        const enrollID = await totalEnrollment(); // nếu bạn vẫn cần
+        const enrollID_new = "e" + (enrollID + 1); // tránh race condition bằng sequence/uuid
 
         // 3) Lấy giá tại thời điểm mua
         const course = await userModel.findCourseByID(courseId);
@@ -169,6 +183,13 @@ router.post("/purchase-courses-process/:id", async (req, res) => {
 
 //video courses
 router.get("/preview-lessons/:id", async (req, res) => {
+    // Kiểm tra xem user đã đăng nhập chưa
+    if (!req.session.authUser) {
+        return res.redirect(
+            `/account/signin?redirect=/courses/preview-lessons/${req.params.id}`
+        );
+    }
+
     const courseId = req.params.id;
     const userId = req.session.authUser.id;
     //const lessonId = req.query.lesson;
@@ -222,6 +243,11 @@ router.get("/preview-lessons/:id", async (req, res) => {
     });
 });
 router.post("/save-progress", express.json(), async (req, res) => {
+    // Kiểm tra xem user đã đăng nhập chưa
+    if (!req.session.authUser) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const user_id = req.session.authUser.id;
     const { lesson_id, seconds, completed } = req.body || {};
     console.log(
@@ -245,44 +271,51 @@ router.post("/save-progress", express.json(), async (req, res) => {
     res.json({ ok: true });
 });
 //search courses
-router.get('/search', async (req, res) => {
-    const query = req.query.q || '';
-    const terms = query.trim().split(/\s+/).map(t => `${t}:*`).join(' & ');
+router.get("/search", async (req, res) => {
+    const query = req.query.q || "";
+    const terms = query
+        .trim()
+        .split(/\s+/)
+        .map((t) => `${t}:*`)
+        .join(" & ");
     const courses = await coursesModel.findCourseByQuery(terms);
     if (query.length === 0) {
         console.log("Không có khóa học nào");
         res.render("vwCourses/dis_courses", {
             q: query,
-            empty: true
-        })
-    }
-    else {
+            empty: true,
+        });
+    } else {
         console.log("Đã tìm thấy khóa học nào");
         res.render("vwCourses/dis_courses", {
             q: query,
             empty: false,
-            courses: courses
-        })
+            courses: courses,
+        });
     }
 });
-router.get('/', async (req, res) => {
-    const featuredCourses = await homeModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
-    const mostViewed = await coursesModel.getMostViewedCourses(); // 
-    const newest = await homeModel.getNewestCourses(); // 
-    if (newest) {
-        console.log("có dữ liệu")
+router.get("/", async (req, res) => {
+    // Kiểm tra nếu có parameter category, redirect đến view-courses
+    if (req.query.category) {
+        return res.redirect(`/courses/view-courses?category=${req.query.category}`);
     }
-    else {
-        console.log("ko có dữ liệu")
+
+    const featuredCourses = await homeModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
+    const mostViewed = await coursesModel.getMostViewedCourses(); //
+    const newest = await homeModel.getNewestCourses(); //
+    if (newest) {
+        console.log("có dữ liệu");
+    } else {
+        console.log("ko có dữ liệu");
     }
     const popularCategories = await homeModel.getHotCategories(); // lĩnh vực có nhiều người học nhất
     const popularCourses = await homeModel.getPopularCourses();
-    res.render('home', {
+    res.render("home", {
         featuredCourses,
         mostViewed,
         newest,
         popularCategories,
-        popularCourses
+        popularCourses,
     });
 
     //feedback
@@ -295,19 +328,26 @@ router.get('/', async (req, res) => {
     });
 });
 // THÊM KHÓA HỌC VÀO GIỎ HÀNG
-router.post('/add-to-cart', async (req, res) => {
+router.post("/add-to-cart", async (req, res) => {
     if (!req.session.authUser) {
-        return res.status(401).json({ success: false, message: 'Bạn cần đăng nhập' });
+        return res
+            .status(401)
+            .json({ success: false, message: "Bạn cần đăng nhập" });
     }
 
     try {
         const userId = req.session.authUser.id;
         const courseId = req.body.course_id;
         await coursesModel.addToCart(userId, courseId);
-        return res.json({ success: true, message: 'Đã thêm vào giỏ hàng thành công!' });
+        return res.json({
+            success: true,
+            message: "Đã thêm vào giỏ hàng thành công!",
+        });
     } catch (err) {
-        console.error('Lỗi khi thêm vào giỏ hàng:', err);
-        return res.status(500).json({ success: false, message: 'Lỗi khi thêm vào giỏ hàng' });
+        console.error("Lỗi khi thêm vào giỏ hàng:", err);
+        return res
+            .status(500)
+            .json({ success: false, message: "Lỗi khi thêm vào giỏ hàng" });
     }
 });
 export default router;

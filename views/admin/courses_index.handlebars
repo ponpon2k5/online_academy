@@ -32,18 +32,45 @@
         </p>
         
         <div class="d-grid gap-2">
-          <a href="/courses/{{this.id}}" class="btn btn-outline-primary btn-sm" target="_blank">
+          <!-- Nút xem khóa học - nổi bật -->
+          <a href="/courses/course-detail/{{this.id}}" class="btn btn-primary btn-sm" target="_blank">
             <i class="bi bi-eye"></i> Xem khóa học
           </a>
-          <div class="btn-group" role="group">
-            {{#if (ne this.status "removed")}}
-            <form method="post" action="/admin/courses/{{this.id}}/remove" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn gỡ bỏ khóa học này?')">
-              <button type="submit" class="btn btn-danger btn-sm">
+          
+          <!-- Nhóm nút hành động admin -->
+          <div class="d-flex gap-1">
+            {{#if (eq this.status "published")}}
+            <!-- Khóa học đã xuất bản: có thể chuyển thành bản nháp hoặc gỡ bỏ -->
+            <form method="post" action="/admin/courses/{{this.id}}/draft" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn chuyển khóa học này thành bản nháp?')">
+              <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                <i class="bi bi-file-earmark-text"></i> Bản nháp
+              </button>
+            </form>
+            <form method="post" action="/admin/courses/{{this.id}}/remove" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn gỡ bỏ khóa học này?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                 <i class="bi bi-trash"></i> Gỡ bỏ
               </button>
             </form>
-            {{else}}
-            <button class="btn btn-outline-secondary btn-sm" disabled>
+            {{else if (eq this.status "draft")}}
+            <!-- Khóa học bản nháp: có thể xuất bản hoặc gỡ bỏ -->
+            <form method="post" action="/admin/courses/{{this.id}}/publish" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn xuất bản khóa học này?')">
+              <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                <i class="bi bi-check-circle"></i> Xuất bản
+              </button>
+            </form>
+            <form method="post" action="/admin/courses/{{this.id}}/remove" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn gỡ bỏ khóa học này?')">
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                <i class="bi bi-trash"></i> Gỡ bỏ
+              </button>
+            </form>
+            {{else if (eq this.status "removed")}}
+            <!-- Khóa học đã gỡ bỏ: có thể khôi phục về xuất bản -->
+            <form method="post" action="/admin/courses/{{this.id}}/publish" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn khôi phục và xuất bản khóa học này?')">
+              <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                <i class="bi bi-arrow-clockwise"></i> Khôi phục
+              </button>
+            </form>
+            <button class="btn btn-outline-secondary btn-sm flex-fill" disabled>
               <i class="bi bi-ban"></i> Đã gỡ bỏ
             </button>
             {{/if}}
@@ -65,19 +92,45 @@
 <script>
 function filterCourses(status) {
   const cards = document.querySelectorAll('.course-card');
-  const buttons = document.querySelectorAll('.btn-group button');
+  // Chỉ select các button trong filter group, không ảnh hưởng đến button trong card
+  const filterButtons = document.querySelectorAll('.d-flex .btn-group button');
   
-  // Reset button styles
-  buttons.forEach(btn => {
-    btn.classList.remove('active');
-    btn.classList.add('btn-outline-primary', 'btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
+  // Reset all filter buttons to their default outline state
+  filterButtons.forEach(btn => {
+    // Remove all possible classes first
+    btn.classList.remove('active', 'btn-primary', 'btn-success', 'btn-warning', 'btn-danger', 
+                        'btn-outline-primary', 'btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
+    
+    // Get button text to determine correct outline class
+    const buttonText = btn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      btn.classList.add('btn-outline-primary');
+    } else if (buttonText === 'Đã xuất bản') {
+      btn.classList.add('btn-outline-success');
+    } else if (buttonText === 'Bản nháp') {
+      btn.classList.add('btn-outline-warning');
+    } else if (buttonText === 'Đã gỡ bỏ') {
+      btn.classList.add('btn-outline-danger');
+    }
   });
   
   // Set active button
   const activeBtn = document.querySelector(`button[onclick="filterCourses('${status}')"]`);
   if (activeBtn) {
-    activeBtn.classList.add('active');
+    // Remove outline class and add solid class for active state
     activeBtn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
+    activeBtn.classList.add('active');
+    
+    const buttonText = activeBtn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      activeBtn.classList.add('btn-primary');
+    } else if (buttonText === 'Đã xuất bản') {
+      activeBtn.classList.add('btn-success');
+    } else if (buttonText === 'Bản nháp') {
+      activeBtn.classList.add('btn-warning');
+    } else if (buttonText === 'Đã gỡ bỏ') {
+      activeBtn.classList.add('btn-danger');
+    }
   }
   
   // Filter cards
@@ -89,4 +142,9 @@ function filterCourses(status) {
     }
   });
 }
+
+// Set default active button on page load
+document.addEventListener('DOMContentLoaded', function() {
+  filterCourses('all');
+});
 </script>

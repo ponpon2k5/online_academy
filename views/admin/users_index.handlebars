@@ -17,20 +17,23 @@
 {{#if users.length}}
 <div class="row">
   {{#each users}}
-  <div class="col-md-6 col-lg-4 mb-4 user-card" data-role="{{this.role}}">
+  <div class="col-md-6 col-lg-4 mb-4 user-card" data-role="{{this.role}}" data-user-id="{{this.id}}">
     <div class="card h-100">
       <div class="card-body">
         <div class="d-flex align-items-center mb-3">
-          <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+          <div class="avatar {{#if this.is_active}}bg-primary{{else}}bg-secondary{{/if}} text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
             <i class="bi bi-person-fill"></i>
           </div>
           <div>
-            <h6 class="mb-0">{{this.name}}</h6>
+            <h6 class="mb-0">{{this.name}} {{#unless this.is_active}}<small class="text-muted">(Đã khóa)</small>{{/unless}}</h6>
             <span class="badge {{#if (eq this.role 'admin')}}bg-warning{{else if (eq this.role 'instructor')}}bg-info{{else}}bg-success{{/if}}">
               {{#if (eq this.role 'admin')}}Quản trị viên
               {{else if (eq this.role 'instructor')}}Giảng viên
               {{else}}Học viên{{/if}}
             </span>
+            {{#unless this.is_active}}
+            <span class="badge bg-danger ms-1">Đã khóa</span>
+            {{/unless}}
           </div>
         </div>
         
@@ -47,18 +50,22 @@
         </div>
         
         <div class="d-grid gap-2">
-          {{#if (eq this.role 'instructor')}}
-          <a href="/instructor/courses?instructor={{this.id}}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-book"></i> Xem khóa học
-          </a>
-          {{else if (eq this.role 'student')}}
-          <a href="/student/courses?student={{this.id}}" class="btn btn-outline-success btn-sm">
-            <i class="bi bi-person-check"></i> Xem hồ sơ
-          </a>
-          {{/if}}
-          <button class="btn btn-outline-secondary btn-sm" onclick="viewUserDetails('{{this.id}}')">
-            <i class="bi bi-eye"></i> Chi tiết
-          </button>
+          <div class="d-flex gap-1">
+            {{#if (eq this.role 'instructor')}}
+            <a href="/admin/users/{{this.id}}/courses" class="btn btn-outline-primary btn-sm flex-fill">
+              <i class="bi bi-book"></i> Khóa học
+            </a>
+            {{else if (eq this.role 'student')}}
+            <a href="/admin/users/{{this.id}}/profile" class="btn btn-outline-success btn-sm flex-fill">
+              <i class="bi bi-person-check"></i> Hồ sơ
+            </a>
+            {{/if}}
+            <button class="btn btn-outline-info btn-sm flex-fill" onclick="viewUserDetails('{{this.id}}')">
+              <i class="bi bi-eye"></i> Chi tiết
+            </button>
+          </div>
+          
+          <!-- Đã bỏ nút xóa theo yêu cầu -->
         </div>
       </div>
     </div>
@@ -94,19 +101,44 @@
 <script>
 function filterUsers(role) {
   const cards = document.querySelectorAll('.user-card');
-  const buttons = document.querySelectorAll('.btn-group button');
+  const filterButtons = document.querySelectorAll('.d-flex .btn-group button');
   
-  // Reset button styles
-  buttons.forEach(btn => {
-    btn.classList.remove('active');
-    btn.classList.add('btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
+  // Reset all filter buttons to their default outline state
+  filterButtons.forEach(btn => {
+    // Remove all possible classes first
+    btn.classList.remove('active', 'btn-primary', 'btn-success', 'btn-info', 'btn-warning', 
+                        'btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
+    
+    // Get button text to determine correct outline class
+    const buttonText = btn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      btn.classList.add('btn-outline-primary');
+    } else if (buttonText === 'Học viên') {
+      btn.classList.add('btn-outline-success');
+    } else if (buttonText === 'Giảng viên') {
+      btn.classList.add('btn-outline-info');
+    } else if (buttonText === 'Quản trị') {
+      btn.classList.add('btn-outline-warning');
+    }
   });
   
   // Set active button
   const activeBtn = document.querySelector(`button[onclick="filterUsers('${role}')"]`);
   if (activeBtn) {
-    activeBtn.classList.add('active');
+    // Remove outline class and add solid class for active state
     activeBtn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
+    activeBtn.classList.add('active');
+    
+    const buttonText = activeBtn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      activeBtn.classList.add('btn-primary');
+    } else if (buttonText === 'Học viên') {
+      activeBtn.classList.add('btn-success');
+    } else if (buttonText === 'Giảng viên') {
+      activeBtn.classList.add('btn-info');
+    } else if (buttonText === 'Quản trị') {
+      activeBtn.classList.add('btn-warning');
+    }
   }
   
   // Filter cards
@@ -120,13 +152,61 @@ function filterUsers(role) {
 }
 
 function viewUserDetails(userId) {
-  // Có thể implement AJAX call để lấy chi tiết người dùng
-  document.getElementById('userDetailsContent').innerHTML = `
-    <p>Chi tiết người dùng ID: ${userId}</p>
-    <p>Chức năng này có thể được mở rộng để hiển thị thông tin chi tiết hơn.</p>
-  `;
+  // Tìm user data từ DOM
+  const userCard = document.querySelector(`[data-user-id="${userId}"]`);
+  if (!userCard) {
+    document.getElementById('userDetailsContent').innerHTML = `
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> Không tìm thấy thông tin người dùng
+      </div>
+    `;
+  } else {
+    const userName = userCard.querySelector('h6').textContent;
+    const userEmail = userCard.querySelector('.text-muted').textContent.replace('📧 ', '');
+    const userRole = userCard.querySelector('.badge').textContent.trim();
+    const joinDate = userCard.querySelectorAll('.text-muted')[1].textContent.replace('📅 Tham gia: ', '');
+    
+    document.getElementById('userDetailsContent').innerHTML = `
+      <div class="row">
+        <div class="col-md-4">
+          <div class="text-center">
+            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+              <i class="bi bi-person-fill fs-1"></i>
+            </div>
+            <h5>${userName}</h5>
+            <span class="badge ${userRole === 'Quản trị viên' ? 'bg-warning' : userRole === 'Giảng viên' ? 'bg-info' : 'bg-success'}">${userRole}</span>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <table class="table table-borderless">
+            <tr>
+              <td><strong><i class="bi bi-envelope"></i> Email:</strong></td>
+              <td>${userEmail}</td>
+            </tr>
+            <tr>
+              <td><strong><i class="bi bi-calendar"></i> Ngày tham gia:</strong></td>
+              <td>${joinDate}</td>
+            </tr>
+            <tr>
+              <td><strong><i class="bi bi-shield-check"></i> Vai trò:</strong></td>
+              <td>${userRole}</td>
+            </tr>
+            <tr>
+              <td><strong><i class="bi bi-hash"></i> ID:</strong></td>
+              <td><code>${userId}</code></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    `;
+  }
   
   const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
   modal.show();
 }
+
+// Set default active button on page load
+document.addEventListener('DOMContentLoaded', function() {
+  filterUsers('all');
+});
 </script>

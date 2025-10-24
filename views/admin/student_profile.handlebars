@@ -1,0 +1,199 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">
+    <i class="bi bi-person-circle"></i> Hồ sơ học viên: {{student.name}}
+  </h3>
+  <a href="/admin/users" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Quay lại
+  </a>
+</div>
+
+<!-- Thông tin cơ bản -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+          <i class="bi bi-person-fill fs-1"></i>
+        </div>
+        <h5>{{student.name}}</h5>
+        <span class="badge bg-success">Học viên</span>
+        <div class="mt-3">
+          <small class="text-muted">
+            <i class="bi bi-envelope"></i> {{student.email}}
+          </small><br>
+          <small class="text-muted">
+            <i class="bi bi-calendar"></i> Tham gia: {{formatDate student.created_at}}
+          </small><br>
+          <small class="text-muted">
+            <i class="bi bi-hash"></i> ID: <code>{{student.id}}</code>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-heart text-danger fs-1"></i>
+            <h4 class="mt-2">{{favoriteCourses.length}}</h4>
+            <p class="text-muted mb-0">Khóa học yêu thích</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-bag text-success fs-1"></i>
+            <h4 class="mt-2">{{purchasedCourses.length}}</h4>
+            <p class="text-muted mb-0">Khóa học đã mua</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-trophy text-warning fs-1"></i>
+            <h4 class="mt-2">{{#each progressCourses}}{{#if is_completed}}{{#if @first}}1{{/if}}{{/if}}{{/each}}</h4>
+            <p class="text-muted mb-0">Khóa học hoàn thành</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Khóa học yêu thích -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-heart"></i> Khóa học yêu thích</h5>
+  </div>
+  <div class="card-body">
+    {{#if favoriteCourses.length}}
+    <div class="row">
+      {{#each favoriteCourses}}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100">
+          <img src="{{this.hero_image_url}}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{this.title}}">
+          <div class="card-body">
+            <h6 class="card-title">{{this.title}}</h6>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-primary fw-bold">{{formatCurrency this.price}}</span>
+              {{#if this.rating_avg}}
+              <small class="text-warning">
+                <i class="bi bi-star-fill"></i> {{this.rating_avg}}
+              </small>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-4">
+      <i class="bi bi-heart text-muted display-4"></i>
+      <p class="text-muted mt-2">Chưa có khóa học yêu thích nào</p>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Khóa học đã mua -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-bag"></i> Khóa học đã mua</h5>
+  </div>
+  <div class="card-body">
+    {{#if purchasedCourses.length}}
+    <div class="row">
+      {{#each purchasedCourses}}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100">
+          <img src="{{this.hero_image_url}}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{this.title}}">
+          <div class="card-body">
+            <h6 class="card-title">{{this.title}}</h6>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-success fw-bold">{{formatCurrency this.price}}</span>
+              <small class="text-muted">
+                <i class="bi bi-calendar"></i> {{formatDate this.purchased_at}}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <div class="text-center py-4">
+      <i class="bi bi-bag text-muted display-4"></i>
+      <p class="text-muted mt-2">Chưa mua khóa học nào</p>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<!-- Tiến độ học tập -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Tiến độ học tập</h5>
+  </div>
+  <div class="card-body">
+    {{#if progressCourses.length}}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Khóa học</th>
+            <th>Tiến độ</th>
+            <th>Trạng thái</th>
+            <th>Ngày đăng ký</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each progressCourses}}
+          <tr>
+            <td>
+              <strong>{{this.title}}</strong>
+            </td>
+            <td>
+              <div class="progress" style="height: 20px;">
+                <div class="progress-bar {{#if (eq this.progress_percentage 100)}}bg-success{{else}}bg-primary{{/if}}" 
+                     role="progressbar" 
+                     style="width: {{this.progress_percentage}}%"
+                     aria-valuenow="{{this.progress_percentage}}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                  {{this.progress_percentage}}%
+                </div>
+              </div>
+            </td>
+            <td>
+              {{#if this.is_completed}}
+              <span class="badge bg-success">
+                <i class="bi bi-check-circle"></i> Hoàn thành
+              </span>
+              {{else}}
+              <span class="badge bg-warning">
+                <i class="bi bi-clock"></i> Đang học
+              </span>
+              {{/if}}
+            </td>
+            <td>
+              <small class="text-muted">{{formatDate this.purchased_at}}</small>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="text-center py-4">
+      <i class="bi bi-graph-up text-muted display-4"></i>
+      <p class="text-muted mt-2">Chưa có tiến độ học tập nào</p>
+    </div>
+    {{/if}}
+  </div>
+</div>
