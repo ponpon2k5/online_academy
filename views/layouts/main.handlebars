@@ -81,6 +81,17 @@
               <i class="bi bi-shield-check me-1"></i>Admin
             </a>
           </li>
+          {{else if isAuthenticated}}
+          <li class="nav-item">
+            <a class="nav-link text-dark fw-semibold position-relative" href="/account/shopping-cart">
+              <i class="bi bi-cart fs-5"></i>
+              {{#if cartCount}}
+              <span class="position-absolute badge rounded-circle bg-danger text-white" style="font-size: 0.65rem; top: -2px; right: -2px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; line-height: 1;">
+                {{cartCount}}
+              </span>
+              {{/if}}
+            </a>
+          </li>
           {{else}}
           <li class="nav-item">
             <a class="nav-link text-dark fw-semibold" href="#">
@@ -124,9 +135,16 @@
               <li><a class="dropdown-item py-2" href="/account/change-password">
                 <i class="bi bi-key text-primary me-2"></i>Đổi mật khẩu
               </a></li>
+              {{#if (eq authUser.role 'instructor')}}
               <li><a class="dropdown-item py-2" href="/account/shopping-cart">
                 <i class="bi bi-cart text-primary me-2"></i>Giỏ hàng
               </a></li>
+              {{/if}}
+              {{#if (eq authUser.role 'admin')}}
+              <li><a class="dropdown-item py-2" href="/account/shopping-cart">
+                <i class="bi bi-cart text-primary me-2"></i>Giỏ hàng
+              </a></li>
+              {{/if}}
               <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item py-2 text-danger" href="javascript: document.querySelector('#frmSignout').submit()">
