@@ -1,0 +1,223 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">
+    <i class="bi bi-book"></i> Khóa học của giảng viên: {{instructor.name}}
+  </h3>
+  <a href="/admin/users" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> Quay lại
+  </a>
+</div>
+
+<!-- Thông tin giảng viên -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="avatar bg-info text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 100px; height: 100px;">
+          <i class="bi bi-person-fill fs-1"></i>
+        </div>
+        <h5>{{instructor.name}}</h5>
+        <span class="badge bg-info">Giảng viên</span>
+        <div class="mt-3">
+          <small class="text-muted">
+            <i class="bi bi-envelope"></i> {{instructor.email}}
+          </small><br>
+          <small class="text-muted">
+            <i class="bi bi-calendar"></i> Tham gia: {{formatDate instructor.created_at}}
+          </small><br>
+          <small class="text-muted">
+            <i class="bi bi-hash"></i> ID: <code>{{instructor.id}}</code>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-8">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-book text-primary fs-1"></i>
+            <h4 class="mt-2">{{stats.total_courses}}</h4>
+            <p class="text-muted mb-0">Tổng khóa học</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-check-circle text-success fs-1"></i>
+            <h4 class="mt-2">{{stats.published_courses}}</h4>
+            <p class="text-muted mb-0">Đã xuất bản</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-file-earmark-text text-warning fs-1"></i>
+            <h4 class="mt-2">{{stats.draft_courses}}</h4>
+            <p class="text-muted mb-0">Bản nháp</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <i class="bi bi-people text-info fs-1"></i>
+            <h4 class="mt-2">{{stats.total_students}}</h4>
+            <p class="text-muted mb-0">Học viên</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bộ lọc khóa học -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h5 class="mb-0">Danh sách khóa học</h5>
+  <div class="btn-group" role="group">
+    <button type="button" class="btn btn-outline-primary" onclick="filterCourses('all')">Tất cả</button>
+    <button type="button" class="btn btn-outline-success" onclick="filterCourses('published')">Đã xuất bản</button>
+    <button type="button" class="btn btn-outline-warning" onclick="filterCourses('draft')">Bản nháp</button>
+    <button type="button" class="btn btn-outline-danger" onclick="filterCourses('removed')">Đã gỡ bỏ</button>
+  </div>
+</div>
+
+<!-- Danh sách khóa học -->
+{{#if courses.length}}
+<div class="row">
+  {{#each courses}}
+  <div class="col-md-6 col-lg-4 mb-4 course-card" data-status="{{this.status}}">
+    <div class="card h-100">
+      {{#if this.hero_image_url}}
+      <img src="{{this.hero_image_url}}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{this.title}}">
+      {{else}}
+      <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+        <i class="bi bi-image text-muted fs-1"></i>
+      </div>
+      {{/if}}
+      
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="card-title">{{this.title}}</h6>
+          <span class="badge {{#if (eq this.status 'published')}}bg-success{{else if (eq this.status 'draft')}}bg-warning{{else}}bg-danger{{/if}}">
+            {{#if (eq this.status 'published')}}Đã xuất bản
+            {{else if (eq this.status 'draft')}}Bản nháp
+            {{else}}Đã gỡ bỏ{{/if}}
+          </span>
+        </div>
+        
+        <p class="card-text text-muted small mb-2">{{this.short_desc}}</p>
+        
+        <div class="mb-2">
+          <small class="text-muted">
+            <i class="bi bi-tag"></i> {{this.category_name}}
+          </small>
+        </div>
+        
+        <div class="mb-2">
+          <small class="text-muted">
+            <i class="bi bi-people"></i> {{this.students_count}} học viên
+          </small>
+        </div>
+        
+        {{#if this.rating_avg}}
+        <div class="mb-2">
+          <small class="text-warning">
+            <i class="bi bi-star-fill"></i> {{this.rating_avg}}
+          </small>
+        </div>
+        {{/if}}
+        
+        <div class="mb-3">
+          <small class="text-muted">
+            <i class="bi bi-calendar"></i> {{formatDate this.created_at}}
+          </small>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            {{#if this.promo_price}}
+            <span class="text-primary fw-bold">{{formatCurrency this.promo_price}}</span>
+            <small class="text-muted text-decoration-line-through ms-1">{{formatCurrency this.price}}</small>
+            {{else}}
+            <span class="text-primary fw-bold">{{formatCurrency this.price}}</span>
+            {{/if}}
+          </div>
+          <a href="/courses/course-detail/{{this.id}}" class="btn btn-outline-primary btn-sm" target="_blank">
+            <i class="bi bi-eye"></i> Xem
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/each}}
+</div>
+{{else}}
+<div class="text-center py-5">
+  <i class="bi bi-book display-1 text-muted"></i>
+  <h4 class="mt-3 text-muted">Chưa có khóa học nào</h4>
+  <p class="text-muted">Giảng viên này chưa tạo khóa học nào</p>
+</div>
+{{/if}}
+
+<script>
+function filterCourses(status) {
+  const cards = document.querySelectorAll('.course-card');
+  const filterButtons = document.querySelectorAll('.d-flex .btn-group button');
+  
+  // Reset all filter buttons to their default outline state
+  filterButtons.forEach(btn => {
+    // Remove all possible classes first
+    btn.classList.remove('active', 'btn-primary', 'btn-success', 'btn-warning', 'btn-danger', 
+                        'btn-outline-primary', 'btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
+    
+    // Get button text to determine correct outline class
+    const buttonText = btn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      btn.classList.add('btn-outline-primary');
+    } else if (buttonText === 'Đã xuất bản') {
+      btn.classList.add('btn-outline-success');
+    } else if (buttonText === 'Bản nháp') {
+      btn.classList.add('btn-outline-warning');
+    } else if (buttonText === 'Đã gỡ bỏ') {
+      btn.classList.add('btn-outline-danger');
+    }
+  });
+  
+  // Set active button
+  const activeBtn = document.querySelector(`button[onclick="filterCourses('${status}')"]`);
+  if (activeBtn) {
+    // Remove outline class and add solid class for active state
+    activeBtn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-warning', 'btn-outline-danger');
+    activeBtn.classList.add('active');
+    
+    const buttonText = activeBtn.textContent.trim();
+    if (buttonText === 'Tất cả') {
+      activeBtn.classList.add('btn-primary');
+    } else if (buttonText === 'Đã xuất bản') {
+      activeBtn.classList.add('btn-success');
+    } else if (buttonText === 'Bản nháp') {
+      activeBtn.classList.add('btn-warning');
+    } else if (buttonText === 'Đã gỡ bỏ') {
+      activeBtn.classList.add('btn-danger');
+    }
+  }
+  
+  // Filter cards
+  cards.forEach(card => {
+    if (status === 'all' || card.dataset.status === status) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// Set default active button on page load
+document.addEventListener('DOMContentLoaded', function() {
+  filterCourses('all');
+});
+</script>

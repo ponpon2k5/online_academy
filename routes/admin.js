@@ -120,12 +120,19 @@ r.get("/users", isAdmin, async (req, res) => {
   const rows = await db("profiles")
     .select("id", "name", "role", "email", "created_at")
     .orderBy("created_at", "desc");
+
+  // Thêm is_active = true mặc định cho tất cả user (giả sử tất cả đều active)
+  const usersWithActiveStatus = rows.map((user) => ({
+    ...user,
+    is_active: true, // Mặc định tất cả user đều active
+  }));
+
   res.render("admin/users_index", {
     layout: "admin",
     title: "Users",
     authUser: req.session.user,
     currentPage: "users",
-    users: rows,
+    users: usersWithActiveStatus,
   });
 });
 
@@ -193,6 +200,202 @@ r.post("/users/new-instructor", isAdmin, async (req, res) => {
   } catch (error) {
     console.error("Error creating instructor:", error);
     res.status(500).send("Lỗi khi tạo tài khoản giảng viên");
+  }
+});
+
+// Khóa tài khoản user (tạm thời comment vì chưa có cột is_active)
+r.post("/users/:userId/deactivate", isAdmin, async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // TODO: Cần thêm cột is_active vào bảng profiles
+    // await db("profiles")
+    //   .where("id", userId)
+    //   .where("role", "!=", "admin") // Không cho phép khóa admin
+    //   .update({ is_active: false, updated_at: db.fn.now() });
+
+    console.log(
+      `User ${userId} deactivation requested (feature not implemented yet)`
+    );
+    res.redirect("/admin/users");
+  } catch (error) {
+    console.error("Error deactivating user:", error);
+    res.status(500).send("Lỗi khi khóa tài khoản");
+  }
+});
+
+// Mở khóa tài khoản user (tạm thời comment vì chưa có cột is_active)
+r.post("/users/:userId/activate", isAdmin, async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // TODO: Cần thêm cột is_active vào bảng profiles
+    // await db("profiles")
+    //   .where("id", userId)
+    //   .update({ is_active: true, updated_at: db.fn.now() });
+
+    console.log(
+      `User ${userId} activation requested (feature not implemented yet)`
+    );
+    res.redirect("/admin/users");
+  } catch (error) {
+    console.error("Error activating user:", error);
+    res.status(500).send("Lỗi khi mở khóa tài khoản");
+  }
+});
+
+// Đã bỏ route xóa user theo yêu cầu
+
+// Xem hồ sơ student (dành cho admin)
+r.get("/users/:userId/profile", isAdmin, async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // Lấy thông tin user
+    const user = await db("profiles").where("id", userId).first();
+    if (!user) {
+      return res.status(404).send("Không tìm thấy người dùng");
+    }
+
+    if (user.role !== "student") {
+      return res.status(400).send("Chỉ có thể xem hồ sơ học viên");
+    }
+
+    // Lấy thông tin khóa học yêu thích (từ bảng watchlist)
+    let favoriteCourses = [];
+    try {
+      favoriteCourses = await db("watchlist as w")
+        .join("courses as c", "w.course_id", "c.id")
+        .select(
+          "c.id",
+          "c.title",
+          "c.hero_image_url",
+          "c.price",
+          "c.rating_avg"
+        )
+        .where("w.user_id", userId)
+        .limit(10);
+    } catch (error) {
+      console.log("Không thể lấy khóa học yêu thích:", error.message);
+      favoriteCourses = [];
+    }
+
+    // Lấy thông tin khóa học đã mua (từ bảng enrollments)
+    let purchasedCourses = [];
+    try {
+      purchasedCourses = await db("enrollments as e")
+        .join("courses as c", "e.course_id", "c.id")
+        .select(
+          "c.id",
+          "c.title",
+          "c.hero_image_url",
+          "c.price",
+          "e.purchased_at"
+        )
+        .where("e.user_id", userId)
+        .limit(10);
+    } catch (error) {
+      console.log("Không thể lấy khóa học đã mua:", error.message);
+      purchasedCourses = [];
+    }
+
+    // Lấy thông tin tiến độ học tập (từ bảng enrollments)
+    let progressCourses = [];
+    try {
+      progressCourses = await db("enrollments as e")
+        .join("courses as c", "e.course_id", "c.id")
+        .select(
+          "c.id",
+          "c.title",
+          "e.progress_percentage",
+          "e.is_completed",
+          "e.purchased_at"
+        )
+        .where("e.user_id", userId)
+        .orderBy("e.purchased_at", "desc")
+        .limit(10);
+    } catch (error) {
+      console.log("Không thể lấy tiến độ học tập:", error.message);
+      progressCourses = [];
+    }
+
+    res.render("admin/student_profile", {
+      layout: "admin",
+      title: `Hồ sơ học viên - ${user.name}`,
+      authUser: req.session.user,
+      currentPage: "users",
+      student: user,
+      favoriteCourses,
+      purchasedCourses,
+      progressCourses,
+    });
+  } catch (error) {
+    console.error("Error viewing student profile:", error);
+    res.status(500).send("Lỗi khi tải hồ sơ học viên");
+  }
+});
+
+// Xem khóa học của instructor (dành cho admin)
+r.get("/users/:userId/courses", isAdmin, async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // Lấy thông tin user
+    const user = await db("profiles").where("id", userId).first();
+    if (!user) {
+      return res.status(404).send("Không tìm thấy người dùng");
+    }
+
+    if (user.role !== "instructor") {
+      return res.status(400).send("Chỉ có thể xem khóa học của giảng viên");
+    }
+
+    // Lấy danh sách khóa học của instructor
+    const courses = await db("courses as c")
+      .leftJoin("categories as cat", "c.category_id", "cat.id")
+      .select(
+        "c.id",
+        "c.title",
+        "c.slug",
+        "c.status",
+        "c.created_at",
+        "c.updated_at",
+        "c.students_count",
+        "c.rating_avg",
+        "c.price",
+        "c.promo_price",
+        "c.hero_image_url",
+        "c.short_desc",
+        db.raw("COALESCE(cat.name,'N/A') as category_name")
+      )
+      .where("c.instructor_id", userId)
+      .orderBy("c.created_at", "desc");
+
+    // Thống kê khóa học
+    const stats = await db("courses")
+      .where("instructor_id", userId)
+      .select(
+        db.raw("COUNT(*) as total_courses"),
+        db.raw(
+          "COUNT(CASE WHEN status = 'published' THEN 1 END) as published_courses"
+        ),
+        db.raw("COUNT(CASE WHEN status = 'draft' THEN 1 END) as draft_courses"),
+        db.raw(
+          "COUNT(CASE WHEN status = 'removed' THEN 1 END) as removed_courses"
+        ),
+        db.raw("SUM(students_count) as total_students"),
+        db.raw("AVG(rating_avg) as avg_rating")
+      )
+      .first();
+
+    res.render("admin/instructor_courses", {
+      layout: "admin",
+      title: `Khóa học của giảng viên - ${user.name}`,
+      authUser: req.session.user,
+      currentPage: "users",
+      instructor: user,
+      courses,
+      stats,
+    });
+  } catch (error) {
+    console.error("Error viewing instructor courses:", error);
+    res.status(500).send("Lỗi khi tải khóa học của giảng viên");
   }
 });
 
