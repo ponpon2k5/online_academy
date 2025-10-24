@@ -21,6 +21,7 @@ async function isEnrolled(userId, courseId) {
 //view courses
 router.get('/view-courses', async (req, res) => {
     try {
+        const cate= await coursesModel.get_category();
         const categorySlug = req.query.category || null;
         const sort = req.query.sort || null;
         const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -54,6 +55,7 @@ router.get('/view-courses', async (req, res) => {
             totalPages,
             selectedCategory: categorySlug,
             selectedSort: sort,
+            category: cate
         });
     } catch (err) {
         console.error('Lỗi khi hiển thị khóa học:', err);
@@ -77,15 +79,14 @@ router.post("/enroll-course", async (req, res) => {
 //course detail
 router.get('/course-detail/:id', async (req, res) => {
     const courseId = req.params.id;
-    const userId = req.session.authUser.id;
-    console.log(courseId)
-    console.log(userId)
+
+    const userId = req.session?.authUser?.id || null;
+    await coursesModel.increaseViews(courseId);
     const course = await coursesModel.view_detail_course(courseId);
     const lessons = await coursesModel.view_lesson_in_detail(courseId);
     const feedback = await coursesModel.getFeedback(courseId);
     const sameCourseCategory = await coursesModel.view_courses_same_category(courseId);
     const existed = await isEnrolled(userId, courseId);
-    console.log(existed)
     const instructor_id = course.instructor_id;
     const instructor = await coursesModel.getInstructorProfile(instructor_id);
     res.render('vwCourses/dis_detailCourse', {

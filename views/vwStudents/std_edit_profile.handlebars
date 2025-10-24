@@ -1,52 +1,80 @@
 {{#> std_profile}}
 
 <div class="card" style="width: 50rem;">
-    <div class="card-header">
-        Thông tin cá nhân của học viên
-    </div>
+    <div class="card-header">Thông tin cá nhân của học viên</div>
     <div class="card-body">
-        <form id="frmEditProfile" method="post" action="/student/profile-edit">
-            <div class="mb-3">
-                <label for="full_name" class="form-label">Họ và tên</label>
-                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Nhập họ và tên">
+        <form id="frmEditProfile" method="post" action="/student/profile-edit" enctype="multipart/form-data">
+            <div class="d-flex align-items-start gap-4 mb-4">
+                <div class="text-center">
+                    <img id="avatarPreview"
+                        src="{{#if authUser.avatar_url}}{{authUser.avatar_url}}{{else}}/images/default-avatar.png{{/if}}"
+                        alt="Avatar" class="rounded-circle border" style="width:120px;height:120px;object-fit:cover;">
+                    <div class="mt-2">
+                        <label class="btn btn-sm btn-outline-primary mb-0">
+                            <i class="bi bi-image"></i> Chọn ảnh…
+                            <input type="file" name="avatar" id="avatar" accept="image/*" class="d-none">
+                        </label>
+                    </div>
+                    <div class="form-text">PNG/JPG, tối đa 2MB</div>
+                </div>
+
+                <div class="flex-grow-1">
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name"
+                            value="{{authUser.name}}" placeholder="Nhập họ và tên">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{authUser.email}}"
+                            placeholder="Nhập email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" id="phone" name="phone" value="{{authUser.phone}}"
+                            placeholder="Nhập số điện thoại">
+                    </div>
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Ngày tháng năm sinh</label>
+                        <input type="date" class="form-control" id="dob" name="dob" value="{{authUser.dob}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control" id="address" name="address" value="{{authUser.address}}"
+                            placeholder="Nhập địa chỉ">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Mô tả về bản thân</label>
+                        <input type="text" class="form-control" id="bio" name="bio" value="{{authUser.bio}}"
+                            placeholder="Nhập mô tả bản thân">
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Nhập email">
-            </div>
-            <div class="mb-3">
-                <label for="phone" class="form-label">Số điện thoại</label>
-                <input type="text" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại">
-            </div>
-            <div class="mb-3">
-                <label for="dob" class="form-label">Ngày tháng năm sinh</label>
-                <input type="date" class="form-control" id="dob" name="dob" placeholder="Ngày tháng năm sinh">
-            </div>
-            <div class="mb-3">
-                <label for="address" class="form-label">Địa chỉ</label>
-                <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ">
-            </div>
-            <div class="mb-3">
-                <label for="bio" class="form-label">Mô tả về bản thân</label>
-                <input type="text" class="form-control" id="bio" name="bio" placeholder="Nhập mô tả bản thân">
-            </div>
+
             <div class="d-flex justify-content-between">
                 <a href="/account/change-password" class="btn btn-outline-secondary">
                     <i class="bi bi-key"></i> Change password
                 </a>
-
                 <div>
-                    <button class="btn btn-outline-secondary" type="button" id="btnEnable">
-                        Enable change
-                    </button>
-                    <button class="btn btn-primary" type="submit" id="btnSave">
-                        Save
-                    </button>
+                    <button class="btn btn-outline-secondary" type="button" id="btnEnable">Enable change</button>
+                    <button class="btn btn-primary" type="submit" id="btnSave">Save</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    // Preview ảnh ngay khi chọn
+    document.getElementById('avatar')?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        const img = document.getElementById('avatarPreview');
+        img.src = url;
+    });
+</script>
+
 
 {{#section "js"}}
 <script>
@@ -70,26 +98,22 @@
         const address = document.querySelector('#address').value.trim();
         const bio = document.querySelector('#bio').value.trim();
 
-        // ✅ Kiểm tra rỗng
         if (!full_name || !email || !phone || !dob || !address || !bio) {
             alert('Vui lòng điền đầy đủ thông tin.');
             return;
         }
 
-        // ✅ Kiểm tra email hợp lệ (regex cơ bản)
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
             alert('Email không hợp lệ.');
             return;
         }
 
-        // ✅ Kiểm tra số điện thoại (chỉ số, >= 10 ký tự)
         if (!/^\d{10,}$/.test(phone)) {
             alert('Số điện thoại phải có ít nhất 10 chữ số.');
             return;
         }
 
-        // ✅ Kiểm tra ngày sinh (ngày hợp lệ, không lớn hơn hôm nay)
         const birthDate = new Date(dob);
         const today = new Date();
         if (isNaN(birthDate.getTime()) || birthDate > today) {
@@ -97,7 +121,6 @@
             return;
         }
 
-        // ✅ Nếu tất cả đều hợp lệ -> gửi form thật
         alert('Thông tin hợp lệ. Dữ liệu sẽ được lưu lại.');
         event.target.submit();
     });

@@ -81,12 +81,6 @@
               <i class="bi bi-shield-check me-1"></i>Admin
             </a>
           </li>
-          {{else}}
-          <li class="nav-item">
-            <a class="nav-link text-dark fw-semibold" href="#">
-              <i class="bi bi-mortarboard me-1"></i>Teach
-            </a>
-          </li>
           {{/if}}
 
           {{#if isAuthenticated}}
@@ -116,17 +110,20 @@
                 <i class="bi bi-people text-primary me-2"></i>Manage Users
               </a></li>
               <li><hr class="dropdown-divider"></li>
-              {{else}}
+              {{else if (eq authUser.role 'student')}}
               <li><a class="dropdown-item py-2" href="/student/profile-favor-courses">
                 <i class="bi bi-person text-primary me-2"></i>Trang cá nhân
-              </a></li>
-              {{/if}}
-              <li><a class="dropdown-item py-2" href="/account/change-password">
-                <i class="bi bi-key text-primary me-2"></i>Đổi mật khẩu
               </a></li>
               <li><a class="dropdown-item py-2" href="/account/shopping-cart">
                 <i class="bi bi-cart text-primary me-2"></i>Giỏ hàng
               </a></li>
+              
+              
+              {{/if}}
+              <li><a class="dropdown-item py-2" href="/account/change-password">
+                <i class="bi bi-key text-primary me-2"></i>Đổi mật khẩu
+              </a></li>
+              
               <li><hr class="dropdown-divider"></li>
               <li>
                 <a class="dropdown-item py-2 text-danger" href="javascript: document.querySelector('#frmSignout').submit()">

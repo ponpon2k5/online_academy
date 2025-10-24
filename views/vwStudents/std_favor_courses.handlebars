@@ -1,61 +1,116 @@
 {{#> std_profile}}
 
-<div class="card shadow-sm">
-    <div class="card-header fw-semibold">Khóa học của bạn</div>
+<div class="card shadow-sm border-0">
+    <div class="card-header fw-semibold d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-collection-play me-2"></i> Khóa học của bạn</span>
+        {{#if courses}}
+        <span class="badge bg-primary-subtle text-primary">{{courses.length}} khóa học</span>
+        {{/if}}
+    </div>
+
     <div class="card-body">
-        <!-- Container dạng hàng ngang, tự xuống dòng -->
-        <div class="d-flex flex-wrap gap-3">
-
-            <!-- 1 course item -->
+        {{#if courses}}
+        <!-- Grid responsive -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" id="coursesGrid">
             {{#each courses}}
-            <div class="card" style="width: 13rem;">
+            <div class="col d-flex">
+                <div class="card h-100 w-100 shadow-sm border-0 position-relative">
 
-                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 delete-btn" aria-label="Close"
-                    data-course-id="{{id}}"></button>
+                    <!-- Nút Xóa (btn-close) -->
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2 delete-btn"
+                        aria-label="Xóa khóa học" style="z-index:10;" data-bs-toggle="tooltip"
+                        data-bs-title="Xóa khỏi danh sách yêu thích" data-course-id="{{id}}">
+                    </button>
 
-                <img src="/images/{{hero_image_url}}.jpg" class="w-100 h-100 object-fit-cover rounded-top" alt="Ảnh môn học"
-                    loading="lazy">
-                <div class="card-body p-2">
-                    <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
-                    <p class="card-text small text-muted text-truncate">
-                        {{long_desc}}
-                    </p>
-                    <a href="/courses/course-detail/{{id}}" class="btn btn-primary btn-sm w-100">View Detail</a>
+                    <!-- Ảnh khóa học -->
+                    <a href="/courses/course-detail/{{id}}" class="ratio ratio-16x9 d-block">
+                        <img src="/images/{{hero_image_url}}.jpg" class="w-100 h-100 object-fit-cover rounded-top"
+                            alt="{{title}}" loading="lazy">
+                    </a>
+
+                    <!-- Thông tin -->
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-1 text-truncate" title="{{title}}">{{title}}</h6>
+
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            {{#if rating_avg}}
+                            <span class="badge bg-warning text-dark"><i
+                                    class="bi bi-star-fill me-1"></i>{{rating_avg}}</span>
+                            {{/if}}
+                            {{#if views}}
+                            <span class="text-muted small"><i class="bi bi-eye me-1"></i>{{views}}</span>
+                            {{/if}}
+                        </div>
+
+                        <p class="card-text small text-muted text-truncate" title="{{long_desc}}">
+                            {{long_desc}}
+                        </p>
+
+                        <a href="/courses/course-detail/{{id}}" class="btn btn-primary btn-sm w-100">
+                            Xem chi tiết
+                        </a>
+                    </div>
                 </div>
             </div>
             {{/each}}
         </div>
+        {{else}}
+        <!-- Trạng thái rỗng -->
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-emoji-frown fs-1 d-block mb-2"></i>
+            Chưa có khóa học nào trong danh sách của bạn.
+        </div>
+        {{/if}}
     </div>
 </div>
+
 {{#section "js"}}
 <script>
-    //là cách mà Handlebars tổ chức các phần code JavaScript riêng biệt (thường nằm ở cuối trang) trong các layout template.
-    // Gắn sự kiện click vào tất cả nút ❌
-    document.querySelectorAll('.delete-btn').forEach(btn => { // Tìm tất cả các nút trong trang có class .delete-btn.
-        btn.addEventListener('click', async () => { // gắn sự kiện khi người dùng click vào.
-            const courseId = btn.dataset.courseId;
+    // Kích hoạt tooltip Bootstrap
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
-            if (!confirm('Bạn có chắc muốn xóa khóa học này khỏi danh sách yêu thích?')) return; //Hiển thị popup xác nhận.
+    const grid = document.getElementById('coursesGrid');
 
-            try {
-                // Gửi request DELETE đến server
-                const res = await fetch(`/student/favor-courses/${courseId}`, {
-                    method: 'DELETE'
-                });
+    // Event delegation: xử lý sự kiện click cho nút xoá
+    grid?.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.delete-btn');
+        if (!btn) return;
 
-                const data = await res.json(); //res ở đây là phản hồi (Response) mà bạn nhận được sau khi fetch()
-                if (data.success) {
-                    // Xóa thẻ card ra khỏi giao diện
-                    btn.closest('.card').remove();
-                } else {
-                    alert(data.message || 'Không thể xóa khóa học.');
+        const courseId = btn.getAttribute('data-course-id');
+        if (!confirm('Bạn có chắc muốn xóa khóa học này khỏi danh sách yêu thích?')) return;
+
+        // Hiệu ứng loading nhỏ
+        btn.disabled = true;
+        btn.style.opacity = "0.6";
+
+        try {
+            const res = await fetch(`/student/favor-courses/${courseId}`, { method: 'DELETE' });
+            const data = await res.json();
+
+            if (data?.success) {
+                const col = btn.closest('.col');
+                col?.remove();
+
+                // Nếu xoá hết → hiển thị empty state
+                if (!grid.querySelector('.col')) {
+                    grid.parentElement.innerHTML = `
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-emoji-frown fs-1 d-block mb-2"></i>
+              Chưa có khóa học nào trong danh sách của bạn.
+            </div>`;
                 }
-            } catch (err) {
-                console.error(err);
-                alert('Có lỗi xảy ra khi xóa khóa học.');
+            } else {
+                alert(data?.message || 'Không thể xóa khóa học.');
             }
-        });
+        } catch (err) {
+            console.error(err);
+            alert('Lỗi server. Vui lòng thử lại.');
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
     });
 </script>
 {{/section}}
+
 {{/std_profile}}

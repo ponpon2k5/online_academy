@@ -79,10 +79,11 @@ document.querySelector('input[name="title"]').addEventListener('input', function
   const title = this.value;
   const slug = title
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .trim()
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .trim('-');
+    .replace(/^-+|-+$/g, '');
   document.querySelector('input[name="slug"]').value = slug;
 });
 

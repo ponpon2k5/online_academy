@@ -33,6 +33,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+app.use(express.static(path.join(__dirname, "public")));
 // --------- Xử lý tự động đuôi ảnh ----------
 app.get("/images/:name", (req, res) => {
   const imageDir = path.join(__dirname, "statics", "img");
@@ -50,14 +51,6 @@ app.get("/images/:name", (req, res) => {
   return res.status(404).sendFile(path.join(imageDir, "logo.jpg"));
 });
 
-app.use(express.static(path.join(process.cwd(), "statics")));
-
-// (Nếu bạn cần route động cho ảnh, nhớ đóng ngoặc đầy đủ)
-// app.get("/images/:name", (req, res) => {
-//   const imageDir = path.join(process.cwd(), "statics", "img");
-//   const baseName = req.params.name;
-//   res.sendFile(path.join(imageDir, baseName)); // hoặc xử lý theo ý bạn
-// });
 
 // ---------- Sessions ----------
 app.set("trust proxy", 1);

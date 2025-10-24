@@ -1,6 +1,15 @@
 import db from '../utils/db.js'
 import bcrypt from 'bcryptjs'
 export default {
+    get_category() {
+        return db('categories')
+            .whereIn('id', ['cat1', 'cat2', 'cat3', 'cat4', 'cat5']);
+    },
+    increaseViews(courseId) {
+        return db('courses')
+            .where('id', courseId)
+            .increment('views', 1);
+    },
     count_all_courses({ categorySlug = null } = {}) {
         const q = db('courses as c')
             .join('categories as cat', 'c.category_id', 'cat.id')
@@ -55,6 +64,12 @@ export default {
                     break;
                 case 'price_asc':
                     q.orderBy('effective_price', 'asc').orderBy('c.id', 'desc');
+                    break;
+                case 'rating_asc':
+                    q.orderBy('c.rating_avg', 'asc').orderBy('c.id', 'desc');
+                    break;
+                case 'price_desc':
+                    q.orderBy('effective_price', 'desc').orderBy('c.id', 'desc');
                     break;
             }
         } else {
@@ -254,7 +269,7 @@ export default {
     },
     // --- LẤY TẤT CẢ KHÓA HỌC TRONG GIỎ CỦA USER ---
     // (Query này join 3 bảng để lấy đủ thông tin cho template)
-    
+
     // --- XÓA 1 KHÓA HỌC KHỎI GIỎ HÀNG ---
     removeCartItem(userId, courseId) {
         return db('shopping_cart_items')
@@ -292,7 +307,7 @@ export default {
                     .where('user_id', userId)
                     .whereIn('course_id', courseIds)
                     .del();
-                
+
                 // (Transaction sẽ tự động commit nếu không có lỗi)
             } catch (error) {
                 // Nếu có lỗi, transaction sẽ tự động rollback
@@ -313,7 +328,7 @@ export default {
                 'c.hero_image_url as image_url',    // Đổi tên 'hero_image_url' thành 'image_url'
                 'p.name as instructor_name'         // Lấy tên giảng viên
             );
-            // Các tên 'name', 'image_url', 'instructor_name'
-            [cite_start]// khớp với template shopping-cart.handlebars [cite: 42, 43, 44]
+        // Các tên 'name', 'image_url', 'instructor_name'
+        [cite_start]// khớp với template shopping-cart.handlebars [cite: 42, 43, 44]
     }
 }

@@ -377,16 +377,13 @@
                                 </h6>
                                 <select class="form-select form-select-lg" name="category">
                                     <option value="">Tất cả danh mục</option>
-                                    <option value="lap-trinh-web" {{#if (eq selectedCategory "lap-trinh-web"
-                                        )}}selected{{/if}}>Lập trình Web</option>
-                                    <option value="lap-trinh-di-dong" {{#if (eq selectedCategory "lap-trinh-di-dong"
-                                        )}}selected{{/if}}>Lập trình di động</option>
-                                    <option value="tri-tue-nhan-tao" {{#if (eq selectedCategory "tri-tue-nhan-tao"
-                                        )}}selected{{/if}}>Trí tuệ nhân tạo</option>
-                                    <option value="thiet-ke-do-hoa" {{#if (eq selectedCategory "thiet-ke-do-hoa"
-                                        )}}selected{{/if}}>Thiết kế đồ hoạ</option>
-                                    <option value="marketing" {{#if (eq selectedCategory "marketing" )}}selected{{/if}}>
-                                        Marketing</option>
+
+                                    {{#each category}}
+                                    <option value="{{slug}}" {{#if (eq selectedCategory slug)}}selected{{/if}}>
+                                        {{name}}
+                                    </option>
+                                    {{/each}}
+
                                 </select>
                             </div>
 
@@ -399,8 +396,13 @@
                                     <option value="">Mặc định</option>
                                     <option value="rating_desc" {{#if (eq selectedSort "rating_desc" )}}selected{{/if}}>
                                         Điểm đánh giá giảm dần</option>
+                                    <option value="rating_desc" {{#if (eq selectedSort "rating_asc" )}}selected{{/if}}>
+                                        Điểm đánh giá tăng dần</option>
                                     <option value="price_asc" {{#if (eq selectedSort "price_asc" )}}selected{{/if}}>Giá
                                         tăng dần</option>
+                                    <option value="price_desc" {{#if (eq selectedSort "price_desc" )}}selected{{/if}}>
+                                        Giá
+                                        giảm dần</option>
                                 </select>
                             </div>
 

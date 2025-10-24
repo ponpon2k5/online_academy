@@ -23,8 +23,7 @@ export default {
             .limit(4);
     },
     getMostViewedCourses() {
-        return db('course_views as v')
-            .join('courses as c', 'v.course_id', 'c.id')
+        return db('courses as c')
             .where('c.status', 'published')
             .select(
                 'c.id',
@@ -35,10 +34,9 @@ export default {
                 'c.rating_avg',
                 'c.short_desc',
                 'c.students_count',
-                db.raw('COUNT(v.id) AS view_count')
             )
             .groupBy('c.id', 'c.title', 'c.hero_image_url')
-            .orderBy('view_count', 'desc')
+            .orderBy('c.views', 'desc')
             .limit(10);
     },
 

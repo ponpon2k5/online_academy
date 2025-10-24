@@ -1,4 +1,7 @@
 import express from 'express';
+import multer from "multer";
+import fs from "fs/promises";
+import path from "path";
 import userModel from '../models/user.model.js'
 import { checkAuthenticated } from '../middlewares/auth.mdw.js';
 import coursesModel from '../models/courses.model.js';
@@ -26,7 +29,29 @@ function getPagination(page, totalItems, limit) {
         totalPages
     };
 }
-
+// cấu hình Multer
+const uploadDir = path.join(process.cwd(), "statics", "img", "student");
+const storage = multer.diskStorage({
+    destination: async (req, file, cb) => {
+        // đảm bảo thư mục tồn tại
+        await fs.mkdir(uploadDir, { recursive: true });
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname)?.toLowerCase() || ".jpg";
+        const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext) ? ext : ".jpg";
+        cb(null, `${req.session.authUser.id}${safeExt}`);
+    }
+});
+const fileFilter = (req, file, cb) => {
+    const ok = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
+    cb(ok ? null : new Error("File ảnh không hợp lệ (chỉ JPG/PNG/WEBP)"), ok);
+};
+const upload = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+});
 //profile student
 router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
     const limit = 6; //số khóa học trên mỗi trang
@@ -99,25 +124,46 @@ router.get('/profile-purchased-courses', checkAuthenticated, async (req, res) =>
 router.get('/profile-edit', checkAuthenticated, (req, res) => {
     res.render('vwStudents/std_edit_profile', { title: 'Hồ sơ cá nhân' });
 });
-router.post('/profile-edit', async (req, res) => {
-    const user = {
-        id: req.session.authUser.id,
-        name: req.body.full_name,
-        email: req.body.email,
-        dob: req.body.dob,
-        address: req.body.address,
-        phone: req.body.phone,
-        bio: req.body.bio
+router.post('/profile-edit', checkAuthenticated, upload.single('avatar'), async (req, res) => {
+    try {
+        const userId = req.session.authUser.id;
+
+        // đường dẫn public để lưu vào DB/hiển thị (bắt đầu bằng /uploads/…)
+        let newAvatarUrl = null;
+        if (req.file) {
+            // lưu path tương đối để dùng khi render
+            newAvatarUrl = `/images/student/${req.file.filename}`;
+        }
+
+        // payload update
+        const user = {
+            id: userId,
+            name: req.body.full_name,
+            email: req.body.email,
+            dob: req.body.dob,
+            address: req.body.address,
+            phone: req.body.phone,
+            bio: req.body.bio
+        };
+        if (newAvatarUrl) {
+            user.avatar_url = newAvatarUrl;
+        }
+
+        const result = await userModel.editUser(user);
+        if (result === 0) {
+            return res.render('vwStudents/std_edit_profile', { error: 'Cập nhật không thành công', authUser: req.session.authUser });
+        }
+
+        // cập nhật session để view hiển thị avatar mới ngay
+        Object.assign(req.session.authUser, user);
+        if (newAvatarUrl) req.session.authUser.avatar_url = newAvatarUrl;
+
+        console.log('Update user', userId, 'successfully');
+        res.redirect('/student/profile-favor-courses');
+    } catch (err) {
+        console.error(err);
+        res.status(400).render('vwStudents/std_edit_profile', { error: err.message, authUser: req.session.authUser });
     }
-    const result = await userModel.editUser(user);
-    if (result === 0) {
-        return res.render('vwStudents/std_edit_profile', {
-            error: 'Cập nhật không thành công'
-        });
-    }
-    console.log('Update user', user.id, 'successfully');
-    console.log(user);
-    res.redirect('/student/profile-favor-courses');
 });
 
 router.get('/profile-purcharsed-courses', (req, res) => {

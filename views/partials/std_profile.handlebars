@@ -1,59 +1,62 @@
-<div class="container my-4">
-    <div class="row">
+<div class="container my-5">
+    <div class="row g-4">
         <!-- Cột trái: Thông tin học viên + menu -->
-        <div class="col-lg-5">
+        <div class="col-lg-4">
             <!-- Thông tin học viên -->
-            <div class="card mb-3 shadow-sm">
-                <div class="row g-0">
-                    <div class="col-4">
-                        <img src="..." class="img-fluid rounded-start" alt="...">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <div class="position-relative d-inline-block mb-3">
+                        <img src="/images/student/{{authUser.id}}.jpg" class="rounded-circle border shadow-sm"
+                            alt="Avatar" style="width:120px;height:120px;object-fit:cover;">
+                        <span class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-1"
+                            style="font-size:0.8rem;">
+                        </span>
                     </div>
-                    <div class="col-8">
-                        <div class="card-body py-3">
-                            {{#if isAuthenticated}}
-                            <h5 class="card-title mb-1"><b>{{authUser.full_name}}</b></h5>
-                            <p class="card-text small text-muted mb-1">
-                            <p>Email: {{authUser.email}}</p>
-                            <p>Vai trò: {{authUser.role}}</p>
-                            <p>Description: {{authUser.bio}}</p>
-                            <small>Cập nhật 3 phút trước</small>
-                            </p>
-                            {{/if}}
-                        </div>
-                    </div>
+                    <h5 class="fw-bold mb-0">{{authUser.name}}</h5>
+                    <p class="text-muted mb-1 small">{{authUser.email}}</p>
+                    <span class="badge bg-info text-dark mb-2">{{authUser.role}}</span>
+                    <p class="small text-muted">{{authUser.bio}}</p>
                 </div>
             </div>
+
             <!-- Menu học viên -->
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    Tài khoản học viên
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-person-circle me-2"></i> Tài khoản học viên
                 </div>
                 <ul class="list-group list-group-flush">
-                    <a href="/student/profile-favor-courses" class="list-group-item list-group-item-action">
-                        <i class="bi bi-heart"></i> Watchlist (Yêu thích)
+                    <a href="/student/profile-favor-courses"
+                        class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-heart text-danger me-2"></i> Watchlist (Yêu thích)
                     </a>
-                    <a href="/student/profile-purchased-courses" class="list-group-item list-group-item-action">
-                        <i class="bi bi-bag"></i>Khóa học đã mua
+                    <a href="/student/profile-purchased-courses"
+                        class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-bag text-primary me-2"></i> Khóa học đã mua
                     </a>
-                    <a href="/student/profile-process-course" class="list-group-item list-group-item-action">
-                        <i class="bi bi-gear-wide"></i> Tiến độ học tập
+                    <a href="/student/profile-process-course"
+                        class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-gear-wide-connected text-success me-2"></i> Tiến độ học tập
                     </a>
-                    <a href="/student/profile-edit" class="list-group-item list-group-item-action">
-                        <i class="bi bi-pencil"></i>Thay đổi thông tin cá nhân
+                    <a href="/student/profile-edit"
+                        class="list-group-item list-group-item-action d-flex align-items-center">
+                        <i class="bi bi-pencil-square text-secondary me-2"></i> Thay đổi thông tin cá nhân
                     </a>
                 </ul>
             </div>
         </div>
+
         <!-- Cột phải: Danh sách khóa học -->
-        <div class="col-lg-7">
+        <div class="col-lg-8">
             {{> @partial-block}}
+
             <!-- Phân trang -->
-            <nav aria-label="Pagination">
+            {{#if pagination}}
+            <nav aria-label="Pagination" class="mt-4">
                 <ul class="pagination justify-content-center">
                     {{#if pagination.hasPrev}}
                     <li class="page-item">
                         <a class="page-link" href="?page={{pagination.prevPage}}" aria-label="Previous">
-                            &laquo;
+                            <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
                     {{/if}}
@@ -67,12 +70,13 @@
                     {{#if pagination.hasNext}}
                     <li class="page-item">
                         <a class="page-link" href="?page={{pagination.nextPage}}" aria-label="Next">
-                            &raquo;
+                            <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
                     {{/if}}
                 </ul>
             </nav>
+            {{/if}}
         </div>
     </div>
 </div>
