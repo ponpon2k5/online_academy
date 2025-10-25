@@ -54,7 +54,7 @@ const upload = multer({
 });
 //profile student
 router.get('/profile-favor-courses', checkAuthenticated, async (req, res) => {
-    const limit = 6; //số khóa học trên mỗi trang
+    const limit = 8; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
     const userId = req.session.authUser.id;
 
@@ -100,7 +100,7 @@ router.post('/add-favor-courses/:id', async (req, res) => {
 });
 //
 router.get('/profile-purchased-courses', checkAuthenticated, async (req, res) => {
-    const limit = 6; //số khóa học trên mỗi trang
+    const limit = 8; //số khóa học trên mỗi trang
     const page = parseInt(req.query.page) || 1; // trang hiện tại, mặc định là 1
     const userId = req.session.authUser.id;
 

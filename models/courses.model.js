@@ -134,9 +134,25 @@ export default {
             .select('courses.title as course_title', 'lessons.lesson as lesson_title', 'lessons.video_url')
             .where('course_id', courseId).first();
     },
-    findCourseByQuery(query) {
+
+    findCourseByQuery(terms, limit, offset) {
         return db('courses')
-            .whereRaw('fts @@ to_tsquery(remove_accents(?))', [query]);
+            .whereRaw('fts @@ to_tsquery(remove_accents(?))', [terms])
+            .orderBy('last_published_at', 'desc')
+            .limit(limit)
+            .offset(offset);
+    },
+
+    // ÉP KIỂU INT ngay trong SQL để chắc chắn nhận số nguyên
+    async countByQuery(terms) {
+        const row = await db('courses')
+            .whereRaw('fts @@ to_tsquery(remove_accents(?))', [terms])
+            .count(db.raw('1'))                 // count(*)
+            .first();
+
+        // Nhiều bản PG + Knex trả về { count: '12' } hoặc { 'count': '12' }
+        const total = Number(row?.count ?? 0);
+        return { total };
     },
     findCourseById(courseId) {
         return db('courses').where('id', courseId).first();

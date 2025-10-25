@@ -18,6 +18,13 @@ async function isEnrolled(userId, courseId) {
         .first();
     return !!row;
 }
+function buildPages(currentPage, totalPages) {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+        pages.push({ number: i, active: i === currentPage });
+    }
+    return pages;
+}
 //view courses
 router.get('/view-courses', async (req, res) => {
     try {
@@ -95,6 +102,7 @@ router.get('/course-detail/:id', async (req, res) => {
         feedbacks: feedback,
         relatedCourses: sameCourseCategory,
         instructor: instructor,
+        instructor_id,
         existed
     });
 });
@@ -271,28 +279,44 @@ router.post("/save-progress", express.json(), async (req, res) => {
     res.json({ ok: true });
 });
 //search courses
-router.get("/search", async (req, res) => {
-    const query = req.query.q || "";
-    const terms = query
-        .trim()
-        .split(/\s+/)
-        .map((t) => `${t}:*`)
-        .join(" & ");
-    const courses = await coursesModel.findCourseByQuery(terms);
-    if (query.length === 0) {
-        console.log("Không có khóa học nào");
-        res.render("vwCourses/dis_courses", {
-            q: query,
+router.get('/search', async (req, res) => {
+    const rawQ = (req.query.q || '').trim();
+    if (rawQ) req.session.lastSearchQuery = rawQ;
+    const q = (req.session.lastSearchQuery || '').trim();
+
+    if (!q) {
+        return res.render('vwCourses/dis_courses', {
+            q: '',
             empty: true,
-        });
-    } else {
-        console.log("Đã tìm thấy khóa học nào");
-        res.render("vwCourses/dis_courses", {
-            q: query,
-            empty: false,
-            courses: courses,
+            // KHÔNG truyền pages để template ẩn phân trang
         });
     }
+
+    const terms = q.split(/\s+/).map(t => `${t}:*`).join(' & ');
+
+    const pageSize = 9;
+    const page = Math.max(parseInt(req.query.page || '1', 10) || 1, 1);
+    const offset = (page - 1) * pageSize;
+
+    const [{ total }, courses] = await Promise.all([
+        coursesModel.countByQuery(terms),
+        coursesModel.findCourseByQuery(terms, pageSize, offset),
+    ]);
+
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+
+    // Log nhanh để bạn tự kiểm tra
+    console.log('[SEARCH]', { q, total, page, totalPages });
+
+    const pages = total > 0 ? buildPages(page, totalPages) : [];
+
+    return res.render('vwCourses/dis_courses', {
+        q,
+        empty: total === 0,
+        courses,
+        pages,                 // <<— QUAN TRỌNG: truyền đúng tên biến `pages`
+        // KHÔNG truyền selectedCategory để giữ link "?page=N" y như template
+    });
 });
 router.get("/", async (req, res) => {
     // Kiểm tra nếu có parameter category, redirect đến view-courses
