@@ -662,22 +662,52 @@
                     {{/if}}
                 </div>
 
-                {{#if pages.length}}
-                <nav class="mt-10 mb-10 d-flex justify-content-center">
-                    <ul class="pagination justify-content-center">
-                        {{#each pages}}
-                        <li class="page-item {{#if this.active}}active{{/if}}">
-                            {{#if ../selectedCategory}}
-                            <a class="page-link"
-                                href="?category={{../selectedCategory}}&page={{this.number}}">{{this.number}}</a>
-                            {{else}}
-                            <a class="page-link" href="?page={{this.number}}">{{this.number}}</a>
-                            {{/if}}
-                        </li>
-                        {{/each}}
-                    </ul>
-                </nav>
-                {{/if}}
+{{#if pages.length}}
+<nav class="mt-4 d-flex justify-content-center">
+  <ul class="pagination" style="gap:8px;">
+    {{#if hasPrev}}
+      <li class="page-item">
+        <a class="page-link" href="?page={{prevPage}}" 
+           style="border:none;border-radius:50%;width:42px;height:42px;
+                  display:flex;align-items:center;justify-content:center;
+                  color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
+          &laquo;
+        </a>
+      </li>
+    {{/if}}
+
+    {{#each pages}}
+      <li class="page-item {{#if this.active}}active{{/if}}">
+        <a class="page-link" href="?page={{this.number}}"
+           style="border:none;border-radius:50%;width:42px;height:42px;
+                  display:flex;align-items:center;justify-content:center;
+                  font-weight:500;
+                  {{#if this.active}}
+                    background-color:#007bff;color:white;box-shadow:0 0 8px rgba(0,123,255,0.4);
+                  {{else}}
+                    color:#007bff;
+                  {{/if}}">
+          {{this.number}}
+        </a>
+      </li>
+    {{/each}}
+
+    {{#if hasNext}}
+      <li class="page-item">
+        <a class="page-link" href="?page={{nextPage}}" 
+           style="border:none;border-radius:50%;width:42px;height:42px;
+                  display:flex;align-items:center;justify-content:center;
+                  color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
+          &raquo;
+        </a>
+      </li>
+    {{/if}}
+  </ul>
+</nav>
+{{/if}}
+
+
+
 
                 {{#unless courses}}
                 {{#unless list}}
