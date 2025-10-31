@@ -65,6 +65,14 @@
           <a href="/courses/course-detail/{{this.id}}" class="btn btn-primary btn-sm" target="_blank">
             <i class="bi bi-eye"></i> Xem khóa học
           </a>
+          <div class="d-flex gap-1">
+            <a href="/instructor/courses/{{this.id}}/edit?from=admin" class="btn btn-outline-primary btn-sm flex-fill">
+              <i class="bi bi-pencil-square"></i> Sửa thông tin
+            </a>
+            <a href="/instructor/courses/{{this.id}}/sections?from=admin" class="btn btn-outline-secondary btn-sm flex-fill">
+              <i class="bi bi-journal-plus"></i> Bổ sung nội dung
+            </a>
+          </div>
           
           <!-- Nhóm nút hành động admin -->
           <div class="d-flex gap-1">
