@@ -70,16 +70,64 @@ r.get("/dashboard", isAdmin, async (req, res) => {
 });
 
 r.get("/courses", isAdmin, async (req, res) => {
-  const rows = await db("courses as c")
+  const { q, status, category_id, instructor_id } = req.query || {};
+
+  // Base query
+  const query = db("courses as c")
     .leftJoin("profiles as p", "c.instructor_id", "p.id")
+    .leftJoin("categories as cat", "c.category_id", "cat.id")
     .select(
       "c.id",
       "c.title",
       "c.status",
+      "c.created_at",
       "p.name as instructor",
-      "c.created_at"
-    )
-    .orderBy("c.created_at", "desc");
+      "p.id as instructor_id",
+      "cat.name as category_name",
+      "cat.id as category_id"
+    );
+
+  // Filters
+  if (status && ["published", "draft", "removed"].includes(status)) {
+    query.where("c.status", status);
+  }
+
+  if (category_id) {
+    const cid = String(category_id);
+    const prefix = cid.slice(0, 4);
+    // Chấp nhận cả khớp chính xác (leaf) và khớp prefix (parent)
+    query.andWhere(function () {
+      this.where("c.category_id", cid).orWhereRaw(
+        "LEFT(c.category_id, 4) = ?",
+        [prefix]
+      );
+    });
+  }
+
+  if (instructor_id) {
+    query.where("c.instructor_id", instructor_id);
+  }
+
+  if (q && String(q).trim()) {
+    const kw = `%${String(q).trim()}%`;
+    query.where(function () {
+      this.whereILike("c.title", kw)
+        .orWhereILike("p.name", kw)
+        .orWhereILike("cat.name", kw);
+    });
+  }
+
+  query.orderBy("c.created_at", "desc");
+
+  // Fetch filters data
+  const [rows, categories, instructors] = await Promise.all([
+    query,
+    db("categories").select("id", "name").orderBy("name"),
+    db("profiles")
+      .where("role", "instructor")
+      .select("id", "name")
+      .orderBy("name"),
+  ]);
 
   res.render("admin/courses_index", {
     layout: "admin",
@@ -87,6 +135,14 @@ r.get("/courses", isAdmin, async (req, res) => {
     authUser: req.session.user,
     currentPage: "courses",
     courses: rows,
+    filters: {
+      q: q || "",
+      status: status || "",
+      category_id: category_id || "",
+      instructor_id: instructor_id || "",
+    },
+    categories,
+    instructors,
   });
 });
 
