@@ -369,6 +369,7 @@
                     </div>
                     <div class="card-body p-4">
                         <form method="GET" action="/courses/view-courses" id="filterForm">
+                            <input type="hidden" name="page" value="1">
                             <!-- Danh mục -->
                             <div class="filter-group mb-3">
                                 <h6 class="fw-bold mb-2 d-flex align-items-center">
@@ -378,7 +379,7 @@
                                     <option value="">Tất cả danh mục</option>
 
                                     {{#each category}}
-                                    <option value="{{slug}}" {{#if (eq selectedCategory slug)}}selected{{/if}}>
+                                    <option value="{{slug}}" {{#if (eq ../selectedCategory slug)}}selected{{/if}}>
                                         {{name}}
                                     </option>
                                     {{/each}}
@@ -662,24 +663,28 @@
                     {{/if}}
                 </div>
 
-{{#if pages.length}}
-<nav class="mt-4 d-flex justify-content-center">
-  <ul class="pagination" style="gap:8px;">
-    {{#if hasPrev}}
-      <li class="page-item">
-        <a class="page-link" href="?page={{prevPage}}" 
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                {{#if pages.length}}
+                <nav class="mt-4 d-flex justify-content-center">
+                    <ul class="pagination" style="gap:8px;">
+                        {{#if hasPrev}}
+                        <li class="page-item">
+                            {{!-- Sửa href: Thêm ../ và bỏ else --}}
+                            <a class="page-link"
+                                href="?page={{prevPage}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-          &laquo;
-        </a>
-      </li>
-    {{/if}}
+                                &laquo;
+                            </a>
+                        </li>
+                        {{/if}}
 
-    {{#each pages}}
-      <li class="page-item {{#if this.active}}active{{/if}}">
-        <a class="page-link" href="?page={{this.number}}"
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                        {{#each pages}}
+                        <li class="page-item {{#if this.active}}active{{/if}}">
+                            {{!-- Sửa href: Thêm ../ và bỏ else --}}
+                            <a class="page-link"
+                                href="?page={{this.number}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   font-weight:500;
                   {{#if this.active}}
@@ -687,28 +692,25 @@
                   {{else}}
                     color:#007bff;
                   {{/if}}">
-          {{this.number}}
-        </a>
-      </li>
-    {{/each}}
+                                {{this.number}}
+                            </a>
+                        </li>
+                        {{/each}}
 
-    {{#if hasNext}}
-      <li class="page-item">
-        <a class="page-link" href="?page={{nextPage}}" 
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                        {{#if hasNext}}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{nextPage}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-          &raquo;
-        </a>
-      </li>
-    {{/if}}
-  </ul>
-</nav>
-{{/if}}
-
-
-
-
+                                &raquo;
+                            </a>
+                        </li>
+                        {{/if}}
+                    </ul>
+                </nav>
+                {{/if}}
                 {{#unless courses}}
                 {{#unless list}}
                 <div class="text-center py-5">
