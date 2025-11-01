@@ -1,64 +1,262 @@
 {{#> std_profile}}
 
-<div class="card shadow-sm border-0">
-    <div class="card-header fw-semibold d-flex align-items-center justify-content-between">
-        <span><i class="bi bi-collection-play me-2"></i> Khóa học của bạn</span>
-        {{#if courses}}
-        <span class="badge bg-primary-subtle text-primary">{{courses.length}} khóa học</span>
+<style>
+    .favor-courses-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+    }
+    
+    .favor-courses-header i {
+        font-size: 1.3rem;
+    }
+    
+    .course-card-wrapper {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+    }
+    
+    .course-card-wrapper:hover {
+        transform: translateY(-8px);
+    }
+    
+    .course-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .course-card:hover {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .course-image-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .course-image-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .course-card-wrapper:hover .course-image-wrapper::after {
+        opacity: 1;
+    }
+    
+    .course-image-wrapper img {
+        transition: transform 0.5s ease;
+    }
+    
+    .course-card-wrapper:hover .course-image-wrapper img {
+        transform: scale(1.1);
+    }
+    
+    .delete-btn-favor {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 20;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        opacity: 0.8;
+        pointer-events: auto;
+    }
+    
+    .delete-btn-favor:hover {
+        background: #dc3545;
+        color: white;
+        opacity: 1;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+    
+    .delete-btn-favor::before {
+        content: '×';
+        font-size: 24px;
+        line-height: 1;
+        font-weight: 300;
+    }
+    
+    .course-card-body {
+        padding: 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .course-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.8rem;
+    }
+    
+    .course-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .rating-badge {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .views-count {
+        color: #6b7280;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .course-description {
+        color: #6b7280;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex-grow: 1;
+    }
+    
+    
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 5rem;
+        color: #cbd5e0;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+    
+    .empty-state-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state-text {
+        color: #718096;
+        font-size: 1rem;
+    }
+    
+    .courses-count-badge {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<div class="card shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
+    <div class="card-header fw-semibold d-flex align-items-center justify-content-between favor-courses-header">
+        <span><i class="bi bi-heart-fill me-2"></i> Khóa học yêu thích</span>
+        {{#if total}}
+        <span class="courses-count-badge">{{total}} khóa học</span>
         {{/if}}
     </div>
 
-    <div class="card-body">
+    <div class="card-body p-4">
         {{#if courses}}
-        <!-- Grid responsive -->
-        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3" id="coursesGrid">
+        <!-- Grid responsive - 2 cột (2 trên 2 dưới) -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 g-4" id="coursesGrid">
             {{#each courses}}
-            <div class="col d-flex">
-                <div class="card h-100 w-100 shadow-sm border-0 position-relative">
+            <div class="col d-flex course-card-wrapper">
+                <a href="/courses/course-detail/{{id}}" class="card h-100 w-100 course-card text-decoration-none" style="cursor: pointer;">
 
-                    <!-- Nút Xóa (btn-close) -->
-                    <button type="button" class="btn-close position-absolute top-0 end-0 m-2 delete-btn"
-                        aria-label="Xóa khóa học" style="z-index:10;" data-bs-toggle="tooltip"
+                    <!-- Nút Xóa -->
+                    <button type="button" class="delete-btn-favor delete-btn"
+                        aria-label="Xóa khóa học" data-bs-toggle="tooltip"
                         data-bs-title="Xóa khỏi danh sách yêu thích" data-course-id="{{id}}">
                     </button>
 
                     <!-- Ảnh khóa học -->
-                    <a href="/courses/course-detail/{{id}}" class="ratio ratio-16x9 d-block">
-                        <img src="{{getImageUrl hero_image_url}}" class="w-100 h-100 object-fit-cover rounded-top"
-                            alt="{{title}}" loading="lazy">
-                    </a>
+                    <div class="course-image-wrapper">
+                        <div class="ratio ratio-16x9 d-block">
+                            <img src="{{getImageUrl hero_image_url}}" class="w-100 h-100 object-fit-cover"
+                                alt="{{title}}" loading="lazy">
+                        </div>
+                    </div>
 
                     <!-- Thông tin -->
-                    <div class="card-body p-2">
-                        <h6 class="card-title mb-1 text-truncate" title="{{title}}">{{title}}</h6>
+                    <div class="course-card-body">
+                        <h6 class="course-title" title="{{title}}" style="color: #2d3748;">{{title}}</h6>
 
-                        <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="course-meta">
                             {{#if rating_avg}}
-                            <span class="badge bg-warning text-dark"><i
-                                    class="bi bi-star-fill me-1"></i>{{rating_avg}}</span>
+                            <span class="rating-badge">
+                                <i class="bi bi-star-fill"></i>{{rating_avg}}
+                            </span>
                             {{/if}}
                             {{#if views}}
-                            <span class="text-muted small"><i class="bi bi-eye me-1"></i>{{views}}</span>
+                            <span class="views-count">
+                                <i class="bi bi-eye"></i>{{views}}
+                            </span>
                             {{/if}}
                         </div>
 
-                        <p class="card-text small text-muted text-truncate" title="{{long_desc}}">
+                        <p class="course-description" title="{{long_desc}}">
                             {{long_desc}}
                         </p>
-
-                        <a href="/courses/course-detail/{{id}}" class="btn btn-primary btn-sm w-100">
-                            Xem chi tiết
-                        </a>
                     </div>
-                </div>
+                </a>
             </div>
             {{/each}}
         </div>
         {{else}}
         <!-- Trạng thái rỗng -->
-        <div class="text-center text-muted py-5">
-            <i class="bi bi-emoji-frown fs-1 d-block mb-2"></i>
-            Chưa có khóa học nào trong danh sách của bạn.
+        <div class="empty-state">
+            <i class="bi bi-heart empty-state-icon"></i>
+            <h4 class="empty-state-title">Chưa có khóa học yêu thích</h4>
+            <p class="empty-state-text">Hãy khám phá và thêm các khóa học bạn quan tâm vào danh sách yêu thích nhé!</p>
         </div>
         {{/if}}
     </div>
@@ -76,38 +274,59 @@
         const btn = e.target.closest('.delete-btn');
         if (!btn) return;
 
+        // Ngăn chặn event bubbling để không trigger click vào card
+        e.stopPropagation();
+        e.preventDefault();
+
         const courseId = btn.getAttribute('data-course-id');
         if (!confirm('Bạn có chắc muốn xóa khóa học này khỏi danh sách yêu thích?')) return;
 
-        // Hiệu ứng loading nhỏ
+        // Hiệu ứng loading
         btn.disabled = true;
-        btn.style.opacity = "0.6";
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+        btn.style.transform = "scale(0.95)";
 
         try {
             const res = await fetch(`/student/favor-courses/${courseId}`, { method: 'DELETE' });
             const data = await res.json();
 
             if (data?.success) {
-                const col = btn.closest('.col');
-                col?.remove();
+                // Thêm hiệu ứng fade out trước khi xóa
+                const cardWrapper = btn.closest('.course-card-wrapper');
+                if (cardWrapper) {
+                    cardWrapper.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    cardWrapper.style.opacity = '0';
+                    cardWrapper.style.transform = 'scale(0.9)';
+                    
+                    setTimeout(() => {
+                        cardWrapper.remove();
 
-                // Nếu xoá hết → hiển thị empty state
-                if (!grid.querySelector('.col')) {
-                    grid.parentElement.innerHTML = `
-            <div class="text-center text-muted py-5">
-              <i class="bi bi-emoji-frown fs-1 d-block mb-2"></i>
-              Chưa có khóa học nào trong danh sách của bạn.
-            </div>`;
+                        // Nếu xoá hết → hiển thị empty state
+                        if (!grid.querySelector('.course-card-wrapper')) {
+                            grid.parentElement.innerHTML = `
+                                <div class="empty-state">
+                                    <i class="bi bi-heart empty-state-icon"></i>
+                                    <h4 class="empty-state-title">Chưa có khóa học yêu thích</h4>
+                                    <p class="empty-state-text">Hãy khám phá và thêm các khóa học bạn quan tâm vào danh sách yêu thích nhé!</p>
+                                </div>`;
+                        }
+                    }, 300);
                 }
             } else {
                 alert(data?.message || 'Không thể xóa khóa học.');
+                btn.disabled = false;
+                btn.style.opacity = "0.8";
+                btn.style.cursor = "pointer";
+                btn.style.transform = "scale(1)";
             }
         } catch (err) {
             console.error(err);
             alert('Lỗi server. Vui lòng thử lại.');
-        } finally {
             btn.disabled = false;
-            btn.style.opacity = "1";
+            btn.style.opacity = "0.8";
+            btn.style.cursor = "pointer";
+            btn.style.transform = "scale(1)";
         }
     });
 </script>
