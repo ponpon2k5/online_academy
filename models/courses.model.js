@@ -58,10 +58,17 @@ export default {
     return db("courses as c")
       .join("enrollments as e", "c.id", "e.course_id")
       .join("courses as target", "c.category_id", "target.category_id")
+      .leftJoin(
+        db.raw(
+          "(SELECT course_id, COUNT(*) as weekly_purchases FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' GROUP BY course_id) as weekly"
+        ),
+        "c.id",
+        "weekly.course_id"
+      )
       .where("target.id", courseId)
       .andWhere("c.id", "!=", courseId)
       .andWhereRaw("c.status = ?::course_status", ["published"])
-      .groupBy("c.id")
+      .groupBy("c.id", "weekly.weekly_purchases")
       .select(
         "c.id",
         "c.title",
@@ -69,7 +76,13 @@ export default {
         "c.price",
         "c.promo_price",
         "c.students_count",
-        db.raw("COUNT(e.id) as total_enrollments")
+        "c.rating_avg",
+        "c.rating_count",
+        "c.created_at",
+        "c.updated_at",
+        "c.last_published_at",
+        db.raw("COUNT(e.id) as total_enrollments"),
+        db.raw("COALESCE(weekly.weekly_purchases, 0) as weekly_purchases")
       )
       .orderBy("total_enrollments", "desc")
       .limit(5);
@@ -162,9 +175,40 @@ view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
   },
 
   findCourseByQuery(terms, limit, offset) {
-    return db("courses")
-      .whereRaw("fts @@ to_tsquery(remove_accents(?))", [terms])
-      .orderBy("last_published_at", "desc")
+    return db("courses as c")
+      .leftJoin(
+        db.raw(
+          "(SELECT course_id, COUNT(*) as weekly_purchases FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' GROUP BY course_id) as weekly"
+        ),
+        "c.id",
+        "weekly.course_id"
+      )
+      .join("profiles as p", "c.instructor_id", "p.id")
+      .join("categories as parent", "c.category_id", "parent.id")
+      .whereRaw("c.fts @@ to_tsquery(remove_accents(?))", [terms])
+      .where("c.status", "published")
+      .select(
+        "c.id",
+        "c.title",
+        "c.price",
+        "c.promo_price",
+        db.raw("COALESCE(c.promo_price, c.price) AS effective_price"),
+        "c.hero_image_url",
+        "c.short_desc",
+        "p.name as instructor_name",
+        "parent.name as category_name",
+        "parent.slug as category_slug",
+        "c.rating_avg",
+        "c.rating_count",
+        "c.students_count",
+        "c.created_at",
+        "c.updated_at",
+        "c.last_published_at",
+        db.raw("COALESCE(weekly.weekly_purchases, 0) as weekly_purchases")
+      )
+      .orderByRaw(
+        "COALESCE(c.last_published_at, c.updated_at, c.created_at) DESC NULLS LAST"
+      )
       .limit(limit)
       .offset(offset);
   },
@@ -203,24 +247,24 @@ view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
     return db("lessons").where({ course_id: courseId, id: lessonId }).first();
   },
   getLastLessonProgress(userId, courseId) {
-    return db('video_progress as vp')
-      .join('lessons as l', 'l.id', 'vp.lesson_id')
-      .where('vp.user_id', userId)
-      .andWhere('l.course_id', courseId)
-      .orderBy('vp.update_time', 'desc')    // mới nhất theo thời gian cập nhật
-      .orderBy('vp.last_second', 'desc')    // (phòng khi update_time trùng)
-      .select('vp.lesson_id', 'vp.last_second')
+    return db("video_progress as vp")
+      .join("lessons as l", "l.id", "vp.lesson_id")
+      .where("vp.user_id", userId)
+      .andWhere("l.course_id", courseId)
+      .orderBy("vp.update_time", "desc") // mới nhất theo thời gian cập nhật
+      .orderBy("vp.last_second", "desc") // (phòng khi update_time trùng)
+      .select("vp.lesson_id", "vp.last_second")
       .first();
   },
   getProgress(userId, currentLessonId) {
-    return db('video_progress')
+    return db("video_progress")
       .where({ user_id: userId, lesson_id: currentLessonId })
-      .orderBy('last_second', 'desc')
-      .orderBy('update_time', 'desc')
+      .orderBy("last_second", "desc")
+      .orderBy("update_time", "desc")
       .first();
   },
   saveProgess(user_id, lesson_id, seconds, completed) {
-    const TABLE = 'video_progress';
+    const TABLE = "video_progress";
     return db(TABLE)
       .insert({
         user_id,
@@ -229,13 +273,19 @@ view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
         is_completed: !!completed,
         update_time: db.fn.now(),
       })
-      .onConflict(['user_id', 'lesson_id'])
+      .onConflict(["user_id", "lesson_id"])
       .merge({
         last_second: Math.floor(seconds),
         is_completed: db.raw('(??.??) OR ?', [TABLE, 'is_completed', !!completed]),
         update_time: db.fn.now(),
       })
-      .returning(['user_id', 'lesson_id', 'last_second', 'is_completed', 'update_time']);
+      .returning([
+        "user_id",
+        "lesson_id",
+        "last_second",
+        "is_completed",
+        "update_time",
+      ]);
   },
   showProgress(user_id) {
     return db("video_progress as vp")
