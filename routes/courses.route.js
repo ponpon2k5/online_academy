@@ -115,7 +115,6 @@ router.get("/course-detail/:id", async (req, res) => {
   });
 });
 router.post("/course-detail/:id", async (req, res) => {
-  // Kiểm tra xem user đã đăng nhập chưa
   if (!req.session.authUser) {
     return res.redirect(
       `/account/signin?redirect=/courses/course-detail/${req.params.id}`
@@ -124,21 +123,33 @@ router.post("/course-detail/:id", async (req, res) => {
 
   const courseId = req.params.id;
   const userId = req.session.authUser.id;
-  const comment = req.body.comment; // ✅ lấy cả rating & comment
+  const comment = (req.body.comment || "").trim();
+  const ratingRaw = req.body.rating; 
+  const rating = Number.parseInt(ratingRaw, 10);
+
+  // Validate đơn giản
+  if (!comment || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    // Có thể trả toast / flash message, ở đây redirect gọn
+    return res.redirect(
+      `/courses/course-detail/${courseId}#composeBox`
+    );
+  }
 
   const payload = {
     course_id: String(courseId),
     user_id: String(userId),
-    description: comment.trim(),
+    description: comment,
+    rating, 
   };
+
   try {
-    const result = await coursesModel.save_feedback(payload);
-    console.log("Kết quả insert:", result);
+    await coursesModel.save_feedback(payload);
   } catch (e) {
-    console.error("Lỗi khi insert:", e.message, e.detail, e.code);
+    console.error("Lỗi khi insert/merge review:", e.message, e.detail, e.code);
   }
-  return res.redirect(`/courses/course-detail/${courseId}#feedback`); // ✅ courseId tồn tại
+  return res.redirect(`/courses/course-detail/${courseId}#feedback`);
 });
+
 //purchase course
 router.get("/purchase-courses/:id", async (req, res) => {
   const courseId = req.params.id;

@@ -22,7 +22,7 @@ export default {
     if (categorySlug) q.andWhere("cat.slug", categorySlug);
     return q.first();
   },
-  
+
 
   view_detail_course(courseId) {
     return db("courses as c")
@@ -94,7 +94,59 @@ export default {
       .where("c.id", courseId);
   },
   save_feedback(context) {
-    return db("course_reviews").insert(context);
+    const { course_id } = context;
+    return db.transaction(async (trx) => {
+      // Nếu muốn cho 1 user sửa review của chính họ, dùng upsert:
+      await trx("course_reviews")
+        .insert({
+          course_id: context.course_id,
+          user_id: context.user_id,
+          description: context.description,
+          rating: Number(context.rating),
+          created_at: trx.fn.now(),
+          updated_at: trx.fn.now(),
+        })
+        .onConflict(["course_id", "user_id"])
+        .merge({
+          description: context.description,
+          rating: Number(context.rating),
+          updated_at: trx.fn.now(),
+        });
+
+      // Recompute aggregate (an toàn & đúng tuyệt đối)
+      const agg = await trx("course_reviews")
+        .where("course_id", course_id)
+        .avg({ avg: "rating" })
+        .count({ cnt: "*" })
+        .first();
+
+      const rating_avg = Number(agg?.avg ?? 0);
+      const rating_count = Number(agg?.cnt ?? 0);
+
+      await trx("courses")
+        .where("id", course_id)
+        .update({
+          rating_avg: trx.raw("ROUND(?, 2)", [rating_avg]),
+          rating_count,
+          updated_at: trx.fn.now(),
+        });
+
+      return { ok: true, rating_avg, rating_count };
+    });
+  },
+  getFeedback(course_id) {
+    return db("course_reviews as c")
+      .join("profiles as p", "p.id", "c.user_id")
+      .where("c.course_id", course_id)
+      .select(
+        "c.description as des",
+        "c.rating",
+        "c.created_at",
+        "p.name as name",
+        "p.role as role",
+        "p.avatar_url"
+      )
+      .orderBy("c.created_at", "desc");
   },
   count_all_courses({ categorySlug = null } = {}) {
     const q = db('courses as c')
@@ -132,31 +184,31 @@ export default {
       .groupBy('p.id', 'p.name', 'p.slug')
       .orderBy('p.sort_order', 'asc'); // hoặc p.name
   },
-view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
-  const q = db('courses as c')
-    .join('profiles as p', 'c.instructor_id', 'p.id')
-    .join('categories as parent', 'c.category_id', 'parent.id')
-    .leftJoin('categories as leaf', 'c.sub_category_id', 'leaf.id')
-    .where('c.status', 'published')
-    .select(
-      'c.id','c.title','c.price','c.promo_price',
-      db.raw('COALESCE(c.promo_price, c.price) AS effective_price'),
-      'c.hero_image_url','c.short_desc',
-      'p.name as instructor_name',
-      'parent.name as category_name', 'parent.slug as category_slug',
-      'leaf.name as sub_category_name', 'leaf.slug as sub_category_slug',
-      'c.rating_avg','c.rating_count','c.students_count','c.created_at'
-    );
+  view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
+    const q = db('courses as c')
+      .join('profiles as p', 'c.instructor_id', 'p.id')
+      .join('categories as parent', 'c.category_id', 'parent.id')
+      .leftJoin('categories as leaf', 'c.sub_category_id', 'leaf.id')
+      .where('c.status', 'published')
+      .select(
+        'c.id', 'c.title', 'c.price', 'c.promo_price',
+        db.raw('COALESCE(c.promo_price, c.price) AS effective_price'),
+        'c.hero_image_url', 'c.short_desc',
+        'p.name as instructor_name',
+        'parent.name as category_name', 'parent.slug as category_slug',
+        'leaf.name as sub_category_name', 'leaf.slug as sub_category_slug',
+        'c.rating_avg', 'c.rating_count', 'c.students_count', 'c.created_at'
+      );
 
-  if (categorySlug) {
-    q.andWhere(function () {
-      this.where('parent.slug', categorySlug).orWhere('leaf.slug', categorySlug);
-    });
-  }
+    if (categorySlug) {
+      q.andWhere(function () {
+        this.where('parent.slug', categorySlug).orWhere('leaf.slug', categorySlug);
+      });
+    }
 
-  // sort như cũ...
-  return q.limit(limit).offset(offset);
-},
+    // sort như cũ...
+    return q.limit(limit).offset(offset);
+  },
   view_lessons_by_course_id(courseId) {
     return db("lessons")
       .where("course_id", courseId)

@@ -56,7 +56,36 @@
         });
     }
 </script>
+
 {{/section}}
+<style>
+    .star-picker {
+        display: inline-flex;
+        direction: rtl;
+        gap: .25rem;
+    }
+
+    .star-picker input {
+        display: none;
+    }
+
+    .star-picker label {
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #ced4da;
+        transition: transform .05s ease-in-out;
+    }
+
+    .star-picker label:hover,
+    .star-picker label:hover~label {
+        color: #ffc107;
+        transform: scale(1.05);
+    }
+
+    .star-picker input:checked~label {
+        color: #ffc107;
+    }
+</style>
 <main class="container py-3">
     <!-- Card header: thumbnail + core info -->
     <div class="card border-0 shadow-sm mb-3">
@@ -173,7 +202,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
     {{/each}}
     {{#if existed}}
@@ -190,6 +219,26 @@
                 <form action="/courses/course-detail/{{course.id}}" method="POST" class="needs-validation" novalidate>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nội dung phản hồi</label>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold d-block mb-1">Đánh giá (1–5 sao)</label>
+                            <div class="star-picker" aria-label="Chọn số sao">
+                                <input type="radio" id="star5" name="rating" value="5" required>
+                                <label for="star5" title="Tuyệt vời">★</label>
+
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4" title="Tốt">★</label>
+
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3" title="Khá">★</label>
+
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2" title="Trung bình">★</label>
+
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1" title="Chưa tốt">★</label>
+                            </div>
+                            <div class="form-text">Nhấn vào sao để chọn mức đánh giá.</div>
+                        </div>
                         <textarea name="comment" class="form-control" rows="3"
                             placeholder="Chia sẻ trải nghiệm học của bạn…" required></textarea>
                         <div class="invalid-feedback">Không được để trống.</div>
