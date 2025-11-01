@@ -6,7 +6,7 @@
       <div class="carousel-item {{#if @first}}active{{/if}}">
         <div class="hero-slide">
           <div class="hero-bg"
-            style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('/images/{{this.hero_image_url}}');">
+            style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('{{getImageUrl this.hero_image_url}}');">
             <div class="container">
               <div class="row align-items-center min-vh-75">
                 <div class="col-lg-6">
@@ -45,7 +45,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                   <div class="hero-image-wrapper">
-                    <img src="/images/{{this.hero_image_url}}" alt="{{this.title}}"
+                    <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                       class="hero-image img-fluid rounded-4 shadow-lg">
                   </div>
                 </div>
@@ -56,6 +56,25 @@
       </div>
       {{/each}}
     </div>
+{{#if isFeatured}}
+    <span class="badge bg-warning text-dark rounded-pill">
+      <i class="bi bi-star-fill"></i>
+      Nổi bật
+    </span>
+{{/if}}
+
+{{#if isNew}}
+    <span class="badge bg-info rounded-pill">
+      <i class="bi bi-clock"></i>
+      Mới
+    </span>
+{{/if}}
+
+{{#if isOnSale}}
+    <span class="badge bg-danger rounded-pill">
+      Giảm giá
+    </span>
+{{/if}}
 
     <!-- Custom Carousel Controls -->
     <button class="carousel-control-prev custom-nav-btn" type="button" data-bs-target="#homeCarousel"
@@ -147,90 +166,66 @@
       <h2 class="display-4 fw-bold mb-3">Khám phá theo danh mục</h2>
       <p class="lead text-muted">Tìm khóa học phù hợp với sở thích và mục tiêu của bạn</p>
     </div>
+
     <div class="row g-4">
+
+      {{#each homeCategories}}
       <div class="col-lg-3 col-md-6">
         <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
           <div class="card-body p-4 text-center d-flex flex-column">
+
+            <!-- Dynamic icon & background by index -->
             <div class="category-icon mb-4">
               <div
-                class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                class="icon-wrapper rounded-circle d-inline-flex align-items-center justify-content-center
+                  {{#if (eq @index 0)}} bg-primary bg-opacity-10 {{/if}}
+                  {{#if (eq @index 1)}} bg-success bg-opacity-10 {{/if}}
+                  {{#if (eq @index 2)}} bg-warning bg-opacity-10 {{/if}}
+                  {{#if (eq @index 3)}} bg-info bg-opacity-10 {{/if}}"
                 style="width: 100px; height: 100px;">
-                <i class="bi bi-code-slash display-3 text-primary"></i>
+
+                <i class="
+                  display-3
+                  {{#if (eq @index 0)}} bi-code-slash text-primary {{/if}}
+                  {{#if (eq @index 1)}} bi-palette text-success {{/if}}
+                  {{#if (eq @index 2)}} bi-graph-up text-warning {{/if}}
+                  {{#if (eq @index 3)}} bi-camera text-info {{/if}}
+                "></i>
+
               </div>
             </div>
-            <h5 class="card-title fw-bold mb-3">Lập trình</h5>
-            <p class="card-text text-muted mb-4 flex-grow-1">Web, Mobile, AI/ML, Blockchain</p>
+
+            <!-- Category Title -->
+            <h5 class="card-title fw-bold mb-3">{{this.name}}</h5>
+
+            <!-- Sub-category list -->
+            <p class="card-text text-muted mb-4 flex-grow-1">
+              {{#each this.children}}
+                {{this.name}}{{#unless @last}}, {{/unless}}
+              {{/each}}
+            </p>
+
+            <!-- Explore Button -->
             <div class="mt-auto">
-              <a href="/courses?category=lap-trinh" class="btn btn-primary rounded-pill px-4 py-2">
+              <a href="/courses/view-courses?category={{this.slug}}" 
+                 class="btn rounded-pill px-4 py-2
+                  {{#if (eq @index 0)}} btn-primary {{/if}}
+                  {{#if (eq @index 1)}} btn-success {{/if}}
+                  {{#if (eq @index 2)}} btn-warning {{/if}}
+                  {{#if (eq @index 3)}} btn-info {{/if}} ">
                 <i class="bi bi-arrow-right me-2"></i>Khám phá
               </a>
             </div>
+
           </div>
         </div>
       </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
-          <div class="card-body p-4 text-center d-flex flex-column">
-            <div class="category-icon mb-4">
-              <div
-                class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
-                style="width: 100px; height: 100px;">
-                <i class="bi bi-palette display-3 text-success"></i>
-              </div>
-            </div>
-            <h5 class="card-title fw-bold mb-3">Thiết kế</h5>
-            <p class="card-text text-muted mb-4 flex-grow-1">UI/UX, Graphic, 3D, Animation</p>
-            <div class="mt-auto">
-              <a href="/courses?category=thiet-ke" class="btn btn-success rounded-pill px-4 py-2">
-                <i class="bi bi-arrow-right me-2"></i>Khám phá
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
-          <div class="card-body p-4 text-center d-flex flex-column">
-            <div class="category-icon mb-4">
-              <div
-                class="icon-wrapper bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
-                style="width: 100px; height: 100px;">
-                <i class="bi bi-graph-up display-3 text-warning"></i>
-              </div>
-            </div>
-            <h5 class="card-title fw-bold mb-3">Kinh doanh</h5>
-            <p class="card-text text-muted mb-4 flex-grow-1">Marketing, Sales, Management</p>
-            <div class="mt-auto">
-              <a href="/courses?category=kinh-doanh" class="btn btn-warning rounded-pill px-4 py-2">
-                <i class="bi bi-arrow-right me-2"></i>Khám phá
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="category-card card h-100 border-0 shadow-sm overflow-hidden d-flex flex-column">
-          <div class="card-body p-4 text-center d-flex flex-column">
-            <div class="category-icon mb-4">
-              <div
-                class="icon-wrapper bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
-                style="width: 100px; height: 100px;">
-                <i class="bi bi-camera display-3 text-info"></i>
-              </div>
-            </div>
-            <h5 class="card-title fw-bold mb-3">Nghệ thuật</h5>
-            <p class="card-text text-muted mb-4 flex-grow-1">Photography, Music, Writing</p>
-            <div class="mt-auto">
-              <a href="/courses?category=nghe-thuat" class="btn btn-info rounded-pill px-4 py-2">
-                <i class="bi bi-arrow-right me-2"></i>Khám phá
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
+      {{/each}}
+
     </div>
   </div>
 </section>
+
 
 <!-- Featured Courses Section -->
 <section id="featured-courses" class="featured-courses-section py-5 bg-white">
@@ -247,7 +242,7 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">
@@ -310,7 +305,7 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">
@@ -373,7 +368,7 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
             <div class="course-badge position-absolute top-0 end-0 m-3">

@@ -3,7 +3,7 @@
     <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Tạo khóa học mới</h3>
   </div>
   <div class="card-body">
-    <form method="post" action="/instructor/courses" class="row g-3" id="courseForm">
+    <form method="post" action="/instructor/courses" class="row g-3" id="courseForm" enctype="multipart/form-data">
       <div class="col-md-8">
         <label class="form-label">Tiêu đề khóa học *</label>
         <input name="title" class="form-control" required placeholder="Nhập tiêu đề khóa học" />
@@ -26,8 +26,11 @@
       </div>
       <div class="col-md-6">
         <label class="form-label">Hình ảnh đại diện</label>
-        <input name="hero_image_url" class="form-control" placeholder="https://example.com/image.jpg" />
-        <div class="form-text">URL hình ảnh đại diện cho khóa học</div>
+        <input type="file" name="hero_image" id="hero_image" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"/>
+        <div class="form-text">Chọn ảnh đại diện cho khóa học (JPG, PNG, GIF, WebP - tối đa 5MB)</div>
+        <div id="image_preview" class="mt-2" style="display: none;">
+          <img id="preview_img" src="" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;">
+        </div>
       </div>
       
       <div class="col-12">
@@ -85,6 +88,42 @@ document.querySelector('input[name="title"]').addEventListener('input', function
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
   document.querySelector('input[name="slug"]').value = slug;
+});
+
+// Preview uploaded image
+document.getElementById('hero_image').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('image_preview');
+  const img = document.getElementById('preview_img');
+  
+  if (file) {
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Định dạng file không hỗ trợ! Vui lòng chọn file JPG, PNG, GIF hoặc WebP');
+      e.target.value = '';
+      preview.style.display = 'none';
+      return;
+    }
+    
+    // Check file size (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB');
+      e.target.value = '';
+      preview.style.display = 'none';
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.style.display = 'none';
+  }
 });
 
 </script>

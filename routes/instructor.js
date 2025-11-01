@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { isInstructor, requireRole, ensureAuth } from "../middlewares/auth.js";
+import { uploadVideo, uploadImage } from "../middlewares/uploads.js";
 import db from "../utils/db.js";
+import path from "path";
 
 const r = Router();
 
@@ -197,45 +199,79 @@ r.get("/analytics", isInstructor, async (req, res) => {
   });
 });
 
-r.post("/courses", isInstructor, async (req, res) => {
-  const me = req.session.user;
-  const {
-    category_id,
-    title,
-    slug,
-    short_desc,
-    long_desc,
-    hero_image_url,
-    price,
-    promo_price,
-  } = req.body;
-
-  if (!category_id || !title || !slug || !short_desc || !long_desc) {
-    return res.status(400).send("Missing required fields");
-  }
-
-  try {
-    const courseData = {
-      instructor_id: me.id,
+r.post(
+  "/courses",
+  isInstructor,
+  uploadImage.single("hero_image"),
+  async (req, res) => {
+    const me = req.session.user;
+    const {
       category_id,
       title,
       slug,
       short_desc,
       long_desc,
-      hero_image_url: hero_image_url || null,
-      price: price ? Number(price) : 0,
-      promo_price: promo_price ? Number(promo_price) : null,
-      status: "draft",
-    };
+      hero_image_url,
+      price,
+      promo_price,
+    } = req.body;
 
-    const result = await db("courses").insert(courseData).returning("id");
+    if (!category_id || !title || !slug || !short_desc || !long_desc) {
+      // Nếu có file đã upload nhưng validation fail, xóa file
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      return res.status(400).send("Missing required fields");
+    }
 
-    res.redirect("/instructor/courses");
-  } catch (error) {
-    console.error("Error creating course:", error);
-    res.status(500).send("Error creating course: " + error.message);
+    try {
+      // Xử lý ảnh đại diện: upload file hoặc dùng URL
+      let heroImageUrl = null;
+      if (req.file) {
+        // Nếu có upload file, lưu tên file có extension (ví dụ: course_1234567890.jpg)
+        // File được lưu trong statics/img và được serve qua /images/
+        heroImageUrl = req.file.filename;
+      } else if (hero_image_url && hero_image_url.trim()) {
+        // Nếu không có file nhưng có URL, dùng URL
+        heroImageUrl = hero_image_url.trim();
+      }
+
+      const courseData = {
+        instructor_id: me.id,
+        category_id,
+        title,
+        slug,
+        short_desc,
+        long_desc,
+        hero_image_url: heroImageUrl,
+        price: price ? Number(price) : 0,
+        promo_price: promo_price ? Number(promo_price) : null,
+        status: "draft",
+      };
+
+      const result = await db("courses").insert(courseData).returning("id");
+
+      res.redirect("/instructor/courses");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error creating course: " + error.message);
+    }
   }
-});
+);
 
 r.get("/courses/:courseId/sections", isInstructor, async (req, res) => {
   const { courseId } = req.params;
@@ -271,7 +307,8 @@ r.get("/courses/:courseId/sections", isInstructor, async (req, res) => {
     layout: "admin",
     title: `Sections - ${course.title}`,
     authUser: req.session.user,
-    currentPage: "courses",
+    currentPage: "instructor-courses",
+    fromAdmin: req.query.from === "admin",
     course,
     sections: sectionsWithLessonCount,
     allLessons,
@@ -301,7 +338,8 @@ r.get("/courses/:courseId/lessons/new", isInstructor, async (req, res) => {
     layout: "admin",
     title: "Add Lesson",
     authUser: req.session.user,
-    currentPage: "courses",
+    currentPage: "instructor-courses",
+    fromAdmin: req.query.from === "admin",
     courseId,
     sections: secs,
   });
@@ -331,7 +369,8 @@ r.get(
       layout: "admin",
       title: "Lessons in Section",
       authUser: req.session.user,
-      currentPage: "courses",
+      currentPage: "instructor-courses",
+      fromAdmin: req.query.from === "admin",
       course,
       section,
       lessons,
@@ -339,55 +378,95 @@ r.get(
   }
 );
 
-r.post("/courses/:courseId/lessons", isInstructor, async (req, res) => {
-  const { courseId } = req.params;
-  const {
-    section_id,
-    lesson,
-    description,
-    is_preview,
-    sort_order,
-    duration_seconds,
-    youtube_url,
-  } = req.body;
+r.post(
+  "/courses/:courseId/lessons",
+  isInstructor,
+  uploadVideo.single("video_file"),
+  async (req, res) => {
+    const { courseId } = req.params;
+    const {
+      section_id,
+      lesson,
+      description,
+      is_preview,
+      sort_order,
+      duration_seconds,
+      youtube_url,
+      video_source,
+    } = req.body;
 
-  if (!lesson) return res.status(400).send("Lesson title required");
-  if (!youtube_url) return res.status(400).send("YouTube URL required");
+    if (!lesson) return res.status(400).send("Lesson title required");
 
-  // Validate YouTube URL
-  const youtubeRegex =
-    /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
-  if (!youtubeRegex.test(youtube_url)) {
-    return res.status(400).send("Invalid YouTube URL");
+    // Xử lý nguồn video: YouTube URL hoặc uploaded file
+    let videoUrl = "";
+
+    if (video_source === "upload") {
+      // Nếu upload file video
+      if (!req.file) {
+        return res.status(400).send("Video file is required when uploading");
+      }
+      // Lưu đường dẫn file video - được serve qua /videos/ từ statics/videos
+      videoUrl = `/videos/${req.file.filename}`;
+    } else {
+      // Nếu dùng YouTube URL (mặc định hoặc khi không có file)
+      if (!youtube_url) {
+        return res
+          .status(400)
+          .send("YouTube URL required when not uploading file");
+      }
+
+      // Validate YouTube URL
+      const youtubeRegex =
+        /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+      if (!youtubeRegex.test(youtube_url)) {
+        return res.status(400).send("Invalid YouTube URL");
+      }
+      videoUrl = youtube_url;
+    }
+
+    // Tự động tính sort_order nếu không được cung cấp
+    let finalSortOrder = 0;
+    if (sort_order && Number(sort_order) > 0) {
+      finalSortOrder = Number(sort_order);
+    } else {
+      // Lấy sort_order cao nhất trong section (hoặc course nếu không có section)
+      const maxSortOrder = await db("lessons")
+        .where("course_id", courseId)
+        .where("section_id", section_id || null)
+        .max("sort_order as max")
+        .first();
+      finalSortOrder = (maxSortOrder?.max || 0) + 1;
+    }
+
+    try {
+      await db("lessons").insert({
+        course_id: courseId,
+        section_id: section_id || null,
+        lesson,
+        video_url: videoUrl,
+        duration_seconds: duration_seconds ? Number(duration_seconds) : 0,
+        is_preview: is_preview === "on",
+        sort_order: finalSortOrder,
+        description: description || null,
+      });
+
+      res.redirect(`/instructor/courses/${courseId}/sections`);
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        const filePath = req.file.path;
+        try {
+          fs.unlinkSync(filePath);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error creating lesson: " + error.message);
+    }
   }
-
-  // Tự động tính sort_order nếu không được cung cấp
-  let finalSortOrder = 0;
-  if (sort_order && Number(sort_order) > 0) {
-    finalSortOrder = Number(sort_order);
-  } else {
-    // Lấy sort_order cao nhất trong section (hoặc course nếu không có section)
-    const maxSortOrder = await db("lessons")
-      .where("course_id", courseId)
-      .where("section_id", section_id || null)
-      .max("sort_order as max")
-      .first();
-    finalSortOrder = (maxSortOrder?.max || 0) + 1;
-  }
-
-  await db("lessons").insert({
-    course_id: courseId,
-    section_id: section_id || null,
-    lesson,
-    video_url: youtube_url,
-    duration_seconds: duration_seconds ? Number(duration_seconds) : 0,
-    is_preview: is_preview === "on",
-    sort_order: finalSortOrder,
-    description: description || null,
-  });
-
-  res.redirect(`/instructor/courses/${courseId}/sections`);
-});
+);
 
 r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
   const { courseId } = req.params;
@@ -401,7 +480,8 @@ r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
     layout: "admin",
     title: "Edit Course",
     authUser: req.session.user,
-    currentPage: "courses",
+    currentPage: "instructor-courses",
+    fromAdmin: req.query.from === "admin",
     course,
     categories: cats,
     _editor_head: ``,
@@ -409,32 +489,101 @@ r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
   });
 });
 
-r.post("/courses/:courseId/edit", isInstructor, async (req, res) => {
-  const { courseId } = req.params;
-  const {
-    category_id,
-    title,
-    short_desc,
-    long_desc,
-    hero_image_url,
-    price,
-    promo_price,
-  } = req.body;
-
-  await db("courses")
-    .where("id", courseId)
-    .update({
+r.post(
+  "/courses/:courseId/edit",
+  isInstructor,
+  uploadImage.single("hero_image"),
+  async (req, res) => {
+    const { courseId } = req.params;
+    const {
       category_id,
       title,
       short_desc,
       long_desc,
-      hero_image_url: hero_image_url || null,
-      price: price ? Number(price) : 0,
-      promo_price: promo_price ? Number(promo_price) : null,
-      updated_at: db.fn.now(),
-    });
-  res.redirect("/instructor/courses");
-});
+      hero_image_url,
+      price,
+      promo_price,
+    } = req.body;
+
+    try {
+      // Xử lý ảnh đại diện: upload file mới hoặc giữ nguyên ảnh cũ
+      let heroImageUrl = hero_image_url || null;
+      if (req.file) {
+        // Nếu có upload file mới, lưu tên file có extension
+        const oldFilename = hero_image_url;
+        heroImageUrl = req.file.filename;
+
+        // Xóa ảnh cũ nếu có (tìm file trong statics/img)
+        if (
+          oldFilename &&
+          !oldFilename.startsWith("/") &&
+          !oldFilename.startsWith("http")
+        ) {
+          const fs = (await import("fs")).default;
+          const imageDir = path.join(process.cwd(), "statics", "img");
+
+          // Kiểm tra xem tên file cũ có extension không
+          const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(
+            oldFilename
+          );
+
+          if (hasExtension) {
+            // Có extension, xóa trực tiếp
+            const oldImagePath = path.join(imageDir, oldFilename);
+            try {
+              if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+              }
+            } catch (unlinkError) {
+              console.error("Error deleting old image:", unlinkError);
+            }
+          } else {
+            // Không có extension, tìm với các extension khác nhau
+            const extensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+            for (const ext of extensions) {
+              const oldImagePath = path.join(imageDir, oldFilename + ext);
+              try {
+                if (fs.existsSync(oldImagePath)) {
+                  fs.unlinkSync(oldImagePath);
+                  break; // Xóa file đầu tiên tìm thấy
+                }
+              } catch (unlinkError) {
+                console.error("Error deleting old image:", unlinkError);
+              }
+            }
+          }
+        }
+      }
+
+      await db("courses")
+        .where("id", courseId)
+        .update({
+          category_id,
+          title,
+          short_desc,
+          long_desc,
+          hero_image_url: heroImageUrl,
+          price: price ? Number(price) : 0,
+          promo_price: promo_price ? Number(promo_price) : null,
+          updated_at: db.fn.now(),
+        });
+
+      res.redirect("/instructor/courses");
+    } catch (error) {
+      console.error("Error updating course:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error updating course: " + error.message);
+    }
+  }
+);
 
 r.post("/courses/:courseId/publish", isInstructor, async (req, res) => {
   const { courseId } = req.params;

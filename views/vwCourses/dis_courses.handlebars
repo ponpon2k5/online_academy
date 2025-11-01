@@ -369,6 +369,7 @@
                     </div>
                     <div class="card-body p-4">
                         <form method="GET" action="/courses/view-courses" id="filterForm">
+                            <input type="hidden" name="page" value="1">
                             <!-- Danh mục -->
                             <div class="filter-group mb-3">
                                 <h6 class="fw-bold mb-2 d-flex align-items-center">
@@ -378,7 +379,7 @@
                                     <option value="">Tất cả danh mục</option>
 
                                     {{#each category}}
-                                    <option value="{{slug}}" {{#if (eq selectedCategory slug)}}selected{{/if}}>
+                                    <option value="{{slug}}" {{#if (eq ../selectedCategory slug)}}selected{{/if}}>
                                         {{name}}
                                     </option>
                                     {{/each}}
@@ -450,7 +451,7 @@
                             <div class="course-image position-relative ">
                                 <div class="ratio ratio-16x9">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg" alt="{{this.title}}"
+                                        <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                                             class="w-100 h-100 object-fit-cover rounded-top">
                                     </a>
                                 </div>
@@ -522,7 +523,7 @@
                         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
                             <div class="course-image position-relative">
                                 <a href="/courses/course-detail/{{this.id}}">
-                                    <img src="/images/{{this.hero_image_url}}.jpg" alt="{{this.title}}"
+                                    <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                                         class="w-100 h-100 object-fit-cover rounded-top">
                                 </a>
                                 <div class="course-badge position-absolute top-0 end-0 m-3">
@@ -574,6 +575,26 @@
                     {{/each}}
                     {{/if}}
                 </div>
+                {{#if isFeatured}}
+    <span class="badge bg-warning text-dark rounded-pill">
+      <i class="bi bi-star-fill"></i>
+      Nổi bật
+    </span>
+{{/if}}
+
+{{#if isNew}}
+    <span class="badge bg-info rounded-pill">
+      <i class="bi bi-clock"></i>
+      Mới
+    </span>
+{{/if}}
+
+{{#if isOnSale}}
+    <span class="badge bg-danger rounded-pill">
+      Giảm giá
+    </span>
+{{/if}}
+
                 <div id="coursesList" class="row g-2 d-none">
                     {{#if courses}}
                     {{#each courses}}
@@ -582,7 +603,7 @@
                             <div class="row g-0 align-items-center">
                                 <div class="col-4 col-md-3">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg"
+                                        <img src="{{getImageUrl this.hero_image_url}}"
                                             class="img-fluid rounded-start object-fit-cover w-100"
                                             style="height: 150px;" alt="{{this.title}}">
                                     </a>
@@ -624,7 +645,7 @@
                             <div class="row g-0 align-items-center">
                                 <div class="col-4 col-md-3">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg"
+                                        <img src="{{getImageUrl this.hero_image_url}}"
                                             class="img-fluid rounded-start object-fit-cover w-100"
                                             style="height: 150px;" alt="{{this.title}}">
                                     </a>
@@ -662,24 +683,28 @@
                     {{/if}}
                 </div>
 
-{{#if pages.length}}
-<nav class="mt-4 d-flex justify-content-center">
-  <ul class="pagination" style="gap:8px;">
-    {{#if hasPrev}}
-      <li class="page-item">
-        <a class="page-link" href="?page={{prevPage}}" 
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                {{#if pages.length}}
+                <nav class="mt-4 d-flex justify-content-center">
+                    <ul class="pagination" style="gap:8px;">
+                        {{#if hasPrev}}
+                        <li class="page-item">
+                            {{!-- Sửa href: Thêm ../ và bỏ else --}}
+                            <a class="page-link"
+                                href="?page={{prevPage}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-          &laquo;
-        </a>
-      </li>
-    {{/if}}
+                                &laquo;
+                            </a>
+                        </li>
+                        {{/if}}
 
-    {{#each pages}}
-      <li class="page-item {{#if this.active}}active{{/if}}">
-        <a class="page-link" href="?page={{this.number}}"
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                        {{#each pages}}
+                        <li class="page-item {{#if this.active}}active{{/if}}">
+                            {{!-- Sửa href: Thêm ../ và bỏ else --}}
+                            <a class="page-link"
+                                href="?page={{this.number}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   font-weight:500;
                   {{#if this.active}}
@@ -687,28 +712,25 @@
                   {{else}}
                     color:#007bff;
                   {{/if}}">
-          {{this.number}}
-        </a>
-      </li>
-    {{/each}}
+                                {{this.number}}
+                            </a>
+                        </li>
+                        {{/each}}
 
-    {{#if hasNext}}
-      <li class="page-item">
-        <a class="page-link" href="?page={{nextPage}}" 
-           style="border:none;border-radius:50%;width:42px;height:42px;
+                        {{#if hasNext}}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{nextPage}}{{#if ../q}}&q={{../q}}{{/if}}{{#if ../selectedCategory}}&category={{../selectedCategory}}{{/if}}{{#if ../selectedSort}}&sort={{../selectedSort}}{{/if}}"
+                                style="border:none;border-radius:50%;width:42px;height:42px;
                   display:flex;align-items:center;justify-content:center;
                   color:#007bff;box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-          &raquo;
-        </a>
-      </li>
-    {{/if}}
-  </ul>
-</nav>
-{{/if}}
-
-
-
-
+                                &raquo;
+                            </a>
+                        </li>
+                        {{/if}}
+                    </ul>
+                </nav>
+                {{/if}}
                 {{#unless courses}}
                 {{#unless list}}
                 <div class="text-center py-5">
