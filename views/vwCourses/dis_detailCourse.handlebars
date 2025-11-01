@@ -64,7 +64,7 @@
             <!-- Image (responsive: full width on mobile, left column on md+) -->
             <div class="col-12 col-md-5">
                 <div class="ratio ratio-16x9 h-100">
-                    <img src="/images/{{course.hero_image_url}}.jpg" alt="Ảnh khoá học {{course.title}}"
+                    <img src="{{getImageUrl course.hero_image_url}}" alt="Ảnh khoá học {{course.title}}"
                         class="img-fluid rounded-start rounded-top-md-0" style="object-fit: cover;" loading="lazy" />
                 </div>
             </div>
@@ -259,7 +259,7 @@
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                     <div class="card h-100 border-0 shadow-sm position-relative">
                         <a href="/courses/course-detail/{{this.id}}">
-                            <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+                            <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                                 style="height:180px;object-fit:cover;">
                         </a>
 

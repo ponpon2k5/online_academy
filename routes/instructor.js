@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { isInstructor, requireRole, ensureAuth } from "../middlewares/auth.js";
-import { uploadVideo } from "../middlewares/uploads.js";
+import { uploadVideo, uploadImage } from "../middlewares/uploads.js";
 import db from "../utils/db.js";
+import path from "path";
 
 const r = Router();
 
@@ -198,45 +199,79 @@ r.get("/analytics", isInstructor, async (req, res) => {
   });
 });
 
-r.post("/courses", isInstructor, async (req, res) => {
-  const me = req.session.user;
-  const {
-    category_id,
-    title,
-    slug,
-    short_desc,
-    long_desc,
-    hero_image_url,
-    price,
-    promo_price,
-  } = req.body;
-
-  if (!category_id || !title || !slug || !short_desc || !long_desc) {
-    return res.status(400).send("Missing required fields");
-  }
-
-  try {
-    const courseData = {
-      instructor_id: me.id,
+r.post(
+  "/courses",
+  isInstructor,
+  uploadImage.single("hero_image"),
+  async (req, res) => {
+    const me = req.session.user;
+    const {
       category_id,
       title,
       slug,
       short_desc,
       long_desc,
-      hero_image_url: hero_image_url || null,
-      price: price ? Number(price) : 0,
-      promo_price: promo_price ? Number(promo_price) : null,
-      status: "draft",
-    };
+      hero_image_url,
+      price,
+      promo_price,
+    } = req.body;
 
-    const result = await db("courses").insert(courseData).returning("id");
+    if (!category_id || !title || !slug || !short_desc || !long_desc) {
+      // Nếu có file đã upload nhưng validation fail, xóa file
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      return res.status(400).send("Missing required fields");
+    }
 
-    res.redirect("/instructor/courses");
-  } catch (error) {
-    console.error("Error creating course:", error);
-    res.status(500).send("Error creating course: " + error.message);
+    try {
+      // Xử lý ảnh đại diện: upload file hoặc dùng URL
+      let heroImageUrl = null;
+      if (req.file) {
+        // Nếu có upload file, lưu tên file có extension (ví dụ: course_1234567890.jpg)
+        // File được lưu trong statics/img và được serve qua /images/
+        heroImageUrl = req.file.filename;
+      } else if (hero_image_url && hero_image_url.trim()) {
+        // Nếu không có file nhưng có URL, dùng URL
+        heroImageUrl = hero_image_url.trim();
+      }
+
+      const courseData = {
+        instructor_id: me.id,
+        category_id,
+        title,
+        slug,
+        short_desc,
+        long_desc,
+        hero_image_url: heroImageUrl,
+        price: price ? Number(price) : 0,
+        promo_price: promo_price ? Number(promo_price) : null,
+        status: "draft",
+      };
+
+      const result = await db("courses").insert(courseData).returning("id");
+
+      res.redirect("/instructor/courses");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error creating course: " + error.message);
+    }
   }
-});
+);
 
 r.get("/courses/:courseId/sections", isInstructor, async (req, res) => {
   const { courseId } = req.params;
@@ -370,8 +405,8 @@ r.post(
       if (!req.file) {
         return res.status(400).send("Video file is required when uploading");
       }
-      // Lưu đường dẫn file video (relative path từ public folder)
-      videoUrl = `/uploads/videos/${req.file.filename}`;
+      // Lưu đường dẫn file video - được serve qua /videos/ từ statics/videos
+      videoUrl = `/videos/${req.file.filename}`;
     } else {
       // Nếu dùng YouTube URL (mặc định hoặc khi không có file)
       if (!youtube_url) {
@@ -454,32 +489,101 @@ r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
   });
 });
 
-r.post("/courses/:courseId/edit", isInstructor, async (req, res) => {
-  const { courseId } = req.params;
-  const {
-    category_id,
-    title,
-    short_desc,
-    long_desc,
-    hero_image_url,
-    price,
-    promo_price,
-  } = req.body;
-
-  await db("courses")
-    .where("id", courseId)
-    .update({
+r.post(
+  "/courses/:courseId/edit",
+  isInstructor,
+  uploadImage.single("hero_image"),
+  async (req, res) => {
+    const { courseId } = req.params;
+    const {
       category_id,
       title,
       short_desc,
       long_desc,
-      hero_image_url: hero_image_url || null,
-      price: price ? Number(price) : 0,
-      promo_price: promo_price ? Number(promo_price) : null,
-      updated_at: db.fn.now(),
-    });
-  res.redirect("/instructor/courses");
-});
+      hero_image_url,
+      price,
+      promo_price,
+    } = req.body;
+
+    try {
+      // Xử lý ảnh đại diện: upload file mới hoặc giữ nguyên ảnh cũ
+      let heroImageUrl = hero_image_url || null;
+      if (req.file) {
+        // Nếu có upload file mới, lưu tên file có extension
+        const oldFilename = hero_image_url;
+        heroImageUrl = req.file.filename;
+
+        // Xóa ảnh cũ nếu có (tìm file trong statics/img)
+        if (
+          oldFilename &&
+          !oldFilename.startsWith("/") &&
+          !oldFilename.startsWith("http")
+        ) {
+          const fs = (await import("fs")).default;
+          const imageDir = path.join(process.cwd(), "statics", "img");
+
+          // Kiểm tra xem tên file cũ có extension không
+          const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(
+            oldFilename
+          );
+
+          if (hasExtension) {
+            // Có extension, xóa trực tiếp
+            const oldImagePath = path.join(imageDir, oldFilename);
+            try {
+              if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+              }
+            } catch (unlinkError) {
+              console.error("Error deleting old image:", unlinkError);
+            }
+          } else {
+            // Không có extension, tìm với các extension khác nhau
+            const extensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+            for (const ext of extensions) {
+              const oldImagePath = path.join(imageDir, oldFilename + ext);
+              try {
+                if (fs.existsSync(oldImagePath)) {
+                  fs.unlinkSync(oldImagePath);
+                  break; // Xóa file đầu tiên tìm thấy
+                }
+              } catch (unlinkError) {
+                console.error("Error deleting old image:", unlinkError);
+              }
+            }
+          }
+        }
+      }
+
+      await db("courses")
+        .where("id", courseId)
+        .update({
+          category_id,
+          title,
+          short_desc,
+          long_desc,
+          hero_image_url: heroImageUrl,
+          price: price ? Number(price) : 0,
+          promo_price: promo_price ? Number(promo_price) : null,
+          updated_at: db.fn.now(),
+        });
+
+      res.redirect("/instructor/courses");
+    } catch (error) {
+      console.error("Error updating course:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error updating course: " + error.message);
+    }
+  }
+);
 
 r.post("/courses/:courseId/publish", isInstructor, async (req, res) => {
   const { courseId } = req.params;

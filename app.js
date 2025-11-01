@@ -33,6 +33,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+app.use("/videos", express.static(path.join(__dirname, "statics", "videos")));
 app.use(express.static(path.join(__dirname, "public")));
 // --------- Xử lý tự động đuôi ảnh ----------
 app.get("/images/:name", (req, res) => {
@@ -50,7 +51,6 @@ app.get("/images/:name", (req, res) => {
   // Nếu không tìm thấy ảnh nào
   return res.status(404).sendFile(path.join(imageDir, "logo.jpg"));
 });
-
 
 // ---------- Sessions ----------
 app.set("trust proxy", 1);
@@ -145,6 +145,29 @@ app.engine(
             .padStart(2, "0")}`;
         } else {
           return `${minutes}:${secs.toString().padStart(2, "0")}`;
+        }
+      },
+      getImageUrl: (url) => {
+        // Nếu không có URL, trả về ảnh mặc định
+        if (!url) return "/images/logo.jpg";
+
+        // Nếu URL bắt đầu với / hoặc http/https, dùng trực tiếp (external URL)
+        if (
+          url.startsWith("/") ||
+          url.startsWith("http://") ||
+          url.startsWith("https://")
+        ) {
+          return url;
+        }
+
+        // Nếu là tên file (không có / hoặc http), kiểm tra đã có extension chưa
+        const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
+        if (hasExtension) {
+          // Đã có extension, dùng trực tiếp
+          return `/images/${url}`;
+        } else {
+          // Chưa có extension, thêm .jpg (format cũ)
+          return `/images/${url}.jpg`;
         }
       },
     },
