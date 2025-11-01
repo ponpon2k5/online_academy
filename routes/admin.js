@@ -174,13 +174,13 @@ r.post("/courses/:courseId/publish", isAdmin, async (req, res) => {
 
 r.get("/users", isAdmin, async (req, res) => {
   const rows = await db("profiles")
-    .select("id", "name", "role", "email", "created_at")
+    .select("id", "name", "role", "email", "created_at", "is_active")
     .orderBy("created_at", "desc");
 
-  // Thêm is_active = true mặc định cho tất cả user (giả sử tất cả đều active)
+  // Đảm bảo is_active có giá trị (mặc định là true nếu NULL)
   const usersWithActiveStatus = rows.map((user) => ({
     ...user,
-    is_active: true, // Mặc định tất cả user đều active
+    is_active: user.is_active !== null ? user.is_active : true,
   }));
 
   res.render("admin/users_index", {
@@ -259,18 +259,28 @@ r.post("/users/new-instructor", isAdmin, async (req, res) => {
   }
 });
 
-// Khóa tài khoản user (tạm thời comment vì chưa có cột is_active)
+// Khóa tài khoản user
 r.post("/users/:userId/deactivate", isAdmin, async (req, res) => {
   const { userId } = req.params;
   try {
-    // TODO: Cần thêm cột is_active vào bảng profiles
-    // await db("profiles")
-    //   .where("id", userId)
-    //   .where("role", "!=", "admin") // Không cho phép khóa admin
-    //   .update({ is_active: false, updated_at: db.fn.now() });
+    // Kiểm tra user có tồn tại không
+    const user = await db("profiles").where("id", userId).first();
+    if (!user) {
+      return res.status(404).send("Không tìm thấy người dùng");
+    }
+
+    // Không cho phép khóa admin
+    if (user.role === "admin") {
+      return res.status(403).send("Không thể khóa tài khoản quản trị viên");
+    }
+
+    // Khóa tài khoản
+    await db("profiles")
+      .where("id", userId)
+      .update({ is_active: false, updated_at: db.fn.now() });
 
     console.log(
-      `User ${userId} deactivation requested (feature not implemented yet)`
+      `User ${userId} (${user.name}) đã bị khóa bởi admin ${req.session.user.id}`
     );
     res.redirect("/admin/users");
   } catch (error) {
@@ -279,17 +289,23 @@ r.post("/users/:userId/deactivate", isAdmin, async (req, res) => {
   }
 });
 
-// Mở khóa tài khoản user (tạm thời comment vì chưa có cột is_active)
+// Mở khóa tài khoản user
 r.post("/users/:userId/activate", isAdmin, async (req, res) => {
   const { userId } = req.params;
   try {
-    // TODO: Cần thêm cột is_active vào bảng profiles
-    // await db("profiles")
-    //   .where("id", userId)
-    //   .update({ is_active: true, updated_at: db.fn.now() });
+    // Kiểm tra user có tồn tại không
+    const user = await db("profiles").where("id", userId).first();
+    if (!user) {
+      return res.status(404).send("Không tìm thấy người dùng");
+    }
+
+    // Mở khóa tài khoản
+    await db("profiles")
+      .where("id", userId)
+      .update({ is_active: true, updated_at: db.fn.now() });
 
     console.log(
-      `User ${userId} activation requested (feature not implemented yet)`
+      `User ${userId} (${user.name}) đã được mở khóa bởi admin ${req.session.user.id}`
     );
     res.redirect("/admin/users");
   } catch (error) {

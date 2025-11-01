@@ -65,6 +65,24 @@
             </button>
           </div>
           
+          {{#unless (eq this.role 'admin')}}
+          <div class="d-flex gap-1">
+            {{#if this.is_active}}
+            <form action="/admin/users/{{this.id}}/deactivate" method="POST" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn khóa tài khoản này?');">
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                <i class="bi bi-lock"></i> Khóa tài khoản
+              </button>
+            </form>
+            {{else}}
+            <form action="/admin/users/{{this.id}}/activate" method="POST" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn mở khóa tài khoản này?');">
+              <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                <i class="bi bi-unlock"></i> Mở khóa
+              </button>
+            </form>
+            {{/if}}
+          </div>
+          {{/unless}}
+          
           <!-- Đã bỏ nút xóa theo yêu cầu -->
         </div>
       </div>
