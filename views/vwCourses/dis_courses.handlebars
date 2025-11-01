@@ -378,12 +378,23 @@
                                 <select class="form-select form-select-lg" name="category">
                                     <option value="">Tất cả danh mục</option>
 
-                                    {{#each category}}
-                                    <option value="{{slug}}" {{#if (eq ../selectedCategory slug)}}selected{{/if}}>
-                                        {{name}}
-                                    </option>
-                                    {{/each}}
+                                    {{#each categoryTree}}
+                                    <optgroup label="{{this.name}}">
+                                        {{!-- Chọn cả nhóm (cha) --}}
+                                        <option value="{{this.slug}}" {{#if (eq ../selectedCategory
+                                            this.slug)}}selected{{/if}}>
+                                            {{this.name}} - Tất cả
+                                        </option>
 
+                                        {{!-- Các danh mục con --}}
+                                        {{#each this.children}}
+                                        <option value="{{this.slug}}" {{#if (eq ../../selectedCategory
+                                            this.slug)}}selected{{/if}}>
+                                            - {{this.name}}
+                                        </option>
+                                        {{/each}}
+                                    </optgroup>
+                                    {{/each}}
                                 </select>
                             </div>
 
@@ -576,24 +587,24 @@
                     {{/if}}
                 </div>
                 {{#if isFeatured}}
-    <span class="badge bg-warning text-dark rounded-pill">
-      <i class="bi bi-star-fill"></i>
-      Nổi bật
-    </span>
-{{/if}}
+                <span class="badge bg-warning text-dark rounded-pill">
+                    <i class="bi bi-star-fill"></i>
+                    Nổi bật
+                </span>
+                {{/if}}
 
-{{#if isNew}}
-    <span class="badge bg-info rounded-pill">
-      <i class="bi bi-clock"></i>
-      Mới
-    </span>
-{{/if}}
+                {{#if isNew}}
+                <span class="badge bg-info rounded-pill">
+                    <i class="bi bi-clock"></i>
+                    Mới
+                </span>
+                {{/if}}
 
-{{#if isOnSale}}
-    <span class="badge bg-danger rounded-pill">
-      Giảm giá
-    </span>
-{{/if}}
+                {{#if isOnSale}}
+                <span class="badge bg-danger rounded-pill">
+                    Giảm giá
+                </span>
+                {{/if}}
 
                 <div id="coursesList" class="row g-2 d-none">
                     {{#if courses}}

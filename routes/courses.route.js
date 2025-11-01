@@ -29,7 +29,7 @@ function buildPages(currentPage, totalPages) {
 //view courses
 router.get("/view-courses", async (req, res) => {
   try {
-    const cate = await coursesModel.get_category();
+    const categoriesTree = await coursesModel.getCategoriesTree();
     const categorySlug = req.query.category || null;
     const sort = req.query.sort || null;
     const page = Math.max(parseInt(req.query.page) || 1, 1);
@@ -63,7 +63,7 @@ router.get("/view-courses", async (req, res) => {
       totalPages,
       selectedCategory: categorySlug,
       selectedSort: sort,
-      category: cate,
+      categoryTree: categoriesTree,
     });
   } catch (err) {
     console.error("Lỗi khi hiển thị khóa học:", err);
