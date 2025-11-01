@@ -33,7 +33,7 @@ router.get("/view-courses", async (req, res) => {
     const categorySlug = req.query.category || null;
     const sort = req.query.sort || null;
     const page = Math.max(parseInt(req.query.page) || 1, 1);
-    const limit = 6;
+    const limit = 9; // Hiển thị 9 khóa học mỗi trang (3x3 grid)
     const offset = (page - 1) * limit;
 
     // Đếm tổng số khóa học (đồng bộ tiêu chí với list)
@@ -64,6 +64,7 @@ router.get("/view-courses", async (req, res) => {
       pages,
       currentPage: page,
       totalPages,
+      totalCount,
       selectedCategory: categorySlug,
       selectedSort: sort,
       categoryTree: categoriesTree,

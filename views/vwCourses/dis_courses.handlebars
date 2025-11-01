@@ -321,8 +321,7 @@
                         <div class="col-6">
                             <div class="stat-item">
                                 <div class="stat-number h3 mb-0">
-                                    {{#if list}}{{list.length}}{{else}}{{#if
-                                    courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}
+                                    {{#if totalCount}}{{totalCount}}{{else}}{{#if list}}{{list.length}}{{else}}{{#if courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}{{/if}}
                                 </div>
                                 <div class="stat-label small opacity-75">Khóa học</div>
                             </div>
