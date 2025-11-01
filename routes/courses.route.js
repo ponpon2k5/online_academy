@@ -320,12 +320,10 @@ router.get('/search', async (req, res) => {
 });
 router.get("/", async (req, res) => {
     // Kiểm tra nếu có parameter category, redirect đến view-courses
-    if (req.query.category) {
-        return res.redirect(`/courses/view-courses?category=${req.query.category}`);
-    }
 
-    const featuredCourses = await homeModel.getFeaturedCourses(); // 3-4 khóa học nổi bật trong tuần
-    const mostViewed = await coursesModel.getMostViewedCourses(); //
+
+    const featuredCourses = await homeModel.getFeaturedCoursesThisWeek(); // 3-4 khóa học nổi bật trong tuần
+    const mostViewed = await homeModel.getMostViewedCourses(); //
     const newest = await homeModel.getNewestCourses(); //
     if (newest) {
         console.log("có dữ liệu");
@@ -343,13 +341,6 @@ router.get("/", async (req, res) => {
     });
 
     //feedback
-
-    res.render("vwHome/index", {
-        featuredCourses,
-        mostViewed,
-        newest,
-        popularCategories,
-    });
 });
 // THÊM KHÓA HỌC VÀO GIỎ HÀNG
 router.post("/add-to-cart", async (req, res) => {

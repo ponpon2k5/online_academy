@@ -59,5 +59,51 @@ export default {
             .groupBy('cat.id', 'cat.name')
             .orderBy('weekly_enrollments', 'desc')
             .limit(6);
-    }
+    },
+    getPopularCourses() {
+    return db("enrollments as e")
+        .join("courses as c", "e.course_id", "c.id")
+        .whereRaw("c.status = ?::course_status", ["published"])
+        .select(
+            "c.id",
+            "c.title",
+            "c.hero_image_url",
+            "c.price",
+            "c.rating_avg",
+            "c.short_desc",
+            "c.students_count",
+            db.raw("COUNT(e.id) as total_enrollments")
+        )
+        .groupBy("c.id")
+        .orderBy("total_enrollments", "desc")
+        .limit(6);
+},
+     async getHomeCategories() {
+    const sql = `
+      SELECT 
+  p.id, 
+  p.name, 
+  p.slug,
+  COALESCE(
+    json_agg(
+      json_build_object(
+        'id', c.id,
+        'name', c.name,
+        'slug', c.slug
+      ) ORDER BY c.sort_order
+    ) FILTER (WHERE c.id IS NOT NULL),
+  '[]') AS children
+FROM public.categories p
+LEFT JOIN public.categories c 
+     ON c.parent_id = p.id AND c.level = 2
+WHERE p.level = 1
+GROUP BY p.id, p.name, p.slug
+ORDER BY p.sort_order
+LIMIT 4;
+
+    `;
+
+    const result = await db.raw(sql);
+    return result.rows; // với PostgreSQL
+  },
 };

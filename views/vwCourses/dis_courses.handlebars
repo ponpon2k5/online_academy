@@ -575,6 +575,26 @@
                     {{/each}}
                     {{/if}}
                 </div>
+                {{#if isFeatured}}
+    <span class="badge bg-warning text-dark rounded-pill">
+      <i class="bi bi-star-fill"></i>
+      Nổi bật
+    </span>
+{{/if}}
+
+{{#if isNew}}
+    <span class="badge bg-info rounded-pill">
+      <i class="bi bi-clock"></i>
+      Mới
+    </span>
+{{/if}}
+
+{{#if isOnSale}}
+    <span class="badge bg-danger rounded-pill">
+      Giảm giá
+    </span>
+{{/if}}
+
                 <div id="coursesList" class="row g-2 d-none">
                     {{#if courses}}
                     {{#each courses}}
