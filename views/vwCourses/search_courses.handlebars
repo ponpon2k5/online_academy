@@ -48,10 +48,29 @@
                 <h4>Không có khóa học nào được tìm thấy</h4>
             {{else}}
             {{#each courses}}
-            <div class="card" style="width: 15rem;">
-
-                <img src="{{getImageUrl hero_image_url}}" class="card-img-top" alt="Ảnh môn học" loading="lazy"
-                    style="height: 180px;">
+            <div class="card" style="width: 15rem; position: relative;">
+                <div class="position-relative">
+                    <img src="{{getImageUrl hero_image_url}}" class="card-img-top" alt="Ảnh môn học" loading="lazy"
+                        style="height: 180px;">
+                    {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        {{#if this.isFeatured}}
+                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small me-1 mb-1">
+                            <i class="bi bi-star-fill"></i>
+                        </span>
+                        {{/if}}
+                        {{#if this.isNew}}
+                        <span class="badge bg-info rounded-pill px-2 py-1 small me-1 mb-1">
+                            <i class="bi bi-clock"></i>
+                        </span>
+                        {{/if}}
+                        {{#if this.isOnSale}}
+                        <span class="badge bg-danger rounded-pill px-2 py-1 small me-1 mb-1">
+                            <i class="bi bi-tag"></i>
+                        </span>
+                        {{/if}}
+                    </div>
+                </div>
                 <div class="card-body p-2">
                     <h6 class="card-title mb-1 text-truncate">{{title}}</h6>
                     <p class="card-text small text-muted text-truncate">

@@ -263,10 +263,24 @@
                                 style="height:180px;object-fit:cover;">
                         </a>
 
-                        <!-- Badge Hot nếu muốn (tuỳ sẵn helper isBestSeller) -->
-                        {{#if (isBestSeller this.students_count)}}
-                        <span class="badge bg-danger position-absolute top-0 start-0 m-2">Hot</span>
-                        {{/if}}
+                        {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {{#if this.isFeatured}}
+                            <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small me-1 mb-1">
+                                <i class="bi bi-star-fill"></i>Nổi bật
+                            </span>
+                            {{/if}}
+                            {{#if this.isNew}}
+                            <span class="badge bg-info rounded-pill px-2 py-1 small me-1 mb-1">
+                                <i class="bi bi-clock"></i>Mới
+                            </span>
+                            {{/if}}
+                            {{#if this.isOnSale}}
+                            <span class="badge bg-danger rounded-pill px-2 py-1 small me-1 mb-1">
+                                <i class="bi bi-tag"></i>Giảm giá
+                            </span>
+                            {{/if}}
+                        </div>
 
                         <div class="card-body">
                             <h6 class="card-title mb-2">

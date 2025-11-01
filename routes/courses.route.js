@@ -3,7 +3,7 @@ import coursesModel from "../models/courses.model.js";
 import userModel from "../models/user.model.js";
 import homeModel from "../models/home.model.js";
 import db from "../utils/db.js";
-
+import { mapCourseList } from "../utils/course.helper.js";
 
 //const player = new Plyr('#player');
 const router = express.Router();
@@ -42,12 +42,15 @@ router.get("/view-courses", async (req, res) => {
     const totalPages = Math.max(Math.ceil(totalCount / limit), 1);
 
     // Lấy danh sách khóa học trang hiện tại
-    const courses = await coursesModel.view_all_courses(
+    const coursesRaw = await coursesModel.view_all_courses(
       categorySlug,
       sort,
       limit,
       offset
     );
+
+    // Áp dụng mapCourseFlags để thêm isFeatured, isNew, isOnSale
+    const courses = mapCourseList(coursesRaw);
 
     // Tạo mảng trang
     const pages = Array.from({ length: totalPages }, (_, i) => ({
@@ -93,9 +96,11 @@ router.get("/course-detail/:id", async (req, res) => {
   const course = await coursesModel.view_detail_course(courseId);
   const lessons = await coursesModel.view_lesson_in_detail(courseId);
   const feedback = await coursesModel.getFeedback(courseId);
-  const sameCourseCategory = await coursesModel.view_courses_same_category(
+  const sameCourseCategoryRaw = await coursesModel.view_courses_same_category(
     courseId
   );
+  // Áp dụng mapCourseFlags cho related courses
+  const relatedCourses = mapCourseList(sameCourseCategoryRaw);
   const existed = await isEnrolled(userId, courseId);
   const instructor_id = course.instructor_id;
   const instructor = await coursesModel.getInstructorProfile(instructor_id);
@@ -103,7 +108,7 @@ router.get("/course-detail/:id", async (req, res) => {
     course: course,
     lessons: lessons,
     feedbacks: feedback,
-    relatedCourses: sameCourseCategory,
+    relatedCourses: relatedCourses,
     instructor: instructor,
     instructor_id,
     existed,
@@ -218,7 +223,9 @@ router.get("/preview-lessons/:id", async (req, res) => {
   currentLessonId = String(currentLessonId);
 
   // Chọn bài hiện tại
-  const currentIndex = listLessons.findIndex((l) => String(l.id) === currentLessonId);
+  const currentIndex = listLessons.findIndex(
+    (l) => String(l.id) === currentLessonId
+  );
   const current_lesson = listLessons[currentIndex];
   if (!current_lesson) return res.sendStatus(404);
 
@@ -230,11 +237,13 @@ router.get("/preview-lessons/:id", async (req, res) => {
 
   const localVideoUrl = `/media/lessons/${currentLessonId}/stream`;
 
-
   // prev/next
-  const prev_lesson_id = currentIndex > 0 ? listLessons[currentIndex - 1].id : null;
+  const prev_lesson_id =
+    currentIndex > 0 ? listLessons[currentIndex - 1].id : null;
   const next_lesson_id =
-    currentIndex < listLessons.length - 1 ? listLessons[currentIndex + 1].id : null;
+    currentIndex < listLessons.length - 1
+      ? listLessons[currentIndex + 1].id
+      : null;
   const des_current_lesson = current_lesson.description;
 
   res.render("vwCourses/dis_videoCourses", {
@@ -266,14 +275,14 @@ router.post("/save-progress", express.json(), async (req, res) => {
   if (!lesson_id || typeof seconds !== "number" || seconds < 0) {
     return res.status(400).json({ message: "Bad payload" });
   }
-  const result =await coursesModel.saveProgess(
+  const result = await coursesModel.saveProgess(
     user_id,
     lesson_id,
     seconds,
     completed,
     new Date()
   );
-  console.log('[DB RESULT]', result);
+  console.log("[DB RESULT]", result);
 
   res.json({ ok: true });
 });
@@ -300,10 +309,13 @@ router.get("/search", async (req, res) => {
   const page = Math.max(parseInt(req.query.page || "1", 10) || 1, 1);
   const offset = (page - 1) * pageSize;
 
-  const [{ total }, courses] = await Promise.all([
+  const [{ total }, coursesRaw] = await Promise.all([
     coursesModel.countByQuery(terms),
     coursesModel.findCourseByQuery(terms, pageSize, offset),
   ]);
+
+  // Áp dụng mapCourseFlags để thêm isFeatured, isNew, isOnSale
+  const courses = mapCourseList(coursesRaw);
 
   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
