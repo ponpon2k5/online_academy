@@ -173,9 +173,26 @@ r.post("/courses/:courseId/publish", isAdmin, async (req, res) => {
 });
 
 r.get("/users", isAdmin, async (req, res) => {
-  const rows = await db("profiles")
+  const { status, role } = req.query || {};
+
+  // Base query
+  let query = db("profiles")
     .select("id", "name", "role", "email", "created_at", "is_active")
     .orderBy("created_at", "desc");
+
+  // Lọc theo trạng thái tài khoản (active/locked)
+  if (status === "locked") {
+    query.where("is_active", false);
+  } else if (status === "active") {
+    query.where("is_active", true);
+  }
+
+  // Lọc theo role (nếu có)
+  if (role && ["student", "instructor", "admin"].includes(role)) {
+    query.where("role", role);
+  }
+
+  const rows = await query;
 
   // Đảm bảo is_active có giá trị (mặc định là true nếu NULL)
   const usersWithActiveStatus = rows.map((user) => ({
@@ -189,6 +206,10 @@ r.get("/users", isAdmin, async (req, res) => {
     authUser: req.session.user,
     currentPage: "users",
     users: usersWithActiveStatus,
+    filters: {
+      status: status || "all",
+      role: role || "all",
+    },
   });
 });
 
