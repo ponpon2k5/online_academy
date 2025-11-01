@@ -17,7 +17,7 @@ import userModel from "./models/user.model.js";
 
 // Routes
 // app.js
-import mediaRoute from './routes/media.route.js';
+import mediaRoute from "./routes/media.route.js";
 import adminCategories from "./routes/admin.categories.js";
 import adminRouter from "./routes/admin.js";
 import instructorRouter from "./routes/instructor.js";
@@ -35,7 +35,7 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
-//app.use("/videos", express.static(path.join(__dirname, "storage", "videos")));
+// Videos được stream qua /media/lessons/:lessonId/stream, không serve static
 app.use(express.static(path.join(__dirname, "public")));
 // --------- Xử lý tự động đuôi ảnh ----------,
 app.get("/images/:name", (req, res) => {
@@ -312,7 +312,7 @@ app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
 app.use("/admin", adminRouter);
 app.use("/instructor", instructorRouter);
-app.use('/media', mediaRoute);
+app.use("/media", mediaRoute);
 
 // ---------- 404 ----------
 app.use((req, res) => {

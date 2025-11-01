@@ -3,8 +3,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Video upload middleware - lưu vào statics/videos
-const videosDir = path.join(process.cwd(), "statics", "videos");
+// Video upload middleware - lưu vào storage/videos
+const videosDir = path.join(process.cwd(), "storage", "videos");
 fs.mkdirSync(videosDir, { recursive: true });
 
 const storage = multer.diskStorage({

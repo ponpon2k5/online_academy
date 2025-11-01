@@ -405,8 +405,8 @@ r.post(
       if (!req.file) {
         return res.status(400).send("Video file is required when uploading");
       }
-      // Lưu đường dẫn file video - được serve qua /videos/ từ statics/videos
-      videoUrl = `/storage/videos/${req.file.filename}`;
+      // Lưu chỉ tên file (không có prefix) - file được stream qua /media/lessons/:lessonId/stream
+      videoUrl = req.file.filename;
     } else {
       // Nếu dùng YouTube URL (mặc định hoặc khi không có file)
       if (!youtube_url) {
