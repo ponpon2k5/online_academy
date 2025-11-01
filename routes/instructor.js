@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { isInstructor, requireRole, ensureAuth } from "../middlewares/auth.js";
+import { uploadVideo } from "../middlewares/uploads.js";
 import db from "../utils/db.js";
 
 const r = Router();
@@ -342,55 +343,95 @@ r.get(
   }
 );
 
-r.post("/courses/:courseId/lessons", isInstructor, async (req, res) => {
-  const { courseId } = req.params;
-  const {
-    section_id,
-    lesson,
-    description,
-    is_preview,
-    sort_order,
-    duration_seconds,
-    youtube_url,
-  } = req.body;
+r.post(
+  "/courses/:courseId/lessons",
+  isInstructor,
+  uploadVideo.single("video_file"),
+  async (req, res) => {
+    const { courseId } = req.params;
+    const {
+      section_id,
+      lesson,
+      description,
+      is_preview,
+      sort_order,
+      duration_seconds,
+      youtube_url,
+      video_source,
+    } = req.body;
 
-  if (!lesson) return res.status(400).send("Lesson title required");
-  if (!youtube_url) return res.status(400).send("YouTube URL required");
+    if (!lesson) return res.status(400).send("Lesson title required");
 
-  // Validate YouTube URL
-  const youtubeRegex =
-    /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
-  if (!youtubeRegex.test(youtube_url)) {
-    return res.status(400).send("Invalid YouTube URL");
+    // Xử lý nguồn video: YouTube URL hoặc uploaded file
+    let videoUrl = "";
+
+    if (video_source === "upload") {
+      // Nếu upload file video
+      if (!req.file) {
+        return res.status(400).send("Video file is required when uploading");
+      }
+      // Lưu đường dẫn file video (relative path từ public folder)
+      videoUrl = `/uploads/videos/${req.file.filename}`;
+    } else {
+      // Nếu dùng YouTube URL (mặc định hoặc khi không có file)
+      if (!youtube_url) {
+        return res
+          .status(400)
+          .send("YouTube URL required when not uploading file");
+      }
+
+      // Validate YouTube URL
+      const youtubeRegex =
+        /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+      if (!youtubeRegex.test(youtube_url)) {
+        return res.status(400).send("Invalid YouTube URL");
+      }
+      videoUrl = youtube_url;
+    }
+
+    // Tự động tính sort_order nếu không được cung cấp
+    let finalSortOrder = 0;
+    if (sort_order && Number(sort_order) > 0) {
+      finalSortOrder = Number(sort_order);
+    } else {
+      // Lấy sort_order cao nhất trong section (hoặc course nếu không có section)
+      const maxSortOrder = await db("lessons")
+        .where("course_id", courseId)
+        .where("section_id", section_id || null)
+        .max("sort_order as max")
+        .first();
+      finalSortOrder = (maxSortOrder?.max || 0) + 1;
+    }
+
+    try {
+      await db("lessons").insert({
+        course_id: courseId,
+        section_id: section_id || null,
+        lesson,
+        video_url: videoUrl,
+        duration_seconds: duration_seconds ? Number(duration_seconds) : 0,
+        is_preview: is_preview === "on",
+        sort_order: finalSortOrder,
+        description: description || null,
+      });
+
+      res.redirect(`/instructor/courses/${courseId}/sections`);
+    } catch (error) {
+      console.error("Error creating lesson:", error);
+      // Nếu có lỗi và đã upload file, xóa file đã upload
+      if (req.file) {
+        const fs = (await import("fs")).default;
+        const filePath = req.file.path;
+        try {
+          fs.unlinkSync(filePath);
+        } catch (unlinkError) {
+          console.error("Error deleting uploaded file:", unlinkError);
+        }
+      }
+      res.status(500).send("Error creating lesson: " + error.message);
+    }
   }
-
-  // Tự động tính sort_order nếu không được cung cấp
-  let finalSortOrder = 0;
-  if (sort_order && Number(sort_order) > 0) {
-    finalSortOrder = Number(sort_order);
-  } else {
-    // Lấy sort_order cao nhất trong section (hoặc course nếu không có section)
-    const maxSortOrder = await db("lessons")
-      .where("course_id", courseId)
-      .where("section_id", section_id || null)
-      .max("sort_order as max")
-      .first();
-    finalSortOrder = (maxSortOrder?.max || 0) + 1;
-  }
-
-  await db("lessons").insert({
-    course_id: courseId,
-    section_id: section_id || null,
-    lesson,
-    video_url: youtube_url,
-    duration_seconds: duration_seconds ? Number(duration_seconds) : 0,
-    is_preview: is_preview === "on",
-    sort_order: finalSortOrder,
-    description: description || null,
-  });
-
-  res.redirect(`/instructor/courses/${courseId}/sections`);
-});
+);
 
 r.get("/courses/:courseId/edit", isInstructor, async (req, res) => {
   const { courseId } = req.params;

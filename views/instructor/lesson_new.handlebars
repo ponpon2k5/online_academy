@@ -3,7 +3,7 @@
     <h3 class="mb-0"><i class="bi bi-play-circle"></i> Thêm bài học mới</h3>
   </div>
   <div class="card-body">
-    <form method="post" action="/instructor/courses/{{courseId}}/lessons" class="row g-3" id="lessonForm">
+    <form method="post" action="/instructor/courses/{{courseId}}/lessons" class="row g-3" id="lessonForm" enctype="multipart/form-data">
       <div class="col-md-8">
         <label class="form-label">Tiêu đề bài học *</label>
         <input name="lesson" class="form-control" required placeholder="Nhập tiêu đề bài học..."/>
@@ -26,11 +26,36 @@
         <div class="form-text">Mô tả chi tiết giúp học viên hiểu rõ nội dung bài học</div>
       </div>
       
-      <div class="col-md-6">
+      <div class="col-12">
+        <label class="form-label">Nguồn video *</label>
+        <div class="btn-group mb-2" role="group" aria-label="Video source selection">
+          <input type="radio" class="btn-check" name="video_source" id="source_youtube" value="youtube" checked>
+          <label class="btn btn-outline-primary" for="source_youtube">
+            <i class="bi bi-youtube"></i> YouTube URL
+          </label>
+          
+          <input type="radio" class="btn-check" name="video_source" id="source_upload" value="upload">
+          <label class="btn btn-outline-primary" for="source_upload">
+            <i class="bi bi-upload"></i> Upload Video
+          </label>
+        </div>
+      </div>
+      
+      <div class="col-12" id="youtube_source_group">
         <label class="form-label">Link YouTube *</label>
-        <input type="url" name="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required/>
+        <input type="url" name="youtube_url" id="youtube_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..."/>
         <div class="form-text">Dán link YouTube của video bài học</div>
       </div>
+      
+      <div class="col-12" id="upload_source_group" style="display: none;">
+        <label class="form-label">Upload Video File *</label>
+        <input type="file" name="video_file" id="video_file" class="form-control" accept="video/mp4,video/webm,video/ogg"/>
+        <div class="form-text">Chọn file video (MP4, WebM, OGG - tối đa 200MB)</div>
+        <div id="video_preview" class="mt-2" style="display: none;">
+          <video id="preview_player" controls style="max-width: 100%; max-height: 300px;"></video>
+        </div>
+      </div>
+      
       <div class="col-md-3">
         <label class="form-label">Thời lượng (giây)</label>
         <input type="number" name="duration_seconds" class="form-control" placeholder="0" min="0"/>
@@ -66,10 +91,60 @@
 </div>
 
 <script>
+// Toggle between YouTube and Upload
+document.querySelectorAll('input[name="video_source"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const source = this.value;
+    const youtubeGroup = document.getElementById('youtube_source_group');
+    const uploadGroup = document.getElementById('upload_source_group');
+    const youtubeInput = document.getElementById('youtube_url');
+    const videoFileInput = document.getElementById('video_file');
+    
+    if (source === 'youtube') {
+      youtubeGroup.style.display = 'block';
+      uploadGroup.style.display = 'none';
+      youtubeInput.setAttribute('required', 'required');
+      videoFileInput.removeAttribute('required');
+      videoFileInput.value = '';
+      document.getElementById('video_preview').style.display = 'none';
+    } else {
+      youtubeGroup.style.display = 'none';
+      uploadGroup.style.display = 'block';
+      youtubeInput.removeAttribute('required');
+      videoFileInput.setAttribute('required', 'required');
+      youtubeInput.value = '';
+    }
+  });
+});
+
+// Preview uploaded video
+document.getElementById('video_file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('video_preview');
+  const player = document.getElementById('preview_player');
+  
+  if (file) {
+    const url = URL.createObjectURL(file);
+    player.src = url;
+    preview.style.display = 'block';
+    
+    // File size check
+    const maxSize = 200 * 1024 * 1024; // 200MB
+    if (file.size > maxSize) {
+      alert('File quá lớn! Vui lòng chọn file nhỏ hơn 200MB');
+      e.target.value = '';
+      preview.style.display = 'none';
+      return;
+    }
+  } else {
+    preview.style.display = 'none';
+  }
+});
+
 // Form validation
 document.getElementById('lessonForm').addEventListener('submit', function(e) {
   const title = document.querySelector('input[name="lesson"]').value.trim();
-  const youtubeUrl = document.querySelector('input[name="youtube_url"]').value.trim();
+  const videoSource = document.querySelector('input[name="video_source"]:checked').value;
   
   if (!title) {
     e.preventDefault();
@@ -77,18 +152,44 @@ document.getElementById('lessonForm').addEventListener('submit', function(e) {
     return false;
   }
   
-  if (!youtubeUrl) {
-    e.preventDefault();
-    alert('Vui lòng nhập link YouTube!');
-    return false;
-  }
-  
-  // Validate YouTube URL
-  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
-  if (!youtubeRegex.test(youtubeUrl)) {
-    e.preventDefault();
-    alert('Vui lòng nhập link YouTube hợp lệ! (VD: https://www.youtube.com/watch?v=...)');
-    return false;
+  if (videoSource === 'youtube') {
+    const youtubeUrl = document.getElementById('youtube_url').value.trim();
+    if (!youtubeUrl) {
+      e.preventDefault();
+      alert('Vui lòng nhập link YouTube!');
+      return false;
+    }
+    
+    // Validate YouTube URL
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+/;
+    if (!youtubeRegex.test(youtubeUrl)) {
+      e.preventDefault();
+      alert('Vui lòng nhập link YouTube hợp lệ! (VD: https://www.youtube.com/watch?v=...)');
+      return false;
+    }
+  } else {
+    const videoFile = document.getElementById('video_file').files[0];
+    if (!videoFile) {
+      e.preventDefault();
+      alert('Vui lòng chọn file video!');
+      return false;
+    }
+    
+    // Check file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+    if (!allowedTypes.includes(videoFile.type)) {
+      e.preventDefault();
+      alert('Định dạng file không hỗ trợ! Vui lòng chọn file MP4, WebM hoặc OGG');
+      return false;
+    }
+    
+    // Check file size (200MB)
+    const maxSize = 200 * 1024 * 1024;
+    if (videoFile.size > maxSize) {
+      e.preventDefault();
+      alert('File quá lớn! Vui lòng chọn file nhỏ hơn 200MB');
+      return false;
+    }
   }
 });
 
