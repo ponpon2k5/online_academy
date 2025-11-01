@@ -470,7 +470,8 @@
                                         <i class="bi bi-tag me-1"></i>Giảm giá
                                     </span>
                                     {{/if}}
-                                </div></div>
+                                </div>
+                            </div>
 
                             <div class="card-body p-4 d-flex flex-column">
                                 <h5 class="card-title fw-bold mb-3">
@@ -478,7 +479,8 @@
                                         {{this.title}}
                                     </a>
                                 </h5>
-                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">{{this.short_desc}}</p>
+                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">
+                                    {{this.short_desc}}</p>
 
                                 <div class="instructor-category text-muted mb-3">
                                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
@@ -490,7 +492,8 @@
                                     <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
                                         <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
                                     </span>
-                                    <p class="text-muted small mb-0 mt-1">Số lượng học viên đánh giá {{this.rating_count}}</p>
+                                    <p class="text-muted small mb-0 mt-1">Số lượng học viên đánh giá
+                                        {{this.rating_count}}</p>
                                 </div>
                                 <div class="course-meta d-flex justify-content-between align-items-center mb-3 mt-auto">
                                     <div class="d-flex align-items-center text-muted">
@@ -536,7 +539,8 @@
                                         <i class="bi bi-tag me-1"></i>Giảm giá
                                     </span>
                                     {{/if}}
-                                </div></div>
+                                </div>
+                            </div>
 
                             <div class="card-body p-4 d-flex flex-column">
                                 <h5 class="card-title fw-bold mb-3">
@@ -544,15 +548,24 @@
                                         {{this.title}}
                                     </a>
                                 </h5>
-                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">{{this.short_desc}}</p>
+                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">
+                                    {{this.short_desc}}</p>
 
                                 <div class="course-meta d-flex justify-content-between align-items-center mb-3">
                                     <div class="d-flex align-items-center text-muted">
                                         <i class="bi bi-people me-1"></i><span class="small">{{this.students_count}} học
                                             viên</span>
                                     </div>
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    </span>
                                     <div class="course-price">
-                                        <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+
+                                        <span class="fs-5 fw-bold text-primary me-2">
+                                            {{formatCurrency this.promo_price}}</span>
+                                        <span class="text-muted text-decoration-line-through">
+                                            {{formatCurrency this.this.price}}</span>
+
                                     </div>
                                 </div>
 
@@ -627,7 +640,14 @@
                                 </div>
                                 <div class="col-8 col-md-9">
                                     <div class="card-body py-2">
-                                        <h5 class="card-title mb-1">{{this.title}}</h5>
+                                        <h5 class="card-title mb-1">{{this.title}}
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                            </span>
+                                            <p class="text-muted small mb-0 mt-1">Số lượng học viên đánh giá
+                                                {{this.rating_count}}</p>
+                                        </h5>
+
                                         <p class="card-text text-muted small mb-2">{{this.short_desc}}</p>
                                         <div class="instructor-category text-muted mb-3">
                                             <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
@@ -638,7 +658,15 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted small"><i
                                                     class="bi bi-people me-1"></i>{{this.students_count}}</span>
-                                            <strong class="text-primary">{{formatCurrency this.price}}</strong>
+
+                                            <div class="course-price">
+
+                                                <span class="fs-5 fw-bold text-primary me-2">
+                                                    {{formatCurrency this.promo_price}}</span>
+                                                <span class="text-muted text-decoration-line-through">
+                                                    {{formatCurrency this.this.price}}</span>
+
+                                            </div>
                                         </div>
                                         <div class="mt-2 d-flex gap-2">
                                             <a href="/courses/course-detail/{{this.id}}"
@@ -698,7 +726,14 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted small"><i
                                                     class="bi bi-people me-1"></i>{{this.students_count}}</span>
-                                            <strong class="text-primary">{{formatCurrency this.price}}</strong>
+                                            <div class="course-price">
+
+                                                <span class="fs-5 fw-bold text-primary me-2">
+                                                    {{formatCurrency this.promo_price}}</span>
+                                                <span class="text-muted text-decoration-line-through">
+                                                    {{formatCurrency this.this.price}}</span>
+
+                                            </div>
                                         </div>
                                         <div class="mt-2 d-flex gap-2">
                                             <a href="/courses/course-detail/{{this.id}}"
