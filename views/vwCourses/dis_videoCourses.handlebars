@@ -9,24 +9,10 @@
             <div class="card">
                 <div class="card-body p-2">
                     <div class="ratio ratio-16x9">
-                        {{#if isYouTube}}
-                        <!-- YouTube Player -->
-                        <iframe id="yt-player" src="https://www.youtube.com/embed/{{embed_id}}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1"
-                            allowfullscreen
-                            loading="lazy">
-                        </iframe>
-                        {{else}}
-                        <!-- Local Video Player -->
-                        <video id="local-video-player" 
-                               controls 
-                               preload="metadata"
-                               style="width: 100%; height: 100%;">
+                        <video id="local-video-player" controls preload="metadata" style="width: 100%; height: 100%;">
                             <source src="{{localVideoUrl}}" type="video/mp4">
-                            <source src="{{localVideoUrl}}" type="video/webm">
-                            <source src="{{localVideoUrl}}" type="video/ogg">
                             Trình duyệt của bạn không hỗ trợ phát video.
                         </video>
-                        {{/if}}
                     </div>
                 </div>
             </div>
@@ -77,44 +63,18 @@
         </div>
     </div>
 </main>
-{{#if isYouTube}}
-<script src="https://www.youtube.com/iframe_api"></script>
-{{/if}}
 <script>
     const LESSON_ID = "{{current_lesson.id}}";
     const RESUME = Number("{{resume_seconds}}") || 0;
-    const IS_YOUTUBE = {{#if isYouTube}}true{{else}}false{{/if}};
+    const IS_YOUTUBE = false; // luôn local
 
     let player, tick;
 
-    {{#if isYouTube}}
-    // YouTube Player
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('yt-player', {
-            events: {
-                onReady: () => {
-                    if (RESUME > 0) player.seekTo(Math.max(RESUME - 2, 0), true);
-                    tick = setInterval(saveTick, 5000);
-                },
-                onStateChange: (e) => {
-                    const END = 0, PAUSED = 2;
-                    if (e.data === END) saveNow(true);
-                    if (e.data === PAUSED) saveNow(false);
-                }
-            }
-        });
-    }
-
-    function getCurrentTime() {
-        return Math.floor(player?.getCurrentTime?.() || 0);
-    }
-    {{else}}
     // Local Video Player
     const videoElement = document.getElementById('local-video-player');
     if (videoElement) {
         player = videoElement;
-        
-        // Resume từ vị trí đã xem
+
         player.addEventListener('loadedmetadata', () => {
             if (RESUME > 0) {
                 player.currentTime = Math.max(RESUME - 2, 0);
@@ -122,24 +82,15 @@
             tick = setInterval(saveTick, 5000);
         });
 
-        // Lưu tiến độ khi video kết thúc hoặc tạm dừng
-        player.addEventListener('ended', () => {
-            saveNow(true);
-        });
-
-        player.addEventListener('pause', () => {
-            saveNow(false);
-        });
+        player.addEventListener('ended', () => saveNow(true));
+        player.addEventListener('pause', () => saveNow(false));
     }
 
     function getCurrentTime() {
         return Math.floor(player?.currentTime || 0);
     }
-    {{/if}}
 
-    function saveTick() { 
-        saveNow(false); 
-    }
+    function saveTick() { saveNow(false); }
 
     function saveNow(done) {
         const t = getCurrentTime();
@@ -147,10 +98,9 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ lesson_id: LESSON_ID, seconds: t, completed: !!done })
-        }).catch(() => {});
+        }).catch(() => { });
     }
 
-    // Lưu khi rời trang (ít bị rớt)
     window.addEventListener('pagehide', () => {
         try {
             const t = getCurrentTime();

@@ -4,6 +4,7 @@ import userModel from "../models/user.model.js";
 import homeModel from "../models/home.model.js";
 import db from "../utils/db.js";
 
+
 //const player = new Plyr('#player');
 const router = express.Router();
 //function
@@ -208,45 +209,32 @@ router.get("/preview-lessons/:id", async (req, res) => {
   const courseTitle = course.title;
 
   const listLessons = await coursesModel.getLessonsByCourse(courseId);
-  const currentLessonId = req.query.lesson || (listLessons[0]?.id ?? null); //truy cập id của phần tử đầu tiên, nếu không có gì cả (mảng rỗng), gán null
-  const currentIndex = listLessons.findIndex((l) => l.id === currentLessonId);
+
+  let currentLessonId = req.query.lesson || null;
+  if (!currentLessonId) {
+    const last = await coursesModel.getLastLessonProgress(userId, courseId);
+    currentLessonId = last?.lesson_id || (listLessons[0]?.id ?? null);
+  }
+  currentLessonId = String(currentLessonId);
+
+  // Chọn bài hiện tại
+  const currentIndex = listLessons.findIndex((l) => String(l.id) === currentLessonId);
   const current_lesson = listLessons[currentIndex];
-  console.log(
-    `[Preview] User ${userId} đang mở bài học: ${current_lesson?.lesson} (ID: ${currentLessonId})`
-  );
+  if (!current_lesson) return res.sendStatus(404);
 
-  //tiến độ học tập
   const prog = await coursesModel.getProgress(userId, currentLessonId);
-  const resume_seconds = prog?.last_second || 0;
-  console.log(
-    `[Progress] Tiến độ trước đó của user ${userId} cho bài ${currentLessonId}: ${resume_seconds}s`
-  );
+  const resume_seconds = Number(prog?.last_second || 0);
 
-  // Kiểm tra xem video là YouTube hay local file
-  const videoUrl = current_lesson.video_url || "";
-  const isYouTube = /youtube\.com|youtu\.be/.test(videoUrl);
+  const isYouTube = false;
+  const embed_id = null;
 
-  const embed_id = isYouTube
-    ? (() => {
-        const url = videoUrl;
-        const m1 = url.match(/youtu\.be\/([^?]+)/);
-        const m2 = url.match(/[?&]v=([^&]+)/);
-        const m3 = url.match(/embed\/([^?]+)/);
-        return m1?.[1] || m2?.[1] || m3?.[1] || url;
-      })()
-    : null;
+  const localVideoUrl = `/media/lessons/${currentLessonId}/stream`;
 
-  // Nếu là local file, dùng đường dẫn trực tiếp
-  const localVideoUrl = isYouTube ? null : videoUrl;
 
-  //nhấn nút next/ prev video
-  const prev_lesson_id =
-    currentIndex > 0 ? listLessons[currentIndex - 1].id : null;
+  // prev/next
+  const prev_lesson_id = currentIndex > 0 ? listLessons[currentIndex - 1].id : null;
   const next_lesson_id =
-    currentIndex < listLessons.length - 1
-      ? listLessons[currentIndex + 1].id
-      : null;
-
+    currentIndex < listLessons.length - 1 ? listLessons[currentIndex + 1].id : null;
   const des_current_lesson = current_lesson.description;
 
   res.render("vwCourses/dis_videoCourses", {
@@ -278,16 +266,14 @@ router.post("/save-progress", express.json(), async (req, res) => {
   if (!lesson_id || typeof seconds !== "number" || seconds < 0) {
     return res.status(400).json({ message: "Bad payload" });
   }
-  await coursesModel.saveProgess(
+  const result =await coursesModel.saveProgess(
     user_id,
     lesson_id,
     seconds,
     completed,
     new Date()
   );
-  console.log(
-    `[DB] Đã lưu tiến độ: user=${user_id}, lesson=${lesson_id}, seconds=${seconds}`
-  );
+  console.log('[DB RESULT]', result);
 
   res.json({ ok: true });
 });

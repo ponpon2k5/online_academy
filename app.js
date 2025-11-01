@@ -16,6 +16,8 @@ import moment from "moment";
 import userModel from "./models/user.model.js";
 
 // Routes
+// app.js
+import mediaRoute from './routes/media.route.js';
 import adminCategories from "./routes/admin.categories.js";
 import adminRouter from "./routes/admin.js";
 import instructorRouter from "./routes/instructor.js";
@@ -310,6 +312,7 @@ app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
 app.use("/admin", adminRouter);
 app.use("/instructor", instructorRouter);
+app.use('/media', mediaRoute);
 
 // ---------- 404 ----------
 app.use((req, res) => {

@@ -199,14 +199,26 @@ export default {
   getLessonById(courseId, lessonId) {
     return db("lessons").where({ course_id: courseId, id: lessonId }).first();
   },
+  getLastLessonProgress(userId, courseId) {
+    return db('video_progress as vp')
+      .join('lessons as l', 'l.id', 'vp.lesson_id')
+      .where('vp.user_id', userId)
+      .andWhere('l.course_id', courseId)
+      .orderBy('vp.update_time', 'desc')    // mới nhất theo thời gian cập nhật
+      .orderBy('vp.last_second', 'desc')    // (phòng khi update_time trùng)
+      .select('vp.lesson_id', 'vp.last_second')
+      .first();
+  },
   getProgress(userId, currentLessonId) {
-    return db("video_progress")
+    return db('video_progress')
       .where({ user_id: userId, lesson_id: currentLessonId })
+      .orderBy('last_second', 'desc')
+      .orderBy('update_time', 'desc')
       .first();
   },
   saveProgess(user_id, lesson_id, seconds, completed) {
-    const TABLE = "video_progress";
-    return db("video_progress")
+    const TABLE = 'video_progress';
+    return db(TABLE)
       .insert({
         user_id,
         lesson_id,
@@ -214,20 +226,13 @@ export default {
         is_completed: !!completed,
         update_time: db.fn.now(),
       })
-      .onConflict(["user_id", "lesson_id"])
+      .onConflict(['user_id', 'lesson_id'])
       .merge({
-        last_second: db.raw("GREATEST(??.??, ?)", [
-          TABLE,
-          "last_second",
-          Math.floor(seconds),
-        ]),
-        is_completed: db.raw("(??.??) OR ?", [
-          TABLE,
-          "is_completed",
-          !!completed,
-        ]),
+        last_second: Math.floor(seconds),     
+        is_completed: db.raw('(??.??) OR ?', [TABLE, 'is_completed', !!completed]),
         update_time: db.fn.now(),
-      });
+      })
+      .returning(['user_id', 'lesson_id', 'last_second', 'is_completed', 'update_time']);
   },
   showProgress(user_id) {
     return db("video_progress as vp")
