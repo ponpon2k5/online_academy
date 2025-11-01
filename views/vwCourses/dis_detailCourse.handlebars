@@ -159,21 +159,21 @@
                         <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
                         {{else}}
 
-                        <form action="/courses/purchase-courses-process/{{course.id}}" method="POST">
-                            <button type="submit" class="btn btn-success">Ghi danh ngay</button>
-                        </form>
-                        <form action="/student/add-favor-courses/{{course.id}}" method="post" class="d-inline">
-                            <button class="btn btn-outline-secondary" type="submit">Thêm vào Watchlist</button>
+                        <form action="/courses/buy-now" method="POST" class="d-inline">
+                            <input type="hidden" name="course_id" value="{{course.id}}">
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">
+                                <i class="bi bi-wallet2 me-1"></i>Mua ngay
+                            </button>
                         </form>
 
                         <button id="btnAddToCart" data-course-id="{{course.id}}"
                             class="btn btn-outline-primary rounded-pill px-3">
                             <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ hàng
                         </button>
-                        <form action="/courses/buy-now" method="POST" class="d-inline">
-                            <input type="hidden" name="course_id" value="{{course.id}}">
-                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">
-                                <i class="bi bi-wallet2 me-1"></i>Mua ngay
+
+                        <form action="/student/add-favor-courses/{{course.id}}" method="post" class="d-inline">
+                            <button class="btn btn-outline-secondary rounded-pill px-3" type="submit">
+                                <i class="bi bi-heart me-1"></i>Thêm vào Watchlist
                             </button>
                         </form>
                         {{/if}}

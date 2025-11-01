@@ -124,22 +124,20 @@ router.post("/course-detail/:id", async (req, res) => {
   const courseId = req.params.id;
   const userId = req.session.authUser.id;
   const comment = (req.body.comment || "").trim();
-  const ratingRaw = req.body.rating; 
+  const ratingRaw = req.body.rating;
   const rating = Number.parseInt(ratingRaw, 10);
 
   // Validate đơn giản
   if (!comment || !Number.isInteger(rating) || rating < 1 || rating > 5) {
     // Có thể trả toast / flash message, ở đây redirect gọn
-    return res.redirect(
-      `/courses/course-detail/${courseId}#composeBox`
-    );
+    return res.redirect(`/courses/course-detail/${courseId}#composeBox`);
   }
 
   const payload = {
     course_id: String(courseId),
     user_id: String(userId),
     description: comment,
-    rating, 
+    rating,
   };
 
   try {
@@ -203,6 +201,76 @@ router.post("/purchase-courses-process/:id", async (req, res) => {
     return res.redirect(
       `/courses/view-courses?toast=error&msg=${encodeURIComponent(
         "Mua khóa học không thành công"
+      )}`
+    );
+  }
+});
+
+//buy now route (alias cho purchase-courses-process)
+router.post("/buy-now", async (req, res) => {
+  try {
+    const courseId = req.body.course_id;
+    console.log(
+      "buy-now received course_id:",
+      courseId,
+      "type:",
+      typeof courseId
+    );
+
+    if (!courseId) {
+      console.error("buy-now error: Missing course_id");
+      return res.status(400).send("Thiếu course_id");
+    }
+
+    // Kiểm tra đăng nhập
+    if (!req.session.authUser) {
+      return res.redirect(
+        `/account/signin?redirect=/courses/purchase-courses/${courseId}`
+      );
+    }
+
+    const userId = req.session.authUser.id;
+    console.log("buy-now processing for user:", userId, "course:", courseId);
+
+    // 1) Chặn mua lại
+    const existed = await isEnrolled(userId, courseId);
+    if (existed) {
+      return res.redirect(
+        `/courses/view-courses?toast=warning&msg=${encodeURIComponent(
+          "Bạn đã sở hữu khóa học này rồi."
+        )}`
+      );
+    }
+
+    // 2) Sinh enrollID
+    const enrollID = await totalEnrollment();
+    const enrollID_new = "e" + (enrollID + 1);
+
+    // 3) Lấy giá tại thời điểm mua
+    const course = await userModel.findCourseByID(courseId);
+    if (!course) {
+      console.error(`Course not found: ${courseId}`);
+      return res.redirect(
+        `/courses/view-courses?toast=error&msg=${encodeURIComponent(
+          "Khóa học không tồn tại"
+        )}`
+      );
+    }
+
+    // 4) Ghi hồ sơ enroll
+    await userModel.enrollCourse(userId, courseId, enrollID_new, course);
+
+    return res.redirect(
+      `/courses/view-courses?toast=success&msg=${encodeURIComponent(
+        "Mua khóa học thành công!"
+      )}`
+    );
+  } catch (err) {
+    console.error("buy-now error:", err);
+    console.error("Error stack:", err.stack);
+    return res.redirect(
+      `/courses/view-courses?toast=error&msg=${encodeURIComponent(
+        `Mua khóa học không thành công: ${err.message || "Lỗi không xác định"}`
       )}`
     );
   }
