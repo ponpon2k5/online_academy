@@ -20,7 +20,7 @@ export default {
             )
             .groupBy('c.id', 'c.title', 'c.hero_image_url', 'c.price')
             .orderBy('weekly_purchases', 'desc')
-            .limit(4);
+            .limit(3);
     },
     getMostViewedCourses() {
         return db('courses as c')
@@ -58,6 +58,6 @@ export default {
             .count({ weekly_enrollments: 'e.id' })
             .groupBy('cat.id', 'cat.name')
             .orderBy('weekly_enrollments', 'desc')
-            .limit(6);
+            .limit(5);
     }
 };

@@ -51,25 +51,23 @@
 
             <!-- Phân trang -->
             {{#if pagination}}
-<nav aria-label="Pagination" class="mt-5 mb-5 d-flex justify-content-center">
-  <ul class="pagination" style="gap:8px;">
+            <nav aria-label="Pagination" class="mt-5 mb-5 d-flex justify-content-center">
+                <ul class="pagination" style="gap:8px;">
 
-    {{#if pagination.hasPrev}}
-    <li class="page-item">
-      <a class="page-link" href="?page={{pagination.prevPage}}" aria-label="Previous"
-         style="border:none;border-radius:50%;width:42px;height:42px;
+                    {{#if pagination.hasPrev}}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{pagination.prevPage}}" aria-label="Previous" style="border:none;border-radius:50%;width:42px;height:42px;
                 display:flex;align-items:center;justify-content:center;
                 color:#007bff;background:white;
                 box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-        <i class="bi bi-chevron-left"></i>
-      </a>
-    </li>
-    {{/if}}
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {{/if}}
 
-    {{#each pagination.pages}}
-    <li class="page-item {{#if active}}active{{/if}}">
-      <a class="page-link" href="?page={{number}}"
-         style="border:none;border-radius:50%;width:42px;height:42px;
+                    {{#each pagination.pages}}
+                    <li class="page-item {{#if active}}active{{/if}}">
+                        <a class="page-link" href="?page={{number}}" style="border:none;border-radius:50%;width:42px;height:42px;
                 display:flex;align-items:center;justify-content:center;
                 font-weight:500;
                 {{#if active}}
@@ -77,26 +75,25 @@
                 {{else}}
                   color:#007bff;background:white;
                 {{/if}}">
-        {{number}}
-      </a>
-    </li>
-    {{/each}}
+                            {{number}}
+                        </a>
+                    </li>
+                    {{/each}}
 
-    {{#if pagination.hasNext}}
-    <li class="page-item">
-      <a class="page-link" href="?page={{pagination.nextPage}}" aria-label="Next"
-         style="border:none;border-radius:50%;width:42px;height:42px;
+                    {{#if pagination.hasNext}}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{pagination.nextPage}}" aria-label="Next" style="border:none;border-radius:50%;width:42px;height:42px;
                 display:flex;align-items:center;justify-content:center;
                 color:#007bff;background:white;
                 box-shadow:0 2px 6px rgba(0,0,0,0.1);font-weight:500;">
-        <i class="bi bi-chevron-right"></i>
-      </a>
-    </li>
-    {{/if}}
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {{/if}}
 
-  </ul>
-</nav>
-{{/if}}
+                </ul>
+            </nav>
+            {{/if}}
 
         </div>
     </div>

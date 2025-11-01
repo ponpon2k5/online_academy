@@ -9,11 +9,20 @@
         <div class="d-flex flex-wrap gap-3">
             {{#each progress}}
             <div class="card mb-3" style="width: 16rem;">
+
                 <img src="/images/{{course_img}}.jpg" class="card-img-top" alt="{{course_title}}">
                 <div class="card-body">
                     <h6 class="card-title">{{course_title}}</h6>
                     <div class="small text-muted mb-1">{{lesson_title}}</div>
-                    <div class="small">Tiến độ: {{last_second}}s — {{finish_text}}</div>
+                    <div class="small">Tiến độ: {{last_second}}s</div>
+                    <div class="small fw-semibold">
+                        {{#if (eq finish_text 'Hoàn thành khóa học')}}
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        {{else}}
+                        <i class="bi bi-hourglass-split text-warning me-1"></i>
+                        {{/if}}
+                        {{finish_text}}
+                    </div>
                 </div>
             </div>
             {{/each}}
