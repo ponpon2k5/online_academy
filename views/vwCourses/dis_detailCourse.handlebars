@@ -152,8 +152,9 @@
                                 Đã sở hữu khoá học
                             </div>
                         </div>
-                        <a href="/learn/{{course.id}}" class="btn btn-primary">Tiếp tục học</a>
-                        <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
+                        <a href="/courses/preview-lessons/{{course.id}}" class="btn-lesson">
+                                <i class="bi bi-play-circle me-1"></i>Tiếp tục học
+                            </a>
                         {{else}}
 
                         <form action="/courses/purchase-courses-process/{{course.id}}" method="POST" class="d-inline">
