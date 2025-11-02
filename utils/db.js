@@ -8,6 +8,6 @@ const db = knex({
             password: 'onlineacademy',
             database: 'postgres'
         },
-        pool: { min: 0, max: 15 }
+        pool: { min: 0, max: 20 }
     });
 export default db;
