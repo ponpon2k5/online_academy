@@ -159,7 +159,7 @@
                         <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
                         {{else}}
 
-                        <form action="/courses/buy-now" method="POST" class="d-inline">
+                        <form action="/courses/purchase-courses-process/{{course.id}}" method="POST" class="d-inline">
                             <input type="hidden" name="course_id" value="{{course.id}}">
                             <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">
                                 <i class="bi bi-wallet2 me-1"></i>Mua ngay
