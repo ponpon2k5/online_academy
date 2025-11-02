@@ -1,7 +1,6 @@
 export function ensureAuth(req, _res, next) {
   if (!req.session) req.session = {};
 
-  // Đồng bộ session data từ authUser sang user để tương thích
   if (req.session.authUser) {
     req.session.user = {
       id: req.session.authUser.id,
@@ -28,7 +27,6 @@ export function isAdmin(req, res, next) {
 }
 
 export function requireAuth(req, res, next) {
-  // Đảm bảo có thông tin user từ session
   if (!req.session?.user) return res.status(401).send("Unauthorized");
   req.user = req.session.user;
   next();
@@ -39,7 +37,6 @@ export function requireRole(...roles) {
     const user = req.session?.user || req.user;
     if (!user) return res.status(401).send("Unauthorized");
     if (!roles.includes(user.role)) return res.status(403).send("Forbidden");
-    // đồng bộ lại
     req.user = user;
     next();
   };

@@ -10,7 +10,6 @@ import { customAlphabet } from "nanoid";
 import coursesModel from "../models/courses.model.js";
 const router = express.Router();
 
-/* =============== Helper: Auth verify (giữ nguyên logic cũ) =============== */
 async function verifyAccount(username, password_verify) {
     const user = await userModel.findByUsername(username);
     if (!user) return null;
@@ -20,7 +19,6 @@ async function verifyAccount(username, password_verify) {
     return safeUser;
 }
 
-/* =============== Helper: Mailer chuẩn =============== */
 function getEnv(name) {
     const v = process.env[name];
     if (!v) throw new Error(`Missing env ${name}`);
@@ -54,7 +52,6 @@ function mailFromAddress() {
     return `"${name}" <${user}>`;
 }
 
-/* ====================== SIGNIN ====================== */
 router.get("/signin", (req, res) => {
     const error = req.query.error === "locked";
     res.render("vwAccount/signin", {
@@ -87,19 +84,16 @@ router.post("/signin", async (req, res) => {
     res.redirect(retUrl);
 });
 
-/* ====================== SIGNUP PAGE ====================== */
 router.get("/signup", (req, res) => {
     res.render("vwAccount/signup");
 });
 
-/* ====================== SIGNOUT ====================== */
 router.post("/signout", (req, res) => {
     req.session.isAuthenticated = false;
     req.session.authUser = null;
     res.redirect("/");
 });
 
-/* ====================== SEND OTP ====================== */
 router.post("/send-otp", async (req, res) => {
     try {
         let { username, password, name, email, dob, permission } = req.body || {};
@@ -169,7 +163,6 @@ router.post("/send-otp", async (req, res) => {
     }
 });
 
-/* ====================== VERIFY OTP ====================== */
 router.post("/verify-otp", async (req, res) => {
     try {
         const { otp } = req.body || {};
@@ -225,7 +218,6 @@ router.post("/verify-otp", async (req, res) => {
     }
 });
 
-/* ====================== CHECK USERNAME/EMAIL ====================== */
 router.get("/is-available", async (req, res) => {
     const username = (req.query.username || "").trim();
     if (!username)
@@ -248,7 +240,6 @@ router.get("/is-email-available", async (req, res) => {
     return res.json({ isAvailable: !exists });
 });
 
-/* ====================== OAUTH (giữ nguyên) ====================== */
 router.get(
     "/auth/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
@@ -270,15 +261,6 @@ router.get(
     }
 );
 
-// router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['public_profile', 'email'] }));
-// router.get('/auth/facebook/callback',
-//     passport.authenticate('facebook', { failureRedirect: '/account/signin' }),
-//     (req, res) => {
-//         req.session.isAuthenticated = true;
-//         req.session.authUser = req.user;
-//         res.redirect(req.session.retUrl || '/');
-//     }
-// );
 
 router.get(
     "/auth/github",
@@ -301,7 +283,6 @@ router.get(
         res.redirect(req.session.retUrl || "/");
     }
 );
-/* ====================== CHANGE PASSWORD/PROFILE (giữ nguyên) ====================== */
 router.get("/change-password", (req, res) => {
     res.render("vwAccount/change_pass");
 });
@@ -366,9 +347,8 @@ router.post("/change-pwd", checkAuthenticated, async (req, res) => {
     req.session.authUser.password = hash_password;
     res.redirect("/account/profile");
 });
-// --- : HIỂN THỊ TRANG GIỎ HÀNG ---
 router.get("/shopping-cart", async (req, res) => {
-    // 1. Kiểm tra đăng nhập
+    // Kiểm tra đăng nhập
     if (!req.session.authUser) {
         return res.redirect("/account/signin");
     }
@@ -376,13 +356,13 @@ router.get("/shopping-cart", async (req, res) => {
     try {
         const userId = req.session.authUser.id;
 
-        // 2. Gọi model để lấy các khóa học trong giỏ
+        // Gọi model để lấy các khóa học trong giỏ
         const coursesInCart = await coursesModel.getCartItems(userId);
 
-        // 3. Kiểm tra giỏ hàng rỗng hay không
+        // Kiểm tra giỏ hàng rỗng hay không
         const isEmpty = !coursesInCart || coursesInCart.length === 0;
 
-        // 4. Render view 'shopping-cart.handlebars'
+        // Render view 'shopping-cart.handlebars'
         // Truyền biến 'isEmpty' và 'coursesInCart' [cite: 24, 31, 38]
         res.render("vwAccount/shopping-cart", {
             title: "Giỏ hàng",
@@ -395,9 +375,8 @@ router.get("/shopping-cart", async (req, res) => {
     }
 });
 
-// --- XỬ LÝ XÓA KHỎI GIỎ HÀNG ---
 router.post("/shopping-cart/delete", async (req, res) => {
-    // 1. Kiểm tra đăng nhập
+    // Kiểm tra đăng nhập
     if (!req.session.authUser) {
         return res.status(401).send("Bạn cần đăng nhập");
     }
@@ -410,10 +389,10 @@ router.post("/shopping-cart/delete", async (req, res) => {
             return res.status(400).send("Thiếu ID khóa học");
         }
 
-        // 2. Gọi model để xóa
+        // Gọi model để xóa
         await coursesModel.removeCartItem(userId, courseId);
 
-        // 3. Chuyển hướng người dùng TRỞ LẠI trang giỏ hàng
+        // Chuyển hướng người dùng TRỞ LẠI trang giỏ hàng
         res.redirect("/account/shopping-cart");
     } catch (err) {
         console.error("Lỗi khi xóa khỏi giỏ hàng:", err);
@@ -421,9 +400,8 @@ router.post("/shopping-cart/delete", async (req, res) => {
     }
 });
 
-// ---  XỬ LÝ THANH TOÁN ---
 router.post("/checkout", async (req, res) => {
-    // 1. Kiểm tra đăng nhập
+    // Kiểm tra đăng nhập
     if (!req.session.authUser) {
         return res.status(401).send("Bạn cần đăng nhập");
     }
@@ -431,10 +409,10 @@ router.post("/checkout", async (req, res) => {
     try {
         const userId = req.session.authUser.id;
 
-        // 2. Lấy danh sách courseIds từ form (nhờ JS ở bước 1)
+        // Lấy danh sách courseIds từ form (nhờ JS ở bước 1)
         let { courseIds } = req.body;
 
-        // 3. Kiểm tra dữ liệu đầu vào
+        // Kiểm tra dữ liệu đầu vào
         if (!courseIds) {
             // Nếu không có JS hoặc user bỏ tick tất cả
             const msg = encodeURIComponent("Vui lòng chọn ít nhất một khóa học.");
@@ -446,10 +424,10 @@ router.post("/checkout", async (req, res) => {
             courseIds = [courseIds];
         }
 
-        // 4. Gọi model để xử lý transaction
+        // Gọi model để xử lý transaction
         await coursesModel.checkout(userId, courseIds);
 
-        // 5. Thông báo thành công và chuyển hướng
+        // Thông báo thành công và chuyển hướng
         // (Bạn có thể chuyển hướng đến trang "Khóa học của tôi")
         const msg = encodeURIComponent(
             "Thanh toán thành công! Khóa học đã được thêm vào tài khoản của bạn."

@@ -87,10 +87,8 @@
     }
 </style>
 <main class="container py-3">
-    <!-- Card header: thumbnail + core info -->
     <div class="card border-0 shadow-sm mb-3">
         <div class="row g-0 align-items-stretch">
-            <!-- Image (responsive: full width on mobile, left column on md+) -->
             <div class="col-12 col-md-5">
                 <div class="ratio ratio-16x9 h-100">
                     <img src="{{getImageUrl course.hero_image_url}}" alt="Ảnh khoá học {{course.title}}"
@@ -103,40 +101,33 @@
                 <div class="card-body h-100 d-flex flex-column">
                     <h1 class="h5 mb-1">{{course.title}}</h1>
 
-                    <!-- Rating + count (nếu có) -->
                     <div class="d-flex align-items-center mb-2">
                         {{#if course.rating_avg}}
                         <span class="me-2 fw-semibold text-warning">{{course.rating_avg}}</span>
                         <span class="me-2" aria-label="{{course.rating_avg}} stars">
-                            {{!-- Fallback sao bằng ký tự, không cần icon library --}}
                             {{#each course.stars_filled}}★{{/each}}{{#each course.stars_empty}}☆{{/each}}
                         </span>
                         <small class="text-muted">({{course.review_count}}★ đánh giá) - {{course.rating_count}} lượt
                             đánh giá</small>
                         {{/if}}
                     </div>
-                    <!-- Giảng viên -->
                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
                             class="fw-semibold">{{course.instructor_name}}</span></p>
 
-                    <!--Số lượng học viên-->
                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Số lượng học viên: <span
                             class="fw-semibold">{{course.students_count}}</span></p>
 
-                    <!-- Cập nhật -->
                     {{#if course.updated_at}}
                     <div class="small text-muted mb-3">
                         Cập nhật: {{formatDate course.updated_at}}
                     </div>
                     {{/if}}
-                    <!-- Mô tả dài (HTML) -->
-                    <!-- Mô tả ngắn -->
+
                     <div class="card-text text-secondary small fst-italic mb-2">
                         <i class="bi bi-info-circle me-1 text-primary"></i>
                         {{{course.short_desc}}}
                     </div>
 
-                    <!-- Mô tả dài -->
                     <div class="card-text text-dark small lh-sm mb-3">
                         <i class="bi bi-align-left me-1 text-success"></i>
                         {{{course.long_desc}}}
