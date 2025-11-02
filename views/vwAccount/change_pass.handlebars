@@ -4,26 +4,38 @@
         <h5 class="mb-0">Đổi mật khẩu</h5>
     </div>
     <div class="card-body">
-        <form id="frmChangePassword" method="post" action="/account/change-password">
+        <form id="frmChangePassword" method="post" action="/account/change-password" novalidate>
             <!-- Mật khẩu hiện tại -->
             <div class="mb-3">
                 <label for="txtOldPassword" class="form-label">Mật khẩu hiện tại</label>
                 <input type="password" class="form-control" id="txtOldPassword" name="oldPassword"
-                    placeholder="Nhập mật khẩu hiện tại">
+                    placeholder="Nhập mật khẩu hiện tại" required>
+                <div class="invalid-feedback"></div>
             </div>
 
             <!-- Mật khẩu mới -->
             <div class="mb-3">
                 <label for="txtNewPassword" class="form-label">Mật khẩu mới</label>
                 <input type="password" class="form-control" id="txtNewPassword" name="newPassword"
-                    placeholder="Nhập mật khẩu mới">
+                    placeholder="Nhập mật khẩu mới" required>
+                <div class="form-text">
+                    <ul id="pwRules" class="list-unstyled small mb-0 mt-2">
+                        <li data-rule="len">[Thiếu] Ít nhất 8 ký tự</li>
+                        <li data-rule="upper">[Thiếu] Có ít nhất 1 chữ hoa (A–Z)</li>
+                        <li data-rule="lower">[Thiếu] Có ít nhất 1 chữ thường (a–z)</li>
+                        <li data-rule="num">[Thiếu] Có ít nhất 1 số (0–9)</li>
+                        <li data-rule="special">[Thiếu] Có ít nhất 1 ký tự đặc biệt (!@#$...)</li>
+                    </ul>
+                </div>
+                <div class="invalid-feedback"></div>
             </div>
 
             <!-- Xác nhận mật khẩu mới -->
             <div class="mb-3">
                 <label for="txtConfirmPassword" class="form-label">Xác nhận mật khẩu mới</label>
                 <input type="password" class="form-control" id="txtConfirmPassword" name="confirmPassword"
-                    placeholder="Nhập lại mật khẩu mới">
+                    placeholder="Nhập lại mật khẩu mới" required>
+                <div class="invalid-feedback"></div>
             </div>
 
             <!-- Hàng nút -->
@@ -34,4 +46,94 @@
         </form>
     </div>
 </div>
+
+{{#section "js"}}
+<script>
+    (function () {
+        const form = document.getElementById('frmChangePassword');
+        const oldPw = document.getElementById('txtOldPassword');
+        const newPw = document.getElementById('txtNewPassword');
+        const cfPw = document.getElementById('txtConfirmPassword');
+        const pwRules = document.querySelectorAll('#pwRules li');
+
+        const showError = (input, msg) => {
+            input.classList.add('is-invalid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.textContent = msg || 'Giá trị không hợp lệ.';
+        };
+
+        const clearError = (input) => {
+            input.classList.remove('is-invalid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.textContent = '';
+        };
+
+        const pwChecks = {
+            len: (v) => v.length >= 8,
+            upper: (v) => /[A-Z]/.test(v),
+            lower: (v) => /[a-z]/.test(v),
+            num: (v) => /\d/.test(v),
+            special: (v) => /[^A-Za-z0-9]/.test(v),
+        };
+
+        const updatePwRules = (v) => {
+            pwRules.forEach((li) => {
+                const rule = li.dataset.rule;
+                const passed = pwChecks[rule](v);
+                li.textContent = (passed ? '[Đủ] ' : '[Thiếu] ') + li.textContent.replace(/^\[Đủ\] |\[Thiếu\] /, '');
+                li.style.color = passed ? 'green' : '#6c757d';
+            });
+        };
+
+        const strongPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+        const validate = () => {
+            let ok = true;
+            [oldPw, newPw, cfPw].forEach(clearError);
+
+            if (!oldPw.value.trim()) { showError(oldPw, 'Vui lòng nhập mật khẩu hiện tại.'); ok = false; }
+            if (!newPw.value.trim()) { showError(newPw, 'Vui lòng nhập mật khẩu mới.'); ok = false; }
+            if (!cfPw.value.trim()) { showError(cfPw, 'Vui lòng xác nhận mật khẩu mới.'); ok = false; }
+
+            if (!ok) return false;
+
+            if (!strongPattern.test(newPw.value)) {
+                showError(newPw, 'Mật khẩu mới chưa đáp ứng đủ yêu cầu.');
+                ok = false;
+            }
+
+            if (oldPw.value && newPw.value && oldPw.value === newPw.value) {
+                showError(newPw, 'Mật khẩu mới không được trùng mật khẩu hiện tại.');
+                ok = false;
+            }
+
+            if (newPw.value !== cfPw.value) {
+                showError(cfPw, 'Xác nhận mật khẩu không khớp.');
+                ok = false;
+            }
+
+            return ok;
+        };
+
+        form.addEventListener('submit', function (e) {
+            if (!validate()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+
+        newPw.addEventListener('input', () => {
+            updatePwRules(newPw.value);
+            clearError(newPw);
+        });
+
+        form.addEventListener('reset', () => {
+            setTimeout(() => {
+                [oldPw, newPw, cfPw].forEach(clearError);
+                updatePwRules('');
+            }, 0);
+        });
+    })();
+</script>
+{{/section}}
 {{/std_profile}}
