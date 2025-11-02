@@ -53,3 +53,38 @@ export const uploadImage = multer({
   },
   limits: { fileSize: 1024 * 1024 * 5 }, // 5MB
 });
+
+// Instructor avatar upload middleware - lưu vào statics/img/instructor
+const instructorAvatarDir = path.join(
+  process.cwd(),
+  "statics",
+  "img",
+  "instructor"
+);
+fs.mkdirSync(instructorAvatarDir, { recursive: true });
+
+const instructorAvatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, instructorAvatarDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || ".jpg");
+    // Lưu tên file là instructor_id để dễ dàng truy cập
+    const instructorId =
+      req.session?.user?.id || req.body.instructor_id || Date.now();
+    cb(null, `${instructorId}${ext}`);
+  },
+});
+
+export const uploadInstructorAvatar = multer({
+  storage: instructorAvatarStorage,
+  fileFilter: (_req, file, cb) => {
+    const ok = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ].includes(file.mimetype);
+    cb(ok ? null : new Error("Unsupported image type"), ok);
+  },
+  limits: { fileSize: 1024 * 1024 * 5 }, // 5MB
+});

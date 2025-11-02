@@ -1,8 +1,13 @@
 import { Router } from "express";
 import { isInstructor, requireRole, ensureAuth } from "../middlewares/auth.js";
-import { uploadVideo, uploadImage } from "../middlewares/uploads.js";
+import {
+  uploadVideo,
+  uploadImage,
+  uploadInstructorAvatar,
+} from "../middlewares/uploads.js";
 import db from "../utils/db.js";
 import path from "path";
+import userModel from "../models/user.model.js";
 
 const r = Router();
 
@@ -142,17 +147,255 @@ r.get("/courses/new", isInstructor, async (req, res) => {
   });
 });
 
-// Profile settings route
+// Profile settings route - GET
 r.get("/profile", isInstructor, async (req, res) => {
-  const me = req.session.user;
-  res.render("instructor/profile", {
-    layout: "admin",
-    title: "Cài đặt hồ sơ",
-    authUser: req.session.user,
-    currentPage: "profile",
-    user: me,
-  });
+  try {
+    const me = req.session.user;
+    // Lấy thông tin từ bảng profiles
+    const userProfile = await userModel.findById(me.id);
+
+    if (!userProfile) {
+      return res.status(404).send("Không tìm thấy hồ sơ");
+    }
+
+    // Lấy thông tin từ bảng instructors (liên kết với profiles qua id)
+    // Bảng instructors sử dụng trường "id" làm primary key (giống với profiles.id)
+    try {
+      const instructorInfo = await db("instructors").where("id", me.id).first();
+
+      if (instructorInfo) {
+        userProfile.specialization =
+          instructorInfo.specialization || userProfile.specialization;
+        userProfile.experience_years =
+          instructorInfo.experience_years !== null &&
+          instructorInfo.experience_years !== undefined
+            ? instructorInfo.experience_years
+            : userProfile.experience_years;
+      }
+    } catch (instructorError) {
+      // Bảng instructors có thể không tồn tại hoặc có lỗi
+      console.log(
+        "Could not load from instructors table:",
+        instructorError.message
+      );
+      // Giữ nguyên giá trị từ profiles nếu có
+    }
+
+    res.render("instructor/profile", {
+      layout: "admin",
+      title: "Cài đặt hồ sơ",
+      authUser: req.session.user,
+      currentPage: "profile",
+      user: userProfile,
+      success: req.query.success || null,
+      error: null,
+    });
+  } catch (error) {
+    console.error("Error loading profile:", error);
+    res.render("instructor/profile", {
+      layout: "admin",
+      title: "Cài đặt hồ sơ",
+      authUser: req.session.user,
+      currentPage: "profile",
+      user: req.session.user,
+      error: "Lỗi khi tải thông tin hồ sơ",
+    });
+  }
 });
+
+// Profile settings route - POST (Cập nhật hồ sơ)
+r.post("/profile", isInstructor, async (req, res) => {
+  try {
+    const me = req.session.user;
+
+    // Kiểm tra req.body tồn tại
+    if (!req.body) {
+      const userProfile = await userModel.findById(me.id).catch(() => me);
+      return res.render("instructor/profile", {
+        layout: "admin",
+        title: "Cài đặt hồ sơ",
+        authUser: req.session.user,
+        currentPage: "profile",
+        user: userProfile || me,
+        error: "Lỗi: Không nhận được dữ liệu từ form",
+      });
+    }
+
+    const { name, email, phone, specialization, experience_years, bio } =
+      req.body || {};
+
+    // Tạo object update
+    const updateData = {};
+    if (name !== undefined && name !== null && name.trim() !== "") {
+      updateData.name = name.trim();
+    }
+    if (email !== undefined && email !== null && email.trim() !== "") {
+      // Kiểm tra format email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        const userProfile = await userModel.findById(me.id).catch(() => me);
+        return res.render("instructor/profile", {
+          layout: "admin",
+          title: "Cài đặt hồ sơ",
+          authUser: req.session.user,
+          currentPage: "profile",
+          user: userProfile || me,
+          error: "Email không hợp lệ",
+        });
+      }
+      updateData.email = email.trim().toLowerCase();
+    }
+    if (phone !== undefined && phone !== null) {
+      updateData.phone = phone.trim() || null;
+    }
+    if (bio !== undefined && bio !== null) updateData.bio = bio;
+
+    // Tách dữ liệu cho 2 bảng: profiles và instructors
+    const profileUpdate = {
+      name: updateData.name,
+      email: updateData.email,
+      phone: updateData.phone,
+      bio: updateData.bio,
+    };
+
+    // Xóa các trường undefined/null
+    Object.keys(profileUpdate).forEach(
+      (key) =>
+        (profileUpdate[key] === undefined || profileUpdate[key] === null) &&
+        delete profileUpdate[key]
+    );
+
+    // Cập nhật vào bảng profiles
+    const result = await userModel.editUser({
+      id: me.id,
+      ...profileUpdate,
+    });
+
+    // Xử lý cập nhật vào bảng instructors (specialization và experience_years)
+    const instructorUpdate = {};
+    if (specialization !== undefined && specialization !== null) {
+      instructorUpdate.specialization = specialization.trim() || null;
+    }
+    if (experience_years !== undefined && experience_years !== "") {
+      instructorUpdate.experience_years = parseInt(experience_years) || 0;
+    }
+
+    // Xử lý cập nhật vào bảng instructors (specialization và experience_years)
+    // Bảng instructors liên kết với profiles qua id (instructor_id hoặc id)
+    if (Object.keys(instructorUpdate).length > 0) {
+      try {
+        // Tìm record với id (bảng instructors dùng id làm primary key, không có instructor_id)
+        const existingInstructor = await db("instructors")
+          .where("id", me.id)
+          .first();
+
+        if (existingInstructor) {
+          // Cập nhật nếu đã có record
+          await db("instructors").where("id", me.id).update(instructorUpdate);
+        } else {
+          // Tạo mới nếu chưa có
+          await db("instructors").insert({
+            id: me.id,
+            ...instructorUpdate,
+          });
+        }
+      } catch (instructorError) {
+        // Bảng instructors có thể không tồn tại hoặc có lỗi
+        console.error(
+          "Error updating instructors table:",
+          instructorError.message
+        );
+        // Vẫn tiếp tục vì đã cập nhật profiles thành công
+      }
+    }
+
+    if (result === 0) {
+      const userProfile = await userModel.findById(me.id);
+      return res.render("instructor/profile", {
+        layout: "admin",
+        title: "Cài đặt hồ sơ",
+        authUser: req.session.user,
+        currentPage: "profile",
+        user: userProfile,
+        error: "Cập nhật không thành công",
+      });
+    }
+
+    // Cập nhật session với thông tin mới
+    const updatedProfile = await userModel.findById(me.id);
+
+    // Lấy thông tin từ bảng instructors để cập nhật session (dùng trường id)
+    try {
+      const instructorInfo = await db("instructors").where("id", me.id).first();
+
+      if (instructorInfo) {
+        updatedProfile.specialization = instructorInfo.specialization;
+        updatedProfile.experience_years = instructorInfo.experience_years;
+      }
+    } catch (instructorError) {
+      console.log("Could not load instructor info:", instructorError.message);
+    }
+
+    Object.assign(req.session.user, {
+      name: updatedProfile.name,
+      full_name: updatedProfile.name,
+      email: updatedProfile.email,
+      phone: updatedProfile.phone,
+      specialization: updatedProfile.specialization,
+      experience_years: updatedProfile.experience_years,
+      bio: updatedProfile.bio,
+    });
+
+    // Cũng cập nhật authUser nếu có
+    if (req.session.authUser) {
+      req.session.authUser.name = updatedProfile.name;
+      req.session.authUser.email = updatedProfile.email;
+    }
+
+    res.redirect("/instructor/profile?success=Cập nhật hồ sơ thành công");
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    const me = req.session.user;
+    const userProfile = await userModel.findById(me.id).catch(() => me);
+
+    res.render("instructor/profile", {
+      layout: "admin",
+      title: "Cài đặt hồ sơ",
+      authUser: req.session.user,
+      currentPage: "profile",
+      user: userProfile || me,
+      error: "Lỗi khi cập nhật hồ sơ: " + error.message,
+    });
+  }
+});
+
+// Upload avatar route
+r.post(
+  "/profile/avatar",
+  isInstructor,
+  uploadInstructorAvatar.single("avatar"),
+  async (req, res) => {
+    try {
+      const me = req.session.user;
+
+      if (!req.file) {
+        return res.redirect(
+          "/instructor/profile?error=Không có file được chọn"
+        );
+      }
+
+      // File đã được lưu bởi middleware, tên file là instructor_id.jpg
+      // Không cần cập nhật database vì ảnh được lưu với tên file là ID
+
+      res.redirect(
+        "/instructor/profile?success=Cập nhật ảnh đại diện thành công"
+      );
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      res.redirect("/instructor/profile?error=Lỗi khi cập nhật ảnh đại diện");
+    }
+  }
+);
 
 // Analytics/Reports route
 r.get("/analytics", isInstructor, async (req, res) => {

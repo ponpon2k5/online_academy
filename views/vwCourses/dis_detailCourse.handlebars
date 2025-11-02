@@ -356,14 +356,28 @@
     <div class="card mb-3" style="max-width: 540px;">
         <div class="row g-0">
             <div class="col-md-4">
-                <img src="/images/instructor/{{instructor_id}}.jpg" class="img-fluid rounded-start" alt="...">
+                <img src="/images/instructor/{{instructor_id}}.jpg" 
+                     class="img-fluid rounded-start" 
+                     alt="{{instructor.name}}"
+                     style="width: 100%; height: 100%; object-fit: cover;"
+                     onerror="this.src='https://via.placeholder.com/200x200?text=Instructor'; this.onerror=null;">
             </div>
             <div class="col-md-8">
                 <div class="card-body">
                     <h4 class="fw-bold mb-1">{{instructor.name}}</h4>
+                    {{#if instructor.specialization}}
                     <p class="text-primary small mb-2">{{instructor.specialization}}</p>
+                    {{/if}}
+                    {{#if instructor.experience_years}}
                     <p class="text-muted small mb-3">Kinh nghiệm: {{instructor.experience_years}} năm</p>
+                    {{else}}
+                    <p class="text-muted small mb-3">Kinh nghiệm: Chưa cập nhật</p>
+                    {{/if}}
+                    {{#if instructor.bio}}
                     <p class="text-muted small mb-0">{{{instructor.bio}}}</p>
+                    {{else}}
+                    <p class="text-muted small mb-0 fst-italic">Giảng viên chưa cập nhật thông tin giới thiệu.</p>
+                    {{/if}}
                 </div>
             </div>
         </div>

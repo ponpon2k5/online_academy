@@ -82,6 +82,9 @@
           <a class="nav-link {{#if (eq currentPage 'courses-new')}}active{{/if}}" href="/instructor/courses/new">
             <i class="bi bi-plus-circle me-2"></i> Tạo khóa học
           </a>
+          <a class="nav-link {{#if (eq currentPage 'profile')}}active{{/if}}" href="/instructor/profile">
+            <i class="bi bi-person-circle me-2"></i> Cài đặt hồ sơ
+          </a>
           {{/if}}
           
           <hr class="text-white-50">
@@ -118,9 +121,15 @@
                   <span class="text-dark">{{#if authUser}}{{authUser.full_name}}{{else}}User{{/if}}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
+                  {{#if (eq authUser.role 'instructor')}}
+                  <li><a class="dropdown-item" href="/instructor/profile">
+                    <i class="bi bi-person-circle me-2"></i> Cài đặt hồ sơ
+                  </a></li>
+                  {{else}}
                   <li><a class="dropdown-item" href="/account/profile">
                     <i class="bi bi-person me-2"></i> Hồ sơ
                   </a></li>
+                  {{/if}}
                   <li><a class="dropdown-item" href="/account/change-password">
                     <i class="bi bi-key me-2"></i> Đổi mật khẩu
                   </a></li>
