@@ -76,13 +76,15 @@ export default {
         return profile;
       });
   },
-  view_courses_same_category(courseId) {
-    return db("courses as c")
+  view_courses_same_category(courseId, sort = "") {
+    const q = db("courses as c")
       .join("enrollments as e", "c.id", "e.course_id")
       .join("courses as target", "c.category_id", "target.category_id")
       .leftJoin(
         db.raw(
-          "(SELECT course_id, COUNT(*) as weekly_purchases FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' GROUP BY course_id) as weekly"
+          "(SELECT course_id, COUNT(*) as weekly_purchases " +
+          " FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' " +
+          " GROUP BY course_id) as weekly"
         ),
         "c.id",
         "weekly.course_id"
@@ -105,9 +107,39 @@ export default {
         "c.last_published_at",
         db.raw("COUNT(e.id) as total_enrollments"),
         db.raw("COALESCE(weekly.weekly_purchases, 0) as weekly_purchases")
-      )
-      .orderBy("total_enrollments", "desc")
-      .limit(5);
+      );
+
+
+    switch (sort) {
+      case "rating_desc":
+        q.orderBy([{ column: "c.rating_avg", order: "desc" }, { column: "c.rating_count", order: "desc" }]);
+        break;
+      case "rating_asc":
+        q.orderBy([{ column: "c.rating_avg", order: "asc" }, { column: "c.rating_count", order: "asc" }]);
+        break;
+      case "price_asc":
+        // ưu tiên promo_price
+        q.orderBy([
+          db.raw("COALESCE(c.promo_price, c.price) asc"),
+          { column: "c.price", order: "asc" },
+        ]);
+        break;
+      case "price_desc":
+        q.orderBy([
+          db.raw("COALESCE(c.promo_price, c.price) desc"),
+          { column: "c.price", order: "desc" },
+        ]);
+        break;
+
+      default:
+        // mặc định giữ logic cũ 
+        q.orderBy([
+          { column: "weekly_purchases", order: "desc" },
+          { column: "total_enrollments", order: "desc" },
+        ]);
+    }
+
+    return q.limit(5);
   },
   view_lesson_in_detail(courseId) {
     return db("lessons as l")
@@ -236,14 +268,31 @@ export default {
 
     if (categorySlug) {
       q.andWhere(function () {
-        this.where("parent.slug", categorySlug).orWhere(
-          "leaf.slug",
-          categorySlug
-        );
+        this.where("parent.slug", categorySlug).orWhere("leaf.slug", categorySlug);
       });
     }
 
-    // sort như cũ...
+    switch (sort) {
+      case "rating_desc":
+        q.orderBy([{ column: "c.rating_avg", order: "desc" }, { column: "c.rating_count", order: "desc" }]);
+        break;
+      case "rating_asc":
+        q.orderBy([{ column: "c.rating_avg", order: "asc" }, { column: "c.rating_count", order: "asc" }]);
+        break;
+      case "price_asc":
+        // ưu tiên giá khuyến mãi nếu có
+        q.orderByRaw("COALESCE(c.promo_price, c.price) ASC NULLS LAST")
+          .orderBy("c.price", "asc");
+        break;
+      case "price_desc":
+        q.orderByRaw("COALESCE(c.promo_price, c.price) DESC NULLS LAST")
+          .orderBy("c.price", "desc");
+        break;
+      default:
+        // mặc định: khóa học mới/cập nhật gần đây trước
+        q.orderByRaw("COALESCE(c.last_published_at, c.updated_at, c.created_at) DESC NULLS LAST");
+    }
+
     return q.limit(limit).offset(offset);
   },
   view_lessons_by_course_id(courseId) {

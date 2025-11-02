@@ -321,7 +321,8 @@
                         <div class="col-6">
                             <div class="stat-item">
                                 <div class="stat-number h3 mb-0">
-                                    {{#if totalCount}}{{totalCount}}{{else}}{{#if list}}{{list.length}}{{else}}{{#if courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}{{/if}}
+                                    {{#if totalCount}}{{totalCount}}{{else}}{{#if list}}{{list.length}}{{else}}{{#if
+                                    courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}{{/if}}
                                 </div>
                                 <div class="stat-label small opacity-75">Khóa học</div>
                             </div>
@@ -356,6 +357,12 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <form method="GET" action="/courses/view-courses" id="filterForm">
                             <input type="hidden" name="page" value="1">
+
+                            {{!-- GIỮ CÁC QUERY ĐANG CÓ --}}
+                            {{#if q}}<input type="hidden" name="q" value="{{q}}">{{/if}}
+                            {{#if selectedCategory}}<input type="hidden" name="category"
+                                value="{{selectedCategory}}">{{/if}}
+
                             <!-- Danh mục -->
                             <div class="filter-group mb-3">
                                 <h6 class="fw-bold mb-2 d-flex align-items-center">
@@ -363,16 +370,12 @@
                                 </h6>
                                 <select class="form-select form-select-lg" name="category">
                                     <option value="">Tất cả danh mục</option>
-
                                     {{#each categoryTree}}
                                     <optgroup label="{{this.name}}">
-                                        {{!-- Chọn cả nhóm (cha) --}}
                                         <option value="{{this.slug}}" {{#if (eq ../selectedCategory
                                             this.slug)}}selected{{/if}}>
                                             {{this.name}} - Tất cả
                                         </option>
-
-                                        {{!-- Các danh mục con --}}
                                         {{#each this.children}}
                                         <option value="{{this.slug}}" {{#if (eq ../../selectedCategory
                                             this.slug)}}selected{{/if}}>
@@ -389,17 +392,16 @@
                                 <h6 class="fw-bold mb-2 d-flex align-items-center">
                                     <i class="bi bi-sort-down me-2 text-primary"></i>Sắp xếp theo
                                 </h6>
-                                <select class="form-select form-select-lg" name="sort">
-                                    <option value="">Mặc định</option>
+                                <select class="form-select form-select-lg" name="sort" onchange="this.form.submit()">
+                                    <option value="" {{#if (eq selectedSort "" )}}selected{{/if}}>Mặc định</option>
                                     <option value="rating_desc" {{#if (eq selectedSort "rating_desc" )}}selected{{/if}}>
                                         Điểm đánh giá giảm dần</option>
-                                    <option value="rating_desc" {{#if (eq selectedSort "rating_asc" )}}selected{{/if}}>
+                                    <option value="rating_asc" {{#if (eq selectedSort "rating_asc" )}}selected{{/if}}>
                                         Điểm đánh giá tăng dần</option>
                                     <option value="price_asc" {{#if (eq selectedSort "price_asc" )}}selected{{/if}}>Giá
                                         tăng dần</option>
                                     <option value="price_desc" {{#if (eq selectedSort "price_desc" )}}selected{{/if}}>
-                                        Giá
-                                        giảm dần</option>
+                                        Giá giảm dần</option>
                                 </select>
                             </div>
 
@@ -504,7 +506,7 @@
                                         <span class="fs-5 fw-bold text-primary me-2">
                                             {{formatCurrency this.promo_price}}</span>
                                         <span class="text-muted text-decoration-line-through">
-                                            {{formatCurrency this.this.price}}</span>
+                                            {{formatCurrency this.price}}</span>
 
                                     </div>
                                 </div>

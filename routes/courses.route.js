@@ -90,32 +90,42 @@ router.post("/enroll-course", async (req, res) => {
 });
 
 //course detail
-router.get("/course-detail/:id", async (req, res) => {
-  const courseId = req.params.id;
+router.get("/course-detail/:id", async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+    const selectedSort = String(req.query.sort || "");
 
-  const userId = req.session?.authUser?.id || null;
-  await coursesModel.increaseViews(courseId);
-  const course = await coursesModel.view_detail_course(courseId);
-  const lessons = await coursesModel.view_lesson_in_detail(courseId);
-  const feedback = await coursesModel.getFeedback(courseId);
-  const sameCourseCategoryRaw = await coursesModel.view_courses_same_category(
-    courseId
-  );
-  // Áp dụng mapCourseFlags cho related courses
-  const relatedCourses = mapCourseList(sameCourseCategoryRaw);
-  const existed = await isEnrolled(userId, courseId);
-  const instructor_id = course.instructor_id;
-  const instructor = await coursesModel.getInstructorProfile(instructor_id);
-  res.render("vwCourses/dis_detailCourse", {
-    title: course.title || "Chi tiết khóa học",
-    course: course,
-    lessons: lessons,
-    feedbacks: feedback,
-    relatedCourses: relatedCourses,
-    instructor: instructor,
-    instructor_id,
-    existed,
-  });
+    const userId = req.session?.authUser?.id || null;
+    await coursesModel.increaseViews(courseId);
+
+    const course = await coursesModel.view_detail_course(courseId);
+    const lessons = await coursesModel.view_lesson_in_detail(courseId);
+    const feedback = await coursesModel.getFeedback(courseId);
+
+    const sameCourseCategoryRaw = await coursesModel.view_courses_same_category(
+      courseId,
+      selectedSort 
+    );
+
+    const relatedCourses = mapCourseList(sameCourseCategoryRaw);
+    const existed = await isEnrolled(userId, courseId);
+    const instructor_id = course.instructor_id;
+    const instructor = await coursesModel.getInstructorProfile(instructor_id);
+
+    res.render("vwCourses/dis_detailCourse", {
+      title: course.title || "Chi tiết khóa học",
+      course,
+      lessons,
+      feedbacks: feedback,
+      relatedCourses,
+      instructor,
+      instructor_id,
+      existed,
+      selectedSort, 
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 router.post("/course-detail/:id", async (req, res) => {
   if (!req.session.authUser) {
