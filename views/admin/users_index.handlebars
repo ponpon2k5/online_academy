@@ -1,10 +1,23 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h3 class="mb-0"><i class="bi bi-people"></i> Quản lý người dùng</h3>
-  <div class="btn-group" role="group">
-    <button type="button" class="btn btn-outline-primary" onclick="filterUsers('all')">Tất cả</button>
-    <button type="button" class="btn btn-outline-success" onclick="filterUsers('student')">Học viên</button>
-    <button type="button" class="btn btn-outline-info" onclick="filterUsers('instructor')">Giảng viên</button>
-    <button type="button" class="btn btn-outline-warning" onclick="filterUsers('admin')">Quản trị</button>
+  <div class="d-flex gap-2">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn {{#if (eq filters.status 'all')}}btn-primary{{else}}btn-outline-primary{{/if}}" onclick="applyFilter('status', 'all')">
+        <i class="bi bi-list"></i> Tất cả
+      </button>
+      <button type="button" class="btn {{#if (eq filters.status 'active')}}btn-success{{else}}btn-outline-success{{/if}}" onclick="applyFilter('status', 'active')">
+        <i class="bi bi-check-circle"></i> Đang hoạt động
+      </button>
+      <button type="button" class="btn {{#if (eq filters.status 'locked')}}btn-danger{{else}}btn-outline-danger{{/if}}" onclick="applyFilter('status', 'locked')">
+        <i class="bi bi-lock"></i> Đã khóa
+      </button>
+    </div>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn {{#if (eq filters.role 'all')}}btn-primary{{else}}btn-outline-primary{{/if}}" onclick="applyFilter('role', 'all')">Tất cả</button>
+      <button type="button" class="btn {{#if (eq filters.role 'student')}}btn-success{{else}}btn-outline-success{{/if}}" onclick="applyFilter('role', 'student')">Học viên</button>
+      <button type="button" class="btn {{#if (eq filters.role 'instructor')}}btn-info{{else}}btn-outline-info{{/if}}" onclick="applyFilter('role', 'instructor')">Giảng viên</button>
+      <button type="button" class="btn {{#if (eq filters.role 'admin')}}btn-warning{{else}}btn-outline-warning{{/if}}" onclick="applyFilter('role', 'admin')">Quản trị</button>
+    </div>
   </div>
 </div>
 
@@ -17,7 +30,7 @@
 {{#if users.length}}
 <div class="row">
   {{#each users}}
-  <div class="col-md-6 col-lg-4 mb-4 user-card" data-role="{{this.role}}" data-user-id="{{this.id}}">
+  <div class="col-md-6 col-lg-4 mb-4 user-card" data-role="{{this.role}}" data-status="{{#if this.is_active}}active{{else}}locked{{/if}}" data-user-id="{{this.id}}">
     <div class="card h-100">
       <div class="card-body">
         <div class="d-flex align-items-center mb-3">
@@ -65,6 +78,24 @@
             </button>
           </div>
           
+          {{#unless (eq this.role 'admin')}}
+          <div class="d-flex gap-1">
+            {{#if this.is_active}}
+            <form action="/admin/users/{{this.id}}/deactivate" method="POST" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn khóa tài khoản này?');">
+              <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                <i class="bi bi-lock"></i> Khóa tài khoản
+              </button>
+            </form>
+            {{else}}
+            <form action="/admin/users/{{this.id}}/activate" method="POST" class="flex-fill" onsubmit="return confirm('Bạn có chắc muốn mở khóa tài khoản này?');">
+              <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                <i class="bi bi-unlock"></i> Mở khóa
+              </button>
+            </form>
+            {{/if}}
+          </div>
+          {{/unless}}
+          
           <!-- Đã bỏ nút xóa theo yêu cầu -->
         </div>
       </div>
@@ -99,49 +130,26 @@
 </div>
 
 <script>
-function filterUsers(role) {
-  const cards = document.querySelectorAll('.user-card');
-  const filterButtons = document.querySelectorAll('.d-flex .btn-group button');
+// Áp dụng filter và reload trang với query params
+function applyFilter(filterType, value) {
+  const url = new URL(window.location.href);
   
-  // Reset all filter buttons to their default outline state
-  filterButtons.forEach(btn => {
-    // Remove all possible classes first
-    btn.classList.remove('active', 'btn-primary', 'btn-success', 'btn-info', 'btn-warning', 
-                        'btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
-    
-    // Get button text to determine correct outline class
-    const buttonText = btn.textContent.trim();
-    if (buttonText === 'Tất cả') {
-      btn.classList.add('btn-outline-primary');
-    } else if (buttonText === 'Học viên') {
-      btn.classList.add('btn-outline-success');
-    } else if (buttonText === 'Giảng viên') {
-      btn.classList.add('btn-outline-info');
-    } else if (buttonText === 'Quản trị') {
-      btn.classList.add('btn-outline-warning');
-    }
-  });
-  
-  // Set active button
-  const activeBtn = document.querySelector(`button[onclick="filterUsers('${role}')"]`);
-  if (activeBtn) {
-    // Remove outline class and add solid class for active state
-    activeBtn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-info', 'btn-outline-warning');
-    activeBtn.classList.add('active');
-    
-    const buttonText = activeBtn.textContent.trim();
-    if (buttonText === 'Tất cả') {
-      activeBtn.classList.add('btn-primary');
-    } else if (buttonText === 'Học viên') {
-      activeBtn.classList.add('btn-success');
-    } else if (buttonText === 'Giảng viên') {
-      activeBtn.classList.add('btn-info');
-    } else if (buttonText === 'Quản trị') {
-      activeBtn.classList.add('btn-warning');
-    }
+  // Nếu chọn "all", xóa filter đó khỏi URL
+  if (value === 'all') {
+    url.searchParams.delete(filterType);
+  } else {
+    // Giữ nguyên các filter khác và cập nhật filter được chọn
+    url.searchParams.set(filterType, value);
   }
   
-  // Filter cards
+  // Reload trang với filter mới
+  window.location.href = url.toString();
+}
+
+// Filter theo client-side (backup - không cần thiết nếu đã dùng server-side filter)
+function filterUsersClient(role) {
+  const cards = document.querySelectorAll('.user-card');
+  
   cards.forEach(card => {
     if (role === 'all' || card.dataset.role === role) {
       card.style.display = 'block';
@@ -205,8 +213,5 @@ function viewUserDetails(userId) {
   modal.show();
 }
 
-// Set default active button on page load
-document.addEventListener('DOMContentLoaded', function() {
-  filterUsers('all');
-});
+// Không cần filter client-side nữa vì đã dùng server-side filter
 </script>

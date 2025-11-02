@@ -22,64 +22,7 @@ export default {
     if (categorySlug) q.andWhere("cat.slug", categorySlug);
     return q.first();
   },
-  view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
-    const q = db("courses as c")
-      .join("profiles as p", "c.instructor_id", "p.id")
-      // Join danh mục CẤP 1
-      .join("categories as parent", "c.category_id", "parent.id")
-      .where("c.status", "published")
-      .select(
-        db.raw("LEFT(parent.id, 4) as cat_prefix"), // 4 ký tự đầu của ID cấp 1 (cat1, cat2,…)
-        "c.id",
-        "c.title",
-        "c.price",
-        "c.promo_price",
-        db.raw("COALESCE(c.promo_price, c.price) AS effective_price"),
-        "c.hero_image_url",
-        "c.short_desc",
-        "p.name as instructor_name",
-        "parent.name as category_name",
-        "parent.slug as category_slug",
-        "c.rating_avg",
-        "c.rating_count",
-        "c.students_count",
-        "c.created_at"
-      );
 
-    // Lọc theo slug: chấp nhận cả slug cấp 1 (parent) lẫn slug cấp 2 (leaf)
-    if (categorySlug) {
-      q.andWhere(function () {
-        this.where("parent.slug", categorySlug).orWhereExists(function () {
-          this.select(db.raw("1"))
-            .from("categories as leaf")
-            .whereRaw("leaf.parent_id = parent.id")
-            .andWhere("leaf.slug", categorySlug);
-        });
-      });
-    }
-
-    // Sắp xếp
-    if (sort) {
-      switch (sort) {
-        case "rating_desc":
-          q.orderBy("c.rating_avg", "desc").orderBy("c.rating_count", "desc");
-          break;
-        case "price_asc":
-          q.orderBy("effective_price", "asc").orderBy("c.id", "desc");
-          break;
-        case "rating_asc":
-          q.orderBy("c.rating_avg", "asc").orderBy("c.id", "desc");
-          break;
-        case "price_desc":
-          q.orderBy("effective_price", "desc").orderBy("c.id", "desc");
-          break;
-      }
-    } else {
-      q.orderBy("c.created_at", "desc").orderBy("c.id", "desc");
-    }
-
-    return q.limit(limit).offset(offset);
-  },
 
   view_detail_course(courseId) {
     return db("courses as c")
@@ -115,10 +58,17 @@ export default {
     return db("courses as c")
       .join("enrollments as e", "c.id", "e.course_id")
       .join("courses as target", "c.category_id", "target.category_id")
+      .leftJoin(
+        db.raw(
+          "(SELECT course_id, COUNT(*) as weekly_purchases FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' GROUP BY course_id) as weekly"
+        ),
+        "c.id",
+        "weekly.course_id"
+      )
       .where("target.id", courseId)
       .andWhere("c.id", "!=", courseId)
       .andWhereRaw("c.status = ?::course_status", ["published"])
-      .groupBy("c.id")
+      .groupBy("c.id", "weekly.weekly_purchases")
       .select(
         "c.id",
         "c.title",
@@ -126,7 +76,13 @@ export default {
         "c.price",
         "c.promo_price",
         "c.students_count",
-        db.raw("COUNT(e.id) as total_enrollments")
+        "c.rating_avg",
+        "c.rating_count",
+        "c.created_at",
+        "c.updated_at",
+        "c.last_published_at",
+        db.raw("COUNT(e.id) as total_enrollments"),
+        db.raw("COALESCE(weekly.weekly_purchases, 0) as weekly_purchases")
       )
       .orderBy("total_enrollments", "desc")
       .limit(5);
@@ -138,9 +94,121 @@ export default {
       .where("c.id", courseId);
   },
   save_feedback(context) {
-    return db("course_reviews").insert(context);
-  },
+    const { course_id } = context;
+    return db.transaction(async (trx) => {
+      // Nếu muốn cho 1 user sửa review của chính họ, dùng upsert:
+      await trx("course_reviews")
+        .insert({
+          course_id: context.course_id,
+          user_id: context.user_id,
+          description: context.description,
+          rating: Number(context.rating),
+          created_at: trx.fn.now(),
+          updated_at: trx.fn.now(),
+        })
+        .onConflict(["course_id", "user_id"])
+        .merge({
+          description: context.description,
+          rating: Number(context.rating),
+          updated_at: trx.fn.now(),
+        });
 
+      // Recompute aggregate (an toàn & đúng tuyệt đối)
+      const agg = await trx("course_reviews")
+        .where("course_id", course_id)
+        .avg({ avg: "rating" })
+        .count({ cnt: "*" })
+        .first();
+
+      const rating_avg = Number(agg?.avg ?? 0);
+      const rating_count = Number(agg?.cnt ?? 0);
+
+      await trx("courses")
+        .where("id", course_id)
+        .update({
+          rating_avg: trx.raw("ROUND(?, 2)", [rating_avg]),
+          rating_count,
+          updated_at: trx.fn.now(),
+        });
+
+      return { ok: true, rating_avg, rating_count };
+    });
+  },
+  getFeedback(course_id) {
+    return db("course_reviews as c")
+      .join("profiles as p", "p.id", "c.user_id")
+      .where("c.course_id", course_id)
+      .select(
+        "c.description as des",
+        "c.rating",
+        "c.created_at",
+        "p.name as name",
+        "p.role as role",
+        "p.avatar_url"
+      )
+      .orderBy("c.created_at", "desc");
+  },
+  count_all_courses({ categorySlug = null } = {}) {
+    const q = db('courses as c')
+      .join('categories as parent', 'c.category_id', 'parent.id')
+      .leftJoin('categories as leaf', 'c.sub_category_id', 'leaf.id')
+      .whereRaw("c.status = ?::course_status", ['published'])
+      .count({ total: '*' });
+
+    if (categorySlug) {
+      q.andWhere(function () {
+        this.where('parent.slug', categorySlug).orWhere('leaf.slug', categorySlug);
+      });
+    }
+    return q.first();
+  },
+  getCategoriesTree() {
+    // Lấy parent (level 1) + gộp con (level 2) vào mảng children
+    return db('categories as p')
+      .leftJoin('categories as c', 'c.parent_id', 'p.id')
+      .where('p.level', 1)
+      .select(
+        'p.id',
+        'p.name',
+        'p.slug',
+        db.raw(`
+        COALESCE(
+          json_agg(
+            json_build_object('id', c.id, 'name', c.name, 'slug', c.slug)
+            ORDER BY c.sort_order NULLS LAST
+          ) FILTER (WHERE c.id IS NOT NULL),
+          '[]'
+        ) AS children
+      `)
+      )
+      .groupBy('p.id', 'p.name', 'p.slug')
+      .orderBy('p.sort_order', 'asc'); // hoặc p.name
+  },
+  view_all_courses(categorySlug = null, sort = null, limit = 8, offset = 0) {
+    const q = db('courses as c')
+      .join('profiles as p', 'c.instructor_id', 'p.id')
+      .join('categories as parent', 'c.category_id', 'parent.id')
+      .leftJoin('categories as leaf', 'c.sub_category_id', 'leaf.id')
+      .where('c.status', 'published')
+      .select(
+        'c.id', 'c.title', 'c.price', 'c.promo_price',
+        db.raw('COALESCE(c.promo_price, c.price) AS effective_price'),
+        'c.hero_image_url', 'c.short_desc',
+        'p.name as instructor_name',
+        'parent.name as category_name', 'parent.slug as category_slug',
+        'leaf.name as sub_category_name', 'leaf.slug as sub_category_slug',
+        'c.rating_avg', 'c.rating_count', 'c.students_count', 'c.created_at'
+      );
+
+    if (categorySlug) {
+      q.andWhere(function () {
+        this.where('parent.slug', categorySlug).orWhere('leaf.slug', categorySlug);
+      });
+    }
+
+    // sort như cũ...
+    return q.limit(limit).offset(offset);
+  },
   view_lessons_by_course_id(courseId) {
     return db("lessons")
       .where("course_id", courseId)
@@ -159,9 +227,40 @@ export default {
   },
 
   findCourseByQuery(terms, limit, offset) {
-    return db("courses")
-      .whereRaw("fts @@ to_tsquery(remove_accents(?))", [terms])
-      .orderBy("last_published_at", "desc")
+    return db("courses as c")
+      .leftJoin(
+        db.raw(
+          "(SELECT course_id, COUNT(*) as weekly_purchases FROM enrollments WHERE purchased_at >= NOW() - INTERVAL '7 days' GROUP BY course_id) as weekly"
+        ),
+        "c.id",
+        "weekly.course_id"
+      )
+      .join("profiles as p", "c.instructor_id", "p.id")
+      .join("categories as parent", "c.category_id", "parent.id")
+      .whereRaw("c.fts @@ to_tsquery(remove_accents(?))", [terms])
+      .where("c.status", "published")
+      .select(
+        "c.id",
+        "c.title",
+        "c.price",
+        "c.promo_price",
+        db.raw("COALESCE(c.promo_price, c.price) AS effective_price"),
+        "c.hero_image_url",
+        "c.short_desc",
+        "p.name as instructor_name",
+        "parent.name as category_name",
+        "parent.slug as category_slug",
+        "c.rating_avg",
+        "c.rating_count",
+        "c.students_count",
+        "c.created_at",
+        "c.updated_at",
+        "c.last_published_at",
+        db.raw("COALESCE(weekly.weekly_purchases, 0) as weekly_purchases")
+      )
+      .orderByRaw(
+        "COALESCE(c.last_published_at, c.updated_at, c.created_at) DESC NULLS LAST"
+      )
       .limit(limit)
       .offset(offset);
   },
@@ -199,14 +298,26 @@ export default {
   getLessonById(courseId, lessonId) {
     return db("lessons").where({ course_id: courseId, id: lessonId }).first();
   },
+  getLastLessonProgress(userId, courseId) {
+    return db("video_progress as vp")
+      .join("lessons as l", "l.id", "vp.lesson_id")
+      .where("vp.user_id", userId)
+      .andWhere("l.course_id", courseId)
+      .orderBy("vp.update_time", "desc") // mới nhất theo thời gian cập nhật
+      .orderBy("vp.last_second", "desc") // (phòng khi update_time trùng)
+      .select("vp.lesson_id", "vp.last_second")
+      .first();
+  },
   getProgress(userId, currentLessonId) {
     return db("video_progress")
       .where({ user_id: userId, lesson_id: currentLessonId })
+      .orderBy("last_second", "desc")
+      .orderBy("update_time", "desc")
       .first();
   },
   saveProgess(user_id, lesson_id, seconds, completed) {
     const TABLE = "video_progress";
-    return db("video_progress")
+    return db(TABLE)
       .insert({
         user_id,
         lesson_id,
@@ -216,18 +327,17 @@ export default {
       })
       .onConflict(["user_id", "lesson_id"])
       .merge({
-        last_second: db.raw("GREATEST(??.??, ?)", [
-          TABLE,
-          "last_second",
-          Math.floor(seconds),
-        ]),
-        is_completed: db.raw("(??.??) OR ?", [
-          TABLE,
-          "is_completed",
-          !!completed,
-        ]),
+        last_second: Math.floor(seconds),
+        is_completed: db.raw('(??.??) OR ?', [TABLE, 'is_completed', !!completed]),
         update_time: db.fn.now(),
-      });
+      })
+      .returning([
+        "user_id",
+        "lesson_id",
+        "last_second",
+        "is_completed",
+        "update_time",
+      ]);
   },
   showProgress(user_id) {
     return db("video_progress as vp")

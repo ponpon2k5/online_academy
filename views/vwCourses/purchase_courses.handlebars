@@ -6,7 +6,7 @@
             <div class="row g-3 align-items-start">
                 <div class="col-sm-5">
                     <div class="ratio ratio-16x9">
-                        <img src="/images/{{course.hero_image_url}}" alt="Course"
+                        <img src="{{getImageUrl course.hero_image_url}}" alt="Course"
                             class="img-fluid rounded object-fit-cover w-100 h-100">
                     </div>
                 </div>
@@ -69,10 +69,12 @@
                             <span class="badge text-bg-danger">Bán chạy</span>
                         </div>
 
-                        <!-- State: NOT ENROLLED (default) -->
                         <div id="box-not-enrolled">
-                            <form method="post" action="/courses/purchase-courses-process/{{course.id}}">
-                                <button type="submit" class="btn btn-primary w-100">Mua khóa học</button>
+                            <form method="post" action="/courses/buy-now">
+                                <input type="hidden" name="course_id" value="{{course.id}}">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-wallet2 me-1"></i>Mua ngay
+                                </button>
                             </form>
                             <a href="/courses/preview-lessons" class="btn btn-outline-secondary w-100 mt-2">Xem trước
                                 bài học</a>

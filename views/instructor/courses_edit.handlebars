@@ -1,5 +1,5 @@
 <h3 class="mb-3">Edit Course</h3>
-<form method="post" action="/instructor/courses/{{course.id}}/edit" class="row g-3">
+<form method="post" action="/instructor/courses/{{course.id}}/edit" class="row g-3" enctype="multipart/form-data">
   <div class="col-md-6">
     <label class="form-label">Title *</label>
     <input name="title" class="form-control" required value="{{course.title}}"/>
@@ -13,8 +13,20 @@
     </select>
   </div>
   <div class="col-md-6">
-    <label class="form-label">Hero Image URL</label>
-    <input name="hero_image_url" class="form-control" value="{{course.hero_image_url}}"/>
+    <label class="form-label">Hình ảnh đại diện</label>
+    {{#if course.hero_image_url}}
+    <div class="mb-2">
+      <img src="{{course.hero_image_url}}" alt="Current image" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;">
+      <div class="form-text small">Ảnh hiện tại</div>
+    </div>
+    {{/if}}
+    <input type="file" name="hero_image" id="hero_image" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"/>
+    <div class="form-text">Chọn ảnh mới để thay thế (JPG, PNG, GIF, WebP - tối đa 5MB)</div>
+    <div id="image_preview" class="mt-2" style="display: none;">
+      <img id="preview_img" src="" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 1px solid #ddd;">
+      <div class="form-text small">Ảnh preview</div>
+    </div>
+    <input type="hidden" name="hero_image_url" value="{{course.hero_image_url}}"/>
   </div>
   <div class="col-12">
     <label class="form-label">Short Description *</label>
@@ -47,3 +59,41 @@
     {{#if (eq course.status 'published')}}Unpublish{{else}}Publish{{/if}}
   </button>
 </form>
+
+<script>
+// Preview uploaded image
+document.getElementById('hero_image').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('image_preview');
+  const img = document.getElementById('preview_img');
+  
+  if (file) {
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Định dạng file không hỗ trợ! Vui lòng chọn file JPG, PNG, GIF hoặc WebP');
+      e.target.value = '';
+      preview.style.display = 'none';
+      return;
+    }
+    
+    // Check file size (5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB');
+      e.target.value = '';
+      preview.style.display = 'none';
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      img.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.style.display = 'none';
+  }
+});
+</script>

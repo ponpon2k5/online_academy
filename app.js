@@ -16,6 +16,8 @@ import moment from "moment";
 import userModel from "./models/user.model.js";
 
 // Routes
+// app.js
+import mediaRoute from "./routes/media.route.js";
 import adminCategories from "./routes/admin.categories.js";
 import adminRouter from "./routes/admin.js";
 import instructorRouter from "./routes/instructor.js";
@@ -33,8 +35,9 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "statics", "img")));
+// Videos được stream qua /media/lessons/:lessonId/stream, không serve static
 app.use(express.static(path.join(__dirname, "public")));
-// --------- Xử lý tự động đuôi ảnh ----------
+// --------- Xử lý tự động đuôi ảnh ----------,
 app.get("/images/:name", (req, res) => {
   const imageDir = path.join(__dirname, "statics", "img");
   const baseName = req.params.name;
@@ -50,7 +53,6 @@ app.get("/images/:name", (req, res) => {
   // Nếu không tìm thấy ảnh nào
   return res.status(404).sendFile(path.join(imageDir, "logo.jpg"));
 });
-
 
 // ---------- Sessions ----------
 app.set("trust proxy", 1);
@@ -145,6 +147,29 @@ app.engine(
             .padStart(2, "0")}`;
         } else {
           return `${minutes}:${secs.toString().padStart(2, "0")}`;
+        }
+      },
+      getImageUrl: (url) => {
+        // Nếu không có URL, trả về ảnh mặc định
+        if (!url) return "/images/logo.jpg";
+
+        // Nếu URL bắt đầu với / hoặc http/https, dùng trực tiếp (external URL)
+        if (
+          url.startsWith("/") ||
+          url.startsWith("http://") ||
+          url.startsWith("https://")
+        ) {
+          return url;
+        }
+
+        // Nếu là tên file (không có / hoặc http), kiểm tra đã có extension chưa
+        const hasExtension = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
+        if (hasExtension) {
+          // Đã có extension, dùng trực tiếp
+          return `/images/${url}`;
+        } else {
+          // Chưa có extension, thêm .jpg (format cũ)
+          return `/images/${url}.jpg`;
         }
       },
     },
@@ -287,6 +312,7 @@ app.use("/courses", coursesRouter);
 app.use("/admin/categories", adminCategories);
 app.use("/admin", adminRouter);
 app.use("/instructor", instructorRouter);
+app.use("/media", mediaRoute);
 
 // ---------- 404 ----------
 app.use((req, res) => {

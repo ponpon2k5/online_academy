@@ -5,14 +5,14 @@
             <h1 class="h5 mb-1">{{courseTitle}}</h1>
             <div class="text-muted small mb-2">Khoá: {{current_lesson.lesson}}</div>
 
-            <!-- Player: dùng URL dạng /embed/ID (không phải watch?v=) -->
+            <!-- Player: YouTube hoặc Local Video -->
             <div class="card">
                 <div class="card-body p-2">
-                    <div class="ratio ratio-16x9"> <!-- đổi 16x9 → 4x3 -->
-                        <iframe id="yt-player" src="https://www.youtube.com/embed/{{embed_id}}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1"
-                            allowfullscreen
-                            loading="lazy">
-                        </iframe>
+                    <div class="ratio ratio-16x9">
+                        <video id="local-video-player" controls preload="metadata" style="width: 100%; height: 100%;">
+                            <source src="{{localVideoUrl}}" type="video/mp4">
+                            Trình duyệt của bạn không hỗ trợ phát video.
+                        </video>
                     </div>
                 </div>
             </div>
@@ -63,52 +63,52 @@
         </div>
     </div>
 </main>
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
     const LESSON_ID = "{{current_lesson.id}}";
     const RESUME = Number("{{resume_seconds}}") || 0;
+    const IS_YOUTUBE = false; // luôn local
 
-    //player:đối tượng YouTube mà ta có thể điều khiển (pause, play, xem đang ở giây nào, …)
-    //tick: là biến sẽ lưu “timer ID” của setInterval (để sau còn hủy đi khi cần).
     let player, tick;
 
-    function onYouTubeIframeAPIReady() { // hàm YouTube gọi tự động khi iframe_api.js tải xong
-        player = new YT.Player('yt-player', {
-            events: {
-                onReady: () => { // video tải xong
-                    if (RESUME > 0) player.seekTo(Math.max(RESUME - 2, 0), true); //Nếu học viên đã xem được trước đó (VD: 180 giây), thì tua video đến chỗ đó – 2 giây để họ nhớ mạch nội dung.
-                    tick = setInterval(saveTick, 5000); // lưu 5s/lần
-                },
-                onStateChange: (e) => {
-                    const END = 0, PAUSED = 2;
-                    if (e.data === END) saveNow(true);
-                    if (e.data === PAUSED) saveNow(false);
-                }
+    // Local Video Player
+    const videoElement = document.getElementById('local-video-player');
+    if (videoElement) {
+        player = videoElement;
+
+        player.addEventListener('loadedmetadata', () => {
+            if (RESUME > 0) {
+                player.currentTime = Math.max(RESUME - 2, 0);
             }
+            tick = setInterval(saveTick, 5000);
         });
+
+        player.addEventListener('ended', () => saveNow(true));
+        player.addEventListener('pause', () => saveNow(false));
+    }
+
+    function getCurrentTime() {
+        return Math.floor(player?.currentTime || 0);
     }
 
     function saveTick() { saveNow(false); }
 
     function saveNow(done) {
-        const t = Math.floor(player?.getCurrentTime?.() || 0); //Lấy số giây hiện tại mà video đang phát
-        fetch('/courses/save-progress', { // gửi yêu cầu (request) đến một địa chỉ web (URL)và nhận phản hồi (response) từ server.
+        const t = getCurrentTime();
+        fetch('/courses/save-progress', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ lesson_id: LESSON_ID, seconds: t, completed: !!done })
-        }).catch(() => { });//thêm .catch() vào để “bắt lỗi”.
+        }).catch(() => { });
     }
 
-    // Lưu khi rời trang (ít bị rớt)
-    window.addEventListener('pagehide', () => { // Khi học viên tắt tab, refresh, hay chuyển trang, sự kiện pagehide được gọi
+    window.addEventListener('pagehide', () => {
         try {
-            const t = Math.floor(player?.getCurrentTime?.() || 0); //Math.floor() làm tròn
-            navigator.sendBeacon('/courses/save-progress', new Blob( //là hàm đặc biệt của trình duyệt dùng để gửi dữ liệu nhỏ trước khi trang đóng
-            //Ưu điểm: Không bị hủy giữa chừng như fetch() + Gửi rất nhanh và nhẹ.
+            const t = getCurrentTime();
+            navigator.sendBeacon('/courses/save-progress', new Blob(
                 [JSON.stringify({ lesson_id: LESSON_ID, seconds: t })],
                 { type: 'application/json' }
             ));
-        } catch { } //thêm .catch() vào để “bắt lỗi”.
+        } catch { }
         if (tick) clearInterval(tick);
     });
 </script>

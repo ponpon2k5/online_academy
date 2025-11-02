@@ -1,4 +1,4 @@
-{{!-- ========================= JS ========================= --}}
+﻿{{!-- ========================= JS ========================= --}}
 {{#section "js"}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -186,20 +186,7 @@
         transform: scale(1.05);
     }
 
-    .course-overlay {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, .7);
-        opacity: 0;
-        transition: .3s;
-    }
 
-    .course-card:hover .course-overlay {
-        opacity: 1;
-    }
 
     .course-actions .btn {
         border-radius: 10px;
@@ -334,8 +321,7 @@
                         <div class="col-6">
                             <div class="stat-item">
                                 <div class="stat-number h3 mb-0">
-                                    {{#if list}}{{list.length}}{{else}}{{#if
-                                    courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}
+                                    {{#if totalCount}}{{totalCount}}{{else}}{{#if list}}{{list.length}}{{else}}{{#if courses}}{{courses.length}}{{else}}0{{/if}}{{/if}}{{/if}}
                                 </div>
                                 <div class="stat-label small opacity-75">Khóa học</div>
                             </div>
@@ -367,7 +353,7 @@
                             Bộ lọc khóa học
                         </h5>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-4 d-flex flex-column">
                         <form method="GET" action="/courses/view-courses" id="filterForm">
                             <input type="hidden" name="page" value="1">
                             <!-- Danh mục -->
@@ -378,12 +364,23 @@
                                 <select class="form-select form-select-lg" name="category">
                                     <option value="">Tất cả danh mục</option>
 
-                                    {{#each category}}
-                                    <option value="{{slug}}" {{#if (eq ../selectedCategory slug)}}selected{{/if}}>
-                                        {{name}}
-                                    </option>
-                                    {{/each}}
+                                    {{#each categoryTree}}
+                                    <optgroup label="{{this.name}}">
+                                        {{!-- Chọn cả nhóm (cha) --}}
+                                        <option value="{{this.slug}}" {{#if (eq ../selectedCategory
+                                            this.slug)}}selected{{/if}}>
+                                            {{this.name}} - Tất cả
+                                        </option>
 
+                                        {{!-- Các danh mục con --}}
+                                        {{#each this.children}}
+                                        <option value="{{this.slug}}" {{#if (eq ../../selectedCategory
+                                            this.slug)}}selected{{/if}}>
+                                            - {{this.name}}
+                                        </option>
+                                        {{/each}}
+                                    </optgroup>
+                                    {{/each}}
                                 </select>
                             </div>
 
@@ -451,43 +448,38 @@
                             <div class="course-image position-relative ">
                                 <div class="ratio ratio-16x9">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg" alt="{{this.title}}"
+                                        <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                                             class="w-100 h-100 object-fit-cover rounded-top">
                                     </a>
                                 </div>
-                                {{#if (isRecentCourse this.created_at)}}
+                                {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
                                 <div class="course-badge position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-info rounded-pill px-3 py-2">
+                                    {{#if this.isFeatured}}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1 mb-1">
+                                        <i class="bi bi-star-fill me-1"></i>Nổi bật
+                                    </span>
+                                    {{/if}}
+                                    {{#if this.isNew}}
+                                    <span class="badge bg-info rounded-pill px-3 py-2 me-1 mb-1">
                                         <i class="bi bi-clock me-1"></i>Mới
                                     </span>
-                                </div>
-                                {{else}}
-                                {{#if (isBestSeller this.students_count)}}
-                                <div class="course-badge position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-danger rounded-pill px-3 py-2">
-                                        <i class="bi bi-fire me-1"></i>Hot
+                                    {{/if}}
+                                    {{#if this.isOnSale}}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2 me-1 mb-1">
+                                        <i class="bi bi-tag me-1"></i>Giảm giá
                                     </span>
-                                </div>
-                                {{/if}}
-                                {{/if}}
-                                <div class="course-badge position-absolute top-0 end-0 m-3">
-
-                                </div>
-                                <div class="course-overlay">
-                                    <a href="/courses/course-detail/{{this.id}}"
-                                        class="btn btn-warning rounded-circle play-btn">
-                                        <i class="bi bi-play-fill fs-4"></i>
-                                    </a>
+                                    {{/if}}
                                 </div>
                             </div>
 
-                            <div class="card-body p-4">
+                            <div class="card-body p-4 d-flex flex-column">
                                 <h5 class="card-title fw-bold mb-3">
                                     <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
                                         {{this.title}}
                                     </a>
                                 </h5>
-                                <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">
+                                    {{this.short_desc}}</p>
 
                                 <div class="instructor-category text-muted mb-3">
                                     <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
@@ -495,11 +487,14 @@
                                     <p class="mb-0"><i class="bi bi-bookmark-fill me-1"></i> Lĩnh vực: <span
                                             class="fw-semibold">{{this.category_name}}</span></p>
                                 </div>
-                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                                    <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
-                                    <p>Số lượng học viên đánh giá {{this.rating_count}}</p>
-                                </span>
-                                <div class="course-meta d-flex justify-content-between align-items-center mb-3">
+                                <div class="mb-2">
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    </span>
+                                    <p class="text-muted small mb-0 mt-1">Số lượng học viên đánh giá
+                                        {{this.rating_count}}</p>
+                                </div>
+                                <div class="course-meta d-flex justify-content-between align-items-center mb-3 mt-auto">
                                     <div class="d-flex align-items-center text-muted">
                                         <i class="bi bi-people me-1"></i><span class="small">{{this.students_count}} học
                                             viên</span>
@@ -523,41 +518,57 @@
                         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
                             <div class="course-image position-relative">
                                 <a href="/courses/course-detail/{{this.id}}">
-                                    <img src="/images/{{this.hero_image_url}}.jpg" alt="{{this.title}}"
+                                    <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                                         class="w-100 h-100 object-fit-cover rounded-top">
                                 </a>
+                                {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
                                 <div class="course-badge position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    {{#if this.isFeatured}}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1 mb-1">
+                                        <i class="bi bi-star-fill me-1"></i>Nổi bật
                                     </span>
-                                </div>
-                                <div class="course-overlay">
-                                    <a href="/courses/course-detail/{{this.id}}"
-                                        class="btn btn-warning rounded-circle play-btn">
-                                        <i class="bi bi-play-fill fs-4"></i>
-                                    </a>
+                                    {{/if}}
+                                    {{#if this.isNew}}
+                                    <span class="badge bg-info rounded-pill px-3 py-2 me-1 mb-1">
+                                        <i class="bi bi-clock me-1"></i>Mới
+                                    </span>
+                                    {{/if}}
+                                    {{#if this.isOnSale}}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2 me-1 mb-1">
+                                        <i class="bi bi-tag me-1"></i>Giảm giá
+                                    </span>
+                                    {{/if}}
                                 </div>
                             </div>
 
-                            <div class="card-body p-4">
+                            <div class="card-body p-4 d-flex flex-column">
                                 <h5 class="card-title fw-bold mb-3">
                                     <a href="/courses/course-detail/{{this.id}}" class="text-decoration-none text-dark">
                                         {{this.title}}
                                     </a>
                                 </h5>
-                                <p class="card-text text-muted mb-3">{{this.short_desc}}</p>
+                                <p class="card-text text-muted mb-3 flex-grow-1" style="min-height: 3em;">
+                                    {{this.short_desc}}</p>
 
                                 <div class="course-meta d-flex justify-content-between align-items-center mb-3">
                                     <div class="d-flex align-items-center text-muted">
                                         <i class="bi bi-people me-1"></i><span class="small">{{this.students_count}} học
                                             viên</span>
                                     </div>
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                        <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                    </span>
                                     <div class="course-price">
-                                        <span class="fw-bold text-primary fs-5">{{formatCurrency this.price}}</span>
+
+                                        <span class="fs-5 fw-bold text-primary me-2">
+                                            {{formatCurrency this.promo_price}}</span>
+                                        <span class="text-muted text-decoration-line-through">
+                                            {{formatCurrency this.this.price}}</span>
+
                                     </div>
                                 </div>
 
-                                <div class="course-actions d-flex gap-2">
+                                <div class="course-actions d-flex gap-2 mt-auto">
                                     <a href="/courses/course-detail/{{this.id}}"
                                         class="btn btn-outline-primary flex-fill">
                                         <i class="bi bi-eye me-1"></i>Xem chi tiết
@@ -576,24 +587,24 @@
                     {{/if}}
                 </div>
                 {{#if isFeatured}}
-    <span class="badge bg-warning text-dark rounded-pill">
-      <i class="bi bi-star-fill"></i>
-      Nổi bật
-    </span>
-{{/if}}
+                <span class="badge bg-warning text-dark rounded-pill">
+                    <i class="bi bi-star-fill"></i>
+                    Nổi bật
+                </span>
+                {{/if}}
 
-{{#if isNew}}
-    <span class="badge bg-info rounded-pill">
-      <i class="bi bi-clock"></i>
-      Mới
-    </span>
-{{/if}}
+                {{#if isNew}}
+                <span class="badge bg-info rounded-pill">
+                    <i class="bi bi-clock"></i>
+                    Mới
+                </span>
+                {{/if}}
 
-{{#if isOnSale}}
-    <span class="badge bg-danger rounded-pill">
-      Giảm giá
-    </span>
-{{/if}}
+                {{#if isOnSale}}
+                <span class="badge bg-danger rounded-pill">
+                    Giảm giá
+                </span>
+                {{/if}}
 
                 <div id="coursesList" class="row g-2 d-none">
                     {{#if courses}}
@@ -601,16 +612,41 @@
                     <div class="col-12">
                         <div class="card mb-2 border-0 shadow-sm" style="max-width: 100%;">
                             <div class="row g-0 align-items-center">
-                                <div class="col-4 col-md-3">
+                                <div class="col-4 col-md-3 position-relative">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg"
+                                        <img src="{{getImageUrl this.hero_image_url}}"
                                             class="img-fluid rounded-start object-fit-cover w-100"
                                             style="height: 150px;" alt="{{this.title}}">
                                     </a>
+                                    {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
+                                    <div class="position-absolute top-0 end-0 m-1">
+                                        {{#if this.isFeatured}}
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-star-fill"></i>
+                                        </span>
+                                        {{/if}}
+                                        {{#if this.isNew}}
+                                        <span class="badge bg-info rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-clock"></i>
+                                        </span>
+                                        {{/if}}
+                                        {{#if this.isOnSale}}
+                                        <span class="badge bg-danger rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-tag"></i>
+                                        </span>
+                                        {{/if}}
+                                    </div>
                                 </div>
                                 <div class="col-8 col-md-9">
                                     <div class="card-body py-2">
-                                        <h5 class="card-title mb-1">{{this.title}}</h5>
+                                        <h5 class="card-title mb-1">{{this.title}}
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                                                <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+                                            </span>
+                                            <p class="text-muted small mb-0 mt-1">Số lượng học viên đánh giá
+                                                {{this.rating_count}}</p>
+                                        </h5>
+
                                         <p class="card-text text-muted small mb-2">{{this.short_desc}}</p>
                                         <div class="instructor-category text-muted mb-3">
                                             <p class="mb-1"><i class="bi bi-person-fill me-1"></i> Giảng viên: <span
@@ -621,7 +657,15 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted small"><i
                                                     class="bi bi-people me-1"></i>{{this.students_count}}</span>
-                                            <strong class="text-primary">{{formatCurrency this.price}}</strong>
+
+                                            <div class="course-price">
+
+                                                <span class="fs-5 fw-bold text-primary me-2">
+                                                    {{formatCurrency this.promo_price}}</span>
+                                                <span class="text-muted text-decoration-line-through">
+                                                    {{formatCurrency this.this.price}}</span>
+
+                                            </div>
                                         </div>
                                         <div class="mt-2 d-flex gap-2">
                                             <a href="/courses/course-detail/{{this.id}}"
@@ -643,12 +687,30 @@
                     <div class="col-12">
                         <div class="card mb-2 border-0 shadow-sm" style="max-width: 100%;">
                             <div class="row g-0 align-items-center">
-                                <div class="col-4 col-md-3">
+                                <div class="col-4 col-md-3 position-relative">
                                     <a href="/courses/course-detail/{{this.id}}">
-                                        <img src="/images/{{this.hero_image_url}}.jpg"
+                                        <img src="{{getImageUrl this.hero_image_url}}"
                                             class="img-fluid rounded-start object-fit-cover w-100"
                                             style="height: 150px;" alt="{{this.title}}">
                                     </a>
+                                    {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
+                                    <div class="position-absolute top-0 end-0 m-1">
+                                        {{#if this.isFeatured}}
+                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-star-fill"></i>
+                                        </span>
+                                        {{/if}}
+                                        {{#if this.isNew}}
+                                        <span class="badge bg-info rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-clock"></i>
+                                        </span>
+                                        {{/if}}
+                                        {{#if this.isOnSale}}
+                                        <span class="badge bg-danger rounded-pill px-2 py-1 small me-1 mb-1">
+                                            <i class="bi bi-tag"></i>
+                                        </span>
+                                        {{/if}}
+                                    </div>
                                 </div>
                                 <div class="col-8 col-md-9">
                                     <div class="card-body py-2">
@@ -663,7 +725,14 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted small"><i
                                                     class="bi bi-people me-1"></i>{{this.students_count}}</span>
-                                            <strong class="text-primary">{{formatCurrency this.price}}</strong>
+                                            <div class="course-price">
+
+                                                <span class="fs-5 fw-bold text-primary me-2">
+                                                    {{formatCurrency this.promo_price}}</span>
+                                                <span class="text-muted text-decoration-line-through">
+                                                    {{formatCurrency this.this.price}}</span>
+
+                                            </div>
                                         </div>
                                         <div class="mt-2 d-flex gap-2">
                                             <a href="/courses/course-detail/{{this.id}}"

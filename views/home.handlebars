@@ -6,7 +6,7 @@
       <div class="carousel-item {{#if @first}}active{{/if}}">
         <div class="hero-slide">
           <div class="hero-bg"
-            style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('/images/{{this.hero_image_url}}');">
+            style="background-image: linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85)), url('{{getImageUrl this.hero_image_url}}');">
             <div class="container">
               <div class="row align-items-center min-vh-75">
                 <div class="col-lg-6">
@@ -45,7 +45,7 @@
                 </div>
                 <div class="col-lg-6 text-center">
                   <div class="hero-image-wrapper">
-                    <img src="/images/{{this.hero_image_url}}" alt="{{this.title}}"
+                    <img src="{{getImageUrl this.hero_image_url}}" alt="{{this.title}}"
                       class="hero-image img-fluid rounded-4 shadow-lg">
                   </div>
                 </div>
@@ -242,13 +242,26 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
+            {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
             <div class="course-badge position-absolute top-0 end-0 m-3">
-              <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-                <i class="bi bi-star-fill me-1"></i>{{this.rating_avg}}
+              {{#if this.isFeatured}}
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-star-fill me-1"></i>Nổi bật
               </span>
+              {{/if}}
+              {{#if this.isNew}}
+              <span class="badge bg-info rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-clock me-1"></i>Mới
+              </span>
+              {{/if}}
+              {{#if this.isOnSale}}
+              <span class="badge bg-danger rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-tag me-1"></i>Giảm giá
+              </span>
+              {{/if}}
             </div>
             <div
               class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
@@ -305,13 +318,26 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
+            {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
             <div class="course-badge position-absolute top-0 end-0 m-3">
-              <span class="badge bg-danger rounded-pill px-3 py-2">
-                <i class="bi bi-fire me-1"></i>Hot
+              {{#if this.isFeatured}}
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-star-fill me-1"></i>Nổi bật
               </span>
+              {{/if}}
+              {{#if this.isNew}}
+              <span class="badge bg-info rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-clock me-1"></i>Mới
+              </span>
+              {{/if}}
+              {{#if this.isOnSale}}
+              <span class="badge bg-danger rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-tag me-1"></i>Giảm giá
+              </span>
+              {{/if}}
             </div>
             <div
               class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
@@ -368,13 +394,26 @@
         <div class="course-card card h-100 border-0 shadow-sm overflow-hidden">
           <div class="course-image position-relative">
             <a href="/courses/course-detail/{{this.id}}">
-              <img src="/images/{{this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
+              <img src="{{getImageUrl this.hero_image_url}}" class="card-img-top" alt="{{this.title}}"
                 style="height: 240px; object-fit: cover;">
             </a>
+            {{!-- Badge đồng bộ: Nổi bật / Mới / Giảm giá --}}
             <div class="course-badge position-absolute top-0 end-0 m-3">
-              <span class="badge bg-info rounded-pill px-3 py-2">
+              {{#if this.isFeatured}}
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-star-fill me-1"></i>Nổi bật
+              </span>
+              {{/if}}
+              {{#if this.isNew}}
+              <span class="badge bg-info rounded-pill px-3 py-2 me-1 mb-1">
                 <i class="bi bi-clock me-1"></i>Mới
               </span>
+              {{/if}}
+              {{#if this.isOnSale}}
+              <span class="badge bg-danger rounded-pill px-3 py-2 me-1 mb-1">
+                <i class="bi bi-tag me-1"></i>Giảm giá
+              </span>
+              {{/if}}
             </div>
             <div
               class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">

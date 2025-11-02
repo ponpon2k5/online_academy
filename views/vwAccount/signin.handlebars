@@ -5,9 +5,9 @@
     </div>
     <div class="card-body p-4">
       {{#if error}}
-      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <div class="alert {{#if message}}alert-danger{{else}}alert-warning{{/if}} alert-dismissible fade show" role="alert">
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        <strong>Lỗi!</strong> Tên đăng nhập hoặc mật khẩu không đúng.
+        <strong>Lỗi!</strong> {{#if message}}{{message}}{{else}}Tên đăng nhập hoặc mật khẩu không đúng.{{/if}}
       </div>
       {{/if}}
       <div class="mb-3">
@@ -37,10 +37,7 @@
         <a href="/account/auth/google" class="btn btn-danger btn-lg">
           <i class="bi bi-google me-2"></i> Đăng nhập bằng Google
         </a>
-        {{!-- Đang gặp vấn đề ( có thể xoá ) --}}
-        {{!-- <a href="/account/auth/facebook" class="btn btn-primary btn-lg">
-          <i class="bi bi-facebook me-2"></i> Đăng nhập bằng Facebook
-        </a> --}}
+
         <a href="/account/auth/github" class="btn btn-dark btn-lg">
           <i class="bi bi-github me-2"></i> Đăng nhập bằng GitHub
         </a>
