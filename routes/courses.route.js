@@ -60,6 +60,7 @@ router.get("/view-courses", async (req, res) => {
 
     // Render duy nhất 1 lần
     return res.render("vwCourses/dis_courses", {
+      title: "Khóa học",
       courses,
       pages,
       currentPage: page,
@@ -106,6 +107,7 @@ router.get("/course-detail/:id", async (req, res) => {
   const instructor_id = course.instructor_id;
   const instructor = await coursesModel.getInstructorProfile(instructor_id);
   res.render("vwCourses/dis_detailCourse", {
+    title: course.title || "Chi tiết khóa học",
     course: course,
     lessons: lessons,
     feedbacks: feedback,
@@ -155,6 +157,7 @@ router.get("/purchase-courses/:id", async (req, res) => {
   const course = await coursesModel.view_detail_course(courseId);
   const lessons = await coursesModel.view_lessons_by_course_id(courseId);
   res.render("vwCourses/purchase_courses", {
+    title: course.title || "Mua khóa học",
     course: course,
     lessons: lessons,
   });
@@ -327,6 +330,7 @@ router.get("/preview-lessons/:id", async (req, res) => {
   const des_current_lesson = current_lesson.description;
 
   res.render("vwCourses/dis_videoCourses", {
+    title: courseTitle || "Khóa học",
     courseTitle,
     courseId,
     lessons: listLessons,
@@ -374,6 +378,7 @@ router.get("/search", async (req, res) => {
 
   if (!q) {
     return res.render("vwCourses/dis_courses", {
+      title: "Tìm kiếm khóa học",
       q: "",
       empty: true,
       // KHÔNG truyền pages để template ẩn phân trang
@@ -405,6 +410,7 @@ router.get("/search", async (req, res) => {
   const pages = total > 0 ? buildPages(page, totalPages) : [];
 
   return res.render("vwCourses/dis_courses", {
+    title: `Tìm kiếm: ${q}`,
     q,
     empty: total === 0,
     courses,

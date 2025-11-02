@@ -11,6 +11,7 @@ router.get('/', async (req, res) => {
     const homeCategories = await homeModel.getHomeCategories();
     console.log(popularCategories);
     res.render('home', {
+        title: 'Trang chủ',
         featuredCourses, // khóa học nổi bật nhất tuần qua
         newest, // khóa học mới
         mostViewed, // khóa học được xem nhiều nhất 

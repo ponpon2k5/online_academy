@@ -55,6 +55,7 @@ function mailFromAddress() {
 router.get("/signin", (req, res) => {
     const error = req.query.error === "locked";
     res.render("vwAccount/signin", {
+        title: "Đăng nhập",
         error: error,
         message: error
             ? "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên."
@@ -64,14 +65,15 @@ router.get("/signin", (req, res) => {
 
 router.post("/signin", async (req, res) => {
     const user = await userModel.findByUsername(req.body.username);
-    if (!user) return res.render("vwAccount/signin", { error: true });
+    if (!user) return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
 
     const ok = bcrypt.compareSync(req.body.password, user.password);
-    if (!ok) return res.render("vwAccount/signin", { error: true });
+    if (!ok) return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
 
     // Kiểm tra tài khoản có bị khóa không
     if (user.is_active === false) {
         return res.render("vwAccount/signin", {
+            title: "Đăng nhập",
             error: true,
             message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
         });
@@ -85,7 +87,7 @@ router.post("/signin", async (req, res) => {
 });
 
 router.get("/signup", (req, res) => {
-    res.render("vwAccount/signup");
+    res.render("vwAccount/signup", { title: "Đăng ký" });
 });
 
 router.post("/signout", (req, res) => {
@@ -284,7 +286,7 @@ router.get(
     }
 );
 router.get("/change-password", (req, res) => {
-    res.render("vwAccount/change_pass");
+    res.render("vwAccount/change_pass", { title: "Đổi mật khẩu" });
 });
 
 router.post("/change-password", async (req, res) => {
@@ -313,7 +315,7 @@ router.post("/change-password", async (req, res) => {
 });
 
 router.get("/profile", async (req, res) => {
-    res.render("vwAccount/profile", { user: req.session.authUser });
+    res.render("vwAccount/profile", { title: "Hồ sơ", user: req.session.authUser });
 });
 
 router.post("/profile", checkAuthenticated, async (req, res) => {
@@ -322,11 +324,11 @@ router.post("/profile", checkAuthenticated, async (req, res) => {
     await userModel.patch(id, user);
     req.session.authUser.name = req.body.name;
     req.session.authUser.email = req.body.email;
-    res.render("vwAccount/profile", { user: req.session.authUser });
+    res.render("vwAccount/profile", { title: "Hồ sơ", user: req.session.authUser });
 });
 
 router.get("/change-pwd", checkAuthenticated, (req, res) => {
-    res.render("vwAccount/change-pwd", { user: req.session.authUser });
+    res.render("vwAccount/change-pwd", { title: "Đổi mật khẩu", user: req.session.authUser });
 });
 
 router.post("/change-pwd", checkAuthenticated, async (req, res) => {
@@ -337,6 +339,7 @@ router.post("/change-pwd", checkAuthenticated, async (req, res) => {
     const ret = bcrypt.compareSync(curpwd, req.session.authUser.password);
     if (!ret)
         return res.render("vwAccount/change-pwd", {
+            title: "Đổi mật khẩu",
             user: req.session.authUser,
             error: true,
         });
