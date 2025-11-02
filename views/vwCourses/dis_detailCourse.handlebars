@@ -145,7 +145,13 @@
                     </div>
                     <!-- Action buttons -->
                     <div class="mt-auto d-flex flex-wrap gap-2">
-                        {{#if course.user_enrolled}}
+                        {{#if existed}}
+                        <div class="alert alert-success d-flex align-items-center p-2 w-100" role="alert">
+                            <i class="bi bi-patch-check-fill me-2"></i>
+                            <div class="fw-semibold">
+                                Đã sở hữu khoá học
+                            </div>
+                        </div>
                         <a href="/learn/{{course.id}}" class="btn btn-primary">Tiếp tục học</a>
                         <a href="/reviews/{{course.id}}" class="btn btn-outline-secondary">Đánh giá khóa học</a>
                         {{else}}
@@ -163,7 +169,7 @@
                         </button>
 
                         <form action="/student/add-favor-courses/{{course.id}}" method="post" class="d-inline">
-                            <button class="btn btn-outline-secondary rounded-pill px-3" type="submit">
+                            <button class="btn btn-outline-danger rounded-pill px-3" type="submit">
                                 <i class="bi bi-heart me-1"></i>Thêm vào Watchlist
                             </button>
                         </form>
