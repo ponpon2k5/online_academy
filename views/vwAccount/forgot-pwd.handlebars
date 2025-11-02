@@ -13,7 +13,6 @@
     {{/if}}
 
     {{#if showVerifyForm}}
-    {{! TRẠNG THÁI 2: NHẬP OTP VÀ MẬT KHẨU MỚI }}
     <form action="/account/forgot-password/reset" method="post" id="frmReset">
       <p class="text-center text-muted">
         Chúng tôi đã gửi một mã OTP đến email <b>{{email}}</b>.
@@ -43,7 +42,6 @@
     </form>
     
     {{else}}
-    {{! TRẠNG THÁI 1: NHẬP EMAIL }}
     <form action="/account/forgot-password/send-otp" method="post" id="frmSendOtp">
       <p class="text-center text-muted">
         Vui lòng nhập địa chỉ email bạn đã dùng để đăng ký. Chúng tôi sẽ gửi cho bạn một mã OTP để đặt lại mật khẩu.
