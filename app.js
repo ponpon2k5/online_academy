@@ -58,10 +58,17 @@ app.get("/images/:name", (req, res) => {
 app.set("trust proxy", 1);
 app.use(
   session({
-    secret: "duybodoi",
+    secret:
+      process.env.SESSION_SECRET ||
+      (() => {
+        throw new Error("SESSION_SECRET is not set");
+      })(),
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false },
+    cookie: {
+      secure: process.env.SESSION_SECURE === "true",
+      httpOnly: true,
+    },
   })
 );
 
