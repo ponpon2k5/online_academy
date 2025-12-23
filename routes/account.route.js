@@ -11,72 +11,80 @@ import coursesModel from "../models/courses.model.js";
 const router = express.Router();
 
 async function verifyAccount(username, password_verify) {
-    const user = await userModel.findByUsername(username);
-    if (!user) return null;
-    const ok = await bcrypt.compare(password_verify, user.password);
-    if (!ok) return null;
-    const { password, ...safeUser } = user;
-    return safeUser;
+  const user = await userModel.findByUsername(username);
+  if (!user) return null;
+  const ok = await bcrypt.compare(password_verify, user.password);
+  if (!ok) return null;
+  const { password, ...safeUser } = user;
+  return safeUser;
 }
 
 function getEnv(name) {
-    const v = process.env[name];
-    if (!v) throw new Error(`Missing env ${name}`);
-    return v;
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env ${name}`);
+  return v;
 }
 
 function createTransporter() {
-    // Log nhẹ để biết env đã nạp chưa (không lộ secret)
-    const mask = (s) => (s ? s[0] + "***" + s.slice(-2) : "EMPTY");
-    console.log("SMTP_HOST =", process.env.SMTP_HOST || "EMPTY");
-    console.log("SMTP_PORT =", process.env.SMTP_PORT || "EMPTY");
-    console.log("SMTP_USER =", mask(process.env.SMTP_USER));
-    console.log("SMTP_PASS =", process.env.SMTP_PASS ? "***SET***" : "EMPTY");
+  // Log nhẹ để biết env đã nạp chưa (không lộ secret)
+  const mask = (s) => (s ? s[0] + "***" + s.slice(-2) : "EMPTY");
+  console.log("SMTP_HOST =", process.env.SMTP_HOST || "EMPTY");
+  console.log("SMTP_PORT =", process.env.SMTP_PORT || "EMPTY");
+  console.log("SMTP_USER =", mask(process.env.SMTP_USER));
+  console.log("SMTP_PASS =", process.env.SMTP_PASS ? "***SET***" : "EMPTY");
 
-    const host = getEnv("SMTP_HOST");
-    const port = Number(getEnv("SMTP_PORT"));
-    const user = getEnv("SMTP_USER");
-    const pass = getEnv("SMTP_PASS");
+  const host = getEnv("SMTP_HOST");
+  const port = Number(getEnv("SMTP_PORT"));
+  const user = getEnv("SMTP_USER");
+  const pass = getEnv("SMTP_PASS");
 
-    return nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465, // 465: SSL; 587: STARTTLS -> secure=false
-        auth: { user, pass },
-    });
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // 465: SSL; 587: STARTTLS -> secure=false
+    auth: { user, pass },
+  });
 }
 
 function mailFromAddress() {
-    const name = process.env.MAIL_FROM_NAME || "Online Academy";
-    const user = process.env.SMTP_USER || "no-reply@example.com";
-    return `"${name}" <${user}>`;
+  const name = process.env.MAIL_FROM_NAME || "Online Academy";
+  const user = process.env.SMTP_USER || "no-reply@example.com";
+  return `"${name}" <${user}>`;
 }
 
 router.get("/signin", (req, res) => {
-    const error = req.query.error === "locked";
-    res.render("vwAccount/signin", {
-        title: "Đăng nhập",
-        error: error,
-        message: error
-            ? "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên."
-            : null,
-    });
+  const error = req.query.error === "locked";
+  res.render("vwAccount/signin", {
+    title: "Đăng nhập",
+    error: error,
+    message: error
+      ? "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên."
+      : null,
+  });
 });
 
 router.post("/signin", async (req, res) => {
-    const user = await userModel.findByUsername(req.body.username);
-    if (!user) return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
+  const user = await userModel.findByUsername(req.body.username);
+  if (!user)
+    return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
 
-    const ok = bcrypt.compareSync(req.body.password, user.password);
-    if (!ok) return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
+  const ok = bcrypt.compareSync(req.body.password, user.password);
+  if (!ok)
+    return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
 
-    // Kiểm tra tài khoản có bị khóa không
-    if (user.is_active === false) {
-        return res.render("vwAccount/signin", {
-            title: "Đăng nhập",
-            error: true,
-            message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
-        });
+  // Kiểm tra tài khoản có bị khóa không
+  if (user.is_active === false) {
+    return res.render("vwAccount/signin", {
+      title: "Đăng nhập",
+      error: true,
+      message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+    });
+  }
+
+  req.session.regenerate((err) => {
+    if (err) {
+      console.error("Session regenerate error:", err);
+      return res.status(500).send("Lỗi phiên đăng nhập");
     }
 
     req.session.isAuthenticated = true;
@@ -84,366 +92,380 @@ router.post("/signin", async (req, res) => {
     const retUrl = req.session.retUrl || "/";
     delete req.session.retUrl;
     res.redirect(retUrl);
+  });
 });
 
 router.get("/signup", (req, res) => {
-    res.render("vwAccount/signup", { title: "Đăng ký" });
+  res.render("vwAccount/signup", { title: "Đăng ký" });
 });
 
 router.post("/signout", (req, res) => {
-    req.session.isAuthenticated = false;
-    req.session.authUser = null;
+  // Hủy session hoàn toàn thay vì chỉ gán cờ
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Session destroy error:", err);
+    }
+    res.clearCookie("connect.sid");
     res.redirect("/");
+  });
 });
 
 router.post("/send-otp", async (req, res) => {
-    try {
-        let { username, password, name, email, dob, permission } = req.body || {};
-        // Validate tối thiểu phía server
-        if (!username || !password || !name || !email || !dob) {
-            return res.json({ success: false, message: "Thiếu dữ liệu bắt buộc" });
-        }
+  try {
+    let { username, password, name, email, dob, permission } = req.body || {};
+    // Validate tối thiểu phía server
+    if (!username || !password || !name || !email || !dob) {
+      return res.json({ success: false, message: "Thiếu dữ liệu bắt buộc" });
+    }
 
-        const normEmail = String(email).trim().toLowerCase();
+    const normEmail = String(email).trim().toLowerCase();
 
-        // Kiểm tra định dạng email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(normEmail)) {
-            return res.json({ success: false, message: "Email không hợp lệ" });
-        }
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normEmail)) {
+      return res.json({ success: false, message: "Email không hợp lệ" });
+    }
 
-        // Kiểm tra trùng username
-        const existedUsername = await userModel.findByUsername(username);
-        if (existedUsername) {
-            return res.json({ success: false, message: "Tên người dùng đã tồn tại" });
-        }
+    // Kiểm tra trùng username
+    const existedUsername = await userModel.findByUsername(username);
+    if (existedUsername) {
+      return res.json({ success: false, message: "Tên người dùng đã tồn tại" });
+    }
 
-        // Kiểm tra trùng email (an toàn với model trả array hoặc object)
-        const existedEmail = await userModel.findByEmail(normEmail);
-        const emailExists = !!(
-            existedEmail &&
-            (existedEmail.id || (Array.isArray(existedEmail) && existedEmail.length))
-        );
-        if (emailExists) {
-            return res.json({ success: false, message: "Email đã tồn tại" });
-        }
+    // Kiểm tra trùng email (an toàn với model trả array hoặc object)
+    const existedEmail = await userModel.findByEmail(normEmail);
+    const emailExists = !!(
+      existedEmail &&
+      (existedEmail.id || (Array.isArray(existedEmail) && existedEmail.length))
+    );
+    if (emailExists) {
+      return res.json({ success: false, message: "Email đã tồn tại" });
+    }
 
-        // Tạo OTP & lưu session
-        const otp = "" + Math.floor(100000 + Math.random() * 900000); // 6 số
-        req.session.otp = { code: otp, expiresAt: Date.now() + 5 * 60 * 1000 };
-        req.session.registerData = {
-            username,
-            // Hash ngay từ đây (saltRounds = 10)
-            password: bcrypt.hashSync(password, 10),
-            name,
-            email: normEmail,
-            dob,
-            permission: parseInt(permission ?? "0", 10) || 0, // 0: student, 1: instructor
-        };
+    // Tạo OTP & lưu session
+    const otp = "" + Math.floor(100000 + Math.random() * 900000); // 6 số
+    req.session.otp = { code: otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+    req.session.registerData = {
+      username,
+      // Hash ngay từ đây (saltRounds = 10)
+      password: bcrypt.hashSync(password, 10),
+      name,
+      email: normEmail,
+      dob,
+      permission: parseInt(permission ?? "0", 10) || 0, // 0: student, 1: instructor
+    };
 
-        // Gửi mail
-        const transporter = createTransporter();
-        await transporter.verify(); // bắt lỗi config SMTP ngay tại đây
+    // Gửi mail
+    const transporter = createTransporter();
+    await transporter.verify(); // bắt lỗi config SMTP ngay tại đây
 
-        await transporter.sendMail({
-            from: mailFromAddress(),
-            to: normEmail,
-            subject: "Xác thực OTP - Online Academy",
-            text: `Mã OTP của bạn: ${otp} (hết hạn sau 5 phút)`,
-            html: `<h2>Xác thực tài khoản</h2>
+    await transporter.sendMail({
+      from: mailFromAddress(),
+      to: normEmail,
+      subject: "Xác thực OTP - Online Academy",
+      text: `Mã OTP của bạn: ${otp} (hết hạn sau 5 phút)`,
+      html: `<h2>Xác thực tài khoản</h2>
              <p>Mã OTP của bạn là: <b>${otp}</b></p>
              <p>Mã có hiệu lực trong 5 phút. Vui lòng không chia sẻ cho bất kỳ ai.</p>`,
-        });
+    });
 
-        return res.json({ success: true });
-    } catch (e) {
-        console.error("Lỗi gửi email:", e);
-        return res.json({
-            success: false,
-            message: e.message || "Lỗi khi gửi OTP. Vui lòng thử lại.",
-        });
-    }
+    return res.json({ success: true });
+  } catch (e) {
+    console.error("Lỗi gửi email:", e);
+    return res.json({
+      success: false,
+      message: e.message || "Lỗi khi gửi OTP. Vui lòng thử lại.",
+    });
+  }
 });
 
 router.post("/verify-otp", async (req, res) => {
-    try {
-        const { otp } = req.body || {};
-        const s = req.session.otp;
-        const reg = req.session.registerData;
+  try {
+    const { otp } = req.body || {};
+    const s = req.session.otp;
+    const reg = req.session.registerData;
 
-        if (!otp) {
-            return res.json({ success: false, message: "Thiếu OTP" });
-        }
-        if (!s || !s.code) {
-            return res.json({
-                success: false,
-                message: "OTP không tồn tại. Vui lòng gửi lại OTP.",
-            });
-        }
-        if (Date.now() > s.expiresAt) {
-            return res.json({
-                success: false,
-                message: "OTP đã hết hạn. Vui lòng gửi lại OTP.",
-            });
-        }
-        if (String(otp).trim() !== String(s.code)) {
-            return res.json({ success: false, message: "Mã OTP không hợp lệ" });
-        }
-        if (!reg) {
-            return res.json({
-                success: false,
-                message: "Thiếu dữ liệu đăng ký. Vui lòng thực hiện lại.",
-            });
-        }
-
-        // Tạo user sau khi OTP hợp lệ
-        const makeId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 10);
-        const id = "p" + makeId();
-        await userModel.add({
-            id: id,
-            username: reg.username,
-            password: reg.password, // đã hash ở bước send-otp
-            name: reg.name,
-            email: reg.email.toLowerCase(), // normalize
-            dob: reg.dob,
-            permission: Number(reg.permission) || 0,
-        });
-
-        // Xoá dữ liệu tạm trong session
-        delete req.session.otp;
-        delete req.session.registerData;
-
-        return res.json({ success: true });
-    } catch (e) {
-        console.error("verify-otp error:", e);
-        return res.json({ success: false, message: "Xác thực OTP lỗi" });
+    if (!otp) {
+      return res.json({ success: false, message: "Thiếu OTP" });
     }
+    if (!s || !s.code) {
+      return res.json({
+        success: false,
+        message: "OTP không tồn tại. Vui lòng gửi lại OTP.",
+      });
+    }
+    if (Date.now() > s.expiresAt) {
+      return res.json({
+        success: false,
+        message: "OTP đã hết hạn. Vui lòng gửi lại OTP.",
+      });
+    }
+    if (String(otp).trim() !== String(s.code)) {
+      return res.json({ success: false, message: "Mã OTP không hợp lệ" });
+    }
+    if (!reg) {
+      return res.json({
+        success: false,
+        message: "Thiếu dữ liệu đăng ký. Vui lòng thực hiện lại.",
+      });
+    }
+
+    // Tạo user sau khi OTP hợp lệ
+    const makeId = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz", 10);
+    const id = "p" + makeId();
+    await userModel.add({
+      id: id,
+      username: reg.username,
+      password: reg.password, // đã hash ở bước send-otp
+      name: reg.name,
+      email: reg.email.toLowerCase(), // normalize
+      dob: reg.dob,
+      permission: Number(reg.permission) || 0,
+    });
+
+    // Xoá dữ liệu tạm trong session
+    delete req.session.otp;
+    delete req.session.registerData;
+
+    return res.json({ success: true });
+  } catch (e) {
+    console.error("verify-otp error:", e);
+    return res.json({ success: false, message: "Xác thực OTP lỗi" });
+  }
 });
 
 router.get("/is-available", async (req, res) => {
-    const username = (req.query.username || "").trim();
-    if (!username)
-        return res.json({ isAvailable: false, reason: "missing-username" });
-    const user = await userModel.findByUsername(username);
-    return res.json({ isAvailable: !user });
+  const username = (req.query.username || "").trim();
+  if (!username)
+    return res.json({ isAvailable: false, reason: "missing-username" });
+  const user = await userModel.findByUsername(username);
+  return res.json({ isAvailable: !user });
 });
 
 router.get("/is-email-available", async (req, res) => {
-    const email = String(req.query.email || "")
-        .trim()
-        .toLowerCase();
-    if (!email) return res.json({ isAvailable: false, reason: "missing-email" });
+  const email = String(req.query.email || "")
+    .trim()
+    .toLowerCase();
+  if (!email) return res.json({ isAvailable: false, reason: "missing-email" });
 
-    const existed = await userModel.findByEmail(email);
-    const exists = !!(
-        existed &&
-        (existed.id || (Array.isArray(existed) && existed.length))
-    );
-    return res.json({ isAvailable: !exists });
+  const existed = await userModel.findByEmail(email);
+  const exists = !!(
+    existed &&
+    (existed.id || (Array.isArray(existed) && existed.length))
+  );
+  return res.json({ isAvailable: !exists });
 });
 
 router.get(
-    "/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 router.get(
-    "/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/account/signin" }),
-    async (req, res) => {
-        // Kiểm tra tài khoản có bị khóa không
-        if (req.user && req.user.is_active === false) {
-            req.logout((err) => {
-                if (err) console.error("Logout error:", err);
-            });
-            return res.redirect("/account/signin?error=locked");
-        }
-        req.session.isAuthenticated = true;
-        req.session.authUser = req.user;
-        res.redirect(req.session.retUrl || "/");
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/account/signin" }),
+  async (req, res) => {
+    // Kiểm tra tài khoản có bị khóa không
+    if (req.user && req.user.is_active === false) {
+      req.logout((err) => {
+        if (err) console.error("Logout error:", err);
+      });
+      return res.redirect("/account/signin?error=locked");
     }
+    req.session.isAuthenticated = true;
+    req.session.authUser = req.user;
+    res.redirect(req.session.retUrl || "/");
+  }
 );
 
-
 router.get(
-    "/auth/github",
-    passport.authenticate("github", { scope: ["user:email"] })
+  "/auth/github",
+  passport.authenticate("github", { scope: ["user:email"] })
 );
 router.get(
-    "/auth/github/callback",
-    passport.authenticate("github", { failureRedirect: "/account/signin" }),
-    async (req, res) => {
-        // Kiểm tra tài khoản có bị khóa không
-        if (req.user && req.user.is_active === false) {
-            req.logout((err) => {
-                if (err) console.error("Logout error:", err);
-            });
-            return res.redirect("/account/signin?error=locked");
-        }
-        // Đăng nhập thành công
-        req.session.isAuthenticated = true;
-        req.session.authUser = req.user;
-        res.redirect(req.session.retUrl || "/");
+  "/auth/github/callback",
+  passport.authenticate("github", { failureRedirect: "/account/signin" }),
+  async (req, res) => {
+    // Kiểm tra tài khoản có bị khóa không
+    if (req.user && req.user.is_active === false) {
+      req.logout((err) => {
+        if (err) console.error("Logout error:", err);
+      });
+      return res.redirect("/account/signin?error=locked");
     }
+    // Đăng nhập thành công
+    req.session.isAuthenticated = true;
+    req.session.authUser = req.user;
+    res.redirect(req.session.retUrl || "/");
+  }
 );
 router.get("/change-password", (req, res) => {
-    res.render("vwAccount/change_pass", { title: "Đổi mật khẩu" });
+  res.render("vwAccount/change_pass", { title: "Đổi mật khẩu" });
 });
 
 router.post("/change-password", async (req, res) => {
-    const user = await userModel.findByUsername(req.session.authUser.username);
-    if (!user)
-        return res.status(401).json({ message: "Người dùng không tồn tại" });
+  const user = await userModel.findByUsername(req.session.authUser.username);
+  if (!user)
+    return res.status(401).json({ message: "Người dùng không tồn tại" });
 
-    const ok = await bcrypt.compare(req.body.oldPassword, user.password);
-    if (!ok)
-        return res.status(401).json({ message: "Mật khẩu hiện tại không đúng" });
+  const ok = await bcrypt.compare(req.body.oldPassword, user.password);
+  if (!ok)
+    return res.status(401).json({ message: "Mật khẩu hiện tại không đúng" });
 
-    if (req.body.newPassword !== req.body.confirmPassword) {
-        return res.status(401).json({ message: "Xác nhận mật khẩu không đúng" });
-    }
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return res.status(401).json({ message: "Xác nhận mật khẩu không đúng" });
+  }
 
-    const hashedPass = bcrypt.hashSync(req.body.newPassword, 10);
-    const updatedUser = { id: user.id, password: hashedPass };
-    const ret = await userModel.editUser(updatedUser);
-    if (ret === 0)
-        return res
-            .status(500)
-            .json({ message: "Cập nhật mật khẩu không thành công" });
+  const hashedPass = bcrypt.hashSync(req.body.newPassword, 10);
+  const updatedUser = { id: user.id, password: hashedPass };
+  const ret = await userModel.editUser(updatedUser);
+  if (ret === 0)
+    return res
+      .status(500)
+      .json({ message: "Cập nhật mật khẩu không thành công" });
 
-    console.log("User", user.id, "changed password successfully");
-    res.redirect("/student/profile-favor-courses");
+  console.log("User", user.id, "changed password successfully");
+  res.redirect("/student/profile-favor-courses");
 });
 
 router.get("/profile", async (req, res) => {
-    res.render("vwAccount/profile", { title: "Hồ sơ", user: req.session.authUser });
+  res.render("vwAccount/profile", {
+    title: "Hồ sơ",
+    user: req.session.authUser,
+  });
 });
 
 router.post("/profile", checkAuthenticated, async (req, res) => {
-    const id = req.body.id;
-    const user = { name: req.body.name, email: req.body.email };
-    await userModel.patch(id, user);
-    req.session.authUser.name = req.body.name;
-    req.session.authUser.email = req.body.email;
-    res.render("vwAccount/profile", { title: "Hồ sơ", user: req.session.authUser });
+  const id = req.body.id;
+  const user = { name: req.body.name, email: req.body.email };
+  await userModel.patch(id, user);
+  req.session.authUser.name = req.body.name;
+  req.session.authUser.email = req.body.email;
+  res.render("vwAccount/profile", {
+    title: "Hồ sơ",
+    user: req.session.authUser,
+  });
 });
 
 router.get("/change-pwd", checkAuthenticated, (req, res) => {
-    res.render("vwAccount/change-pwd", { title: "Đổi mật khẩu", user: req.session.authUser });
+  res.render("vwAccount/change-pwd", {
+    title: "Đổi mật khẩu",
+    user: req.session.authUser,
+  });
 });
 
 router.post("/change-pwd", checkAuthenticated, async (req, res) => {
-    const id = req.body.id;
-    const curpwd = req.body.currentPassword;
-    const newpwd = req.body.newPassword;
+  const id = req.body.id;
+  const curpwd = req.body.currentPassword;
+  const newpwd = req.body.newPassword;
 
-    const ret = bcrypt.compareSync(curpwd, req.session.authUser.password);
-    if (!ret)
-        return res.render("vwAccount/change-pwd", {
-            title: "Đổi mật khẩu",
-            user: req.session.authUser,
-            error: true,
-        });
+  const ret = bcrypt.compareSync(curpwd, req.session.authUser.password);
+  if (!ret)
+    return res.render("vwAccount/change-pwd", {
+      title: "Đổi mật khẩu",
+      user: req.session.authUser,
+      error: true,
+    });
 
-    const hash_password = bcrypt.hashSync(newpwd, 10);
-    const user = { password: hash_password };
-    await userModel.patch(id, user);
-    req.session.authUser.password = hash_password;
-    res.redirect("/account/profile");
+  const hash_password = bcrypt.hashSync(newpwd, 10);
+  const user = { password: hash_password };
+  await userModel.patch(id, user);
+  req.session.authUser.password = hash_password;
+  res.redirect("/account/profile");
 });
 router.get("/shopping-cart", async (req, res) => {
-    // Kiểm tra đăng nhập
-    if (!req.session.authUser) {
-        return res.redirect("/account/signin");
-    }
+  // Kiểm tra đăng nhập
+  if (!req.session.authUser) {
+    return res.redirect("/account/signin");
+  }
 
-    try {
-        const userId = req.session.authUser.id;
+  try {
+    const userId = req.session.authUser.id;
 
-        // Gọi model để lấy các khóa học trong giỏ
-        const coursesInCart = await coursesModel.getCartItems(userId);
+    // Gọi model để lấy các khóa học trong giỏ
+    const coursesInCart = await coursesModel.getCartItems(userId);
 
-        // Kiểm tra giỏ hàng rỗng hay không
-        const isEmpty = !coursesInCart || coursesInCart.length === 0;
+    // Kiểm tra giỏ hàng rỗng hay không
+    const isEmpty = !coursesInCart || coursesInCart.length === 0;
 
-        // Render view 'shopping-cart.handlebars'
-        // Truyền biến 'isEmpty' và 'coursesInCart' [cite: 24, 31, 38]
-        res.render("vwAccount/shopping-cart", {
-            title: "Giỏ hàng",
-            isEmpty: isEmpty,
-            coursesInCart: coursesInCart,
-        });
-    } catch (err) {
-        console.error("Lỗi khi lấy giỏ hàng:", err);
-        res.status(500).send("Lỗi máy chủ");
-    }
+    // Render view 'shopping-cart.handlebars'
+    // Truyền biến 'isEmpty' và 'coursesInCart' [cite: 24, 31, 38]
+    res.render("vwAccount/shopping-cart", {
+      title: "Giỏ hàng",
+      isEmpty: isEmpty,
+      coursesInCart: coursesInCart,
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy giỏ hàng:", err);
+    res.status(500).send("Lỗi máy chủ");
+  }
 });
 
 router.post("/shopping-cart/delete", async (req, res) => {
-    // Kiểm tra đăng nhập
-    if (!req.session.authUser) {
-        return res.status(401).send("Bạn cần đăng nhập");
+  // Kiểm tra đăng nhập
+  if (!req.session.authUser) {
+    return res.status(401).send("Bạn cần đăng nhập");
+  }
+
+  try {
+    const userId = req.session.authUser.id;
+    const { courseId } = req.body; // Lấy courseId từ input hidden [cite: 49]
+
+    if (!courseId) {
+      return res.status(400).send("Thiếu ID khóa học");
     }
 
-    try {
-        const userId = req.session.authUser.id;
-        const { courseId } = req.body; // Lấy courseId từ input hidden [cite: 49]
+    // Gọi model để xóa
+    await coursesModel.removeCartItem(userId, courseId);
 
-        if (!courseId) {
-            return res.status(400).send("Thiếu ID khóa học");
-        }
-
-        // Gọi model để xóa
-        await coursesModel.removeCartItem(userId, courseId);
-
-        // Chuyển hướng người dùng TRỞ LẠI trang giỏ hàng
-        res.redirect("/account/shopping-cart");
-    } catch (err) {
-        console.error("Lỗi khi xóa khỏi giỏ hàng:", err);
-        res.status(500).send("Lỗi máy chủ");
-    }
+    // Chuyển hướng người dùng TRỞ LẠI trang giỏ hàng
+    res.redirect("/account/shopping-cart");
+  } catch (err) {
+    console.error("Lỗi khi xóa khỏi giỏ hàng:", err);
+    res.status(500).send("Lỗi máy chủ");
+  }
 });
 
 router.post("/checkout", async (req, res) => {
-    // Kiểm tra đăng nhập
-    if (!req.session.authUser) {
-        return res.status(401).send("Bạn cần đăng nhập");
+  // Kiểm tra đăng nhập
+  if (!req.session.authUser) {
+    return res.status(401).send("Bạn cần đăng nhập");
+  }
+
+  try {
+    const userId = req.session.authUser.id;
+
+    // Lấy danh sách courseIds từ form (nhờ JS ở bước 1)
+    let { courseIds } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!courseIds) {
+      // Nếu không có JS hoặc user bỏ tick tất cả
+      const msg = encodeURIComponent("Vui lòng chọn ít nhất một khóa học.");
+      return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
     }
 
-    try {
-        const userId = req.session.authUser.id;
-
-        // Lấy danh sách courseIds từ form (nhờ JS ở bước 1)
-        let { courseIds } = req.body;
-
-        // Kiểm tra dữ liệu đầu vào
-        if (!courseIds) {
-            // Nếu không có JS hoặc user bỏ tick tất cả
-            const msg = encodeURIComponent("Vui lòng chọn ít nhất một khóa học.");
-            return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
-        }
-
-        // Nếu chỉ có 1 item, nó sẽ là string, cần chuyển thành array
-        if (!Array.isArray(courseIds)) {
-            courseIds = [courseIds];
-        }
-
-        // Gọi model để xử lý transaction
-        await coursesModel.checkout(userId, courseIds);
-
-        // Thông báo thành công và chuyển hướng
-        // (Bạn có thể chuyển hướng đến trang "Khóa học của tôi")
-        const msg = encodeURIComponent(
-            "Thanh toán thành công! Khóa học đã được thêm vào tài khoản của bạn."
-        );
-        return res.redirect(
-            `/student/profile-purchased-courses?toast=success&msg=${msg}`
-        ); // (Hoặc /account/shopping-cart)
-    } catch (err) {
-        console.error("Lỗi khi thanh toán:", err);
-        const msg = encodeURIComponent(
-            "Có lỗi xảy ra trong quá trình thanh toán, vui lòng thử lại."
-        );
-        return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
+    // Nếu chỉ có 1 item, nó sẽ là string, cần chuyển thành array
+    if (!Array.isArray(courseIds)) {
+      courseIds = [courseIds];
     }
+
+    // Gọi model để xử lý transaction
+    await coursesModel.checkout(userId, courseIds);
+
+    // Thông báo thành công và chuyển hướng
+    // (Bạn có thể chuyển hướng đến trang "Khóa học của tôi")
+    const msg = encodeURIComponent(
+      "Thanh toán thành công! Khóa học đã được thêm vào tài khoản của bạn."
+    );
+    return res.redirect(
+      `/student/profile-purchased-courses?toast=success&msg=${msg}`
+    ); // (Hoặc /account/shopping-cart)
+  } catch (err) {
+    console.error("Lỗi khi thanh toán:", err);
+    const msg = encodeURIComponent(
+      "Có lỗi xảy ra trong quá trình thanh toán, vui lòng thử lại."
+    );
+    return res.redirect(`/account/shopping-cart?toast=error&msg=${msg}`);
+  }
 });
 export default router;

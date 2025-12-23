@@ -64,10 +64,12 @@ app.use(
         throw new Error("SESSION_SECRET is not set");
       })(),
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Không lưu session rỗng, giảm nguy cơ fixation
     cookie: {
-      secure: process.env.SESSION_SECURE === "true",
-      httpOnly: true,
+      httpOnly: true, // Chặn JS phía client truy cập cookie
+      secure: process.env.SESSION_SECURE === "true", // bật true trên production (HTTPS)
+      sameSite: "lax", // Giảm nguy cơ CSRF nhưng vẫn tiện cho redirect
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 ngày
     },
   })
 );
