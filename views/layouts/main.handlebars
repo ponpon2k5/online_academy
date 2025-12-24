@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{#if title}}{{title}} - {{/if}}Online Academy</title>
+  {{#if csrfToken}}
+  <meta name="csrf-token" content="{{csrfToken}}">
+  {{/if}}
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
@@ -200,6 +203,49 @@
         });
       });
     });
+  </script>
+  <script>
+    // Tự động gắn CSRF token vào form POST và header fetch/XHR
+    (() => {
+      const token = document.querySelector('meta[name="csrf-token"]')?.content;
+      if (!token) return;
+
+      // Gắn hidden input cho mọi form POST/PUT/PATCH/DELETE nếu chưa có
+      const needsToken = new Set(["post", "put", "patch", "delete"]);
+      document.querySelectorAll("form").forEach((form) => {
+        if (!needsToken.has((form.method || "get").toLowerCase())) return;
+        if (form.querySelector('input[name="_csrf"]')) return;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "_csrf";
+        input.value = token;
+        form.appendChild(input);
+      });
+
+      // Wrap fetch để tự động thêm header
+      const originalFetch = window.fetch;
+      window.fetch = (input, init = {}) => {
+        const headers = new Headers(init.headers || {});
+        if (!headers.has("X-CSRF-Token")) {
+          headers.set("X-CSRF-Token", token);
+        }
+        return originalFetch(input, { ...init, headers });
+      };
+
+      // Patch XHR (dùng cho lib cũ nếu có)
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (...args) {
+        this._csrfToken = token;
+        return originalOpen.apply(this, args);
+      };
+      const originalSend = XMLHttpRequest.prototype.send;
+      XMLHttpRequest.prototype.send = function (body) {
+        if (this._csrfToken) {
+          this.setRequestHeader("X-CSRF-Token", this._csrfToken);
+        }
+        return originalSend.call(this, body);
+      };
+    })();
   </script>
 
   {{{_sections.js}}}

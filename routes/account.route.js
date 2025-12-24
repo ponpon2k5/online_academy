@@ -100,7 +100,6 @@ router.get("/signup", (req, res) => {
 });
 
 router.post("/signout", (req, res) => {
-  // Hủy session hoàn toàn thay vì chỉ gán cờ
   req.session.destroy((err) => {
     if (err) {
       console.error("Session destroy error:", err);
@@ -335,7 +334,8 @@ router.get("/profile", async (req, res) => {
 });
 
 router.post("/profile", checkAuthenticated, async (req, res) => {
-  const id = req.body.id;
+  // Luôn lấy ID từ session để chống IDOR - không tin tưởng ID từ client
+  const id = req.session.authUser.id;
   const user = { name: req.body.name, email: req.body.email };
   await userModel.patch(id, user);
   req.session.authUser.name = req.body.name;
@@ -354,7 +354,8 @@ router.get("/change-pwd", checkAuthenticated, (req, res) => {
 });
 
 router.post("/change-pwd", checkAuthenticated, async (req, res) => {
-  const id = req.body.id;
+  // Luôn lấy ID từ session để chống IDOR - không tin tưởng ID từ client
+  const id = req.session.authUser.id;
   const curpwd = req.body.currentPassword;
   const newpwd = req.body.newPassword;
 

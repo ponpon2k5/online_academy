@@ -4,6 +4,7 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import session from "express-session";
+import csurf from "csurf";
 import hbs_sections from "express-handlebars-sections";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -67,12 +68,19 @@ app.use(
     saveUninitialized: false, // Không lưu session rỗng, giảm nguy cơ fixation
     cookie: {
       httpOnly: true, // Chặn JS phía client truy cập cookie
-      secure: process.env.SESSION_SECURE === "true", // bật true trên production (HTTPS)
+      secure: process.env.SESSION_SECURE === "true",
       sameSite: "lax", // Giảm nguy cơ CSRF nhưng vẫn tiện cho redirect
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 ngày
     },
   })
 );
+
+// ---------- CSRF Protection ----------
+app.use(csurf());
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Đồng bộ thông tin đăng nhập ra locals
 app.use(async (req, res, next) => {
@@ -322,6 +330,14 @@ app.use("/admin/categories", adminCategories);
 app.use("/admin", adminRouter);
 app.use("/instructor", instructorRouter);
 app.use("/media", mediaRoute);
+
+// ---------- CSRF error handler ----------
+app.use((err, req, res, next) => {
+  if (err.code === "EBADCSRFTOKEN") {
+    return res.status(403).send("Invalid CSRF token");
+  }
+  next(err);
+});
 
 // ---------- 404 ----------
 app.use((req, res) => {
