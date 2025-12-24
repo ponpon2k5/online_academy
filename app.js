@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import session from "express-session";
 import csurf from "csurf";
 import hbs_sections from "express-handlebars-sections";
+import sanitizeHtml from "sanitize-html";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
@@ -189,6 +190,34 @@ app.engine(
           return `/images/${url}.jpg`;
         }
       },
+      sanitize: (html) =>
+        sanitizeHtml(html || "", {
+          allowedTags: [
+            "b",
+            "i",
+            "em",
+            "strong",
+            "a",
+            "p",
+            "ul",
+            "ol",
+            "li",
+            "br",
+            "span",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+          ],
+          allowedAttributes: {
+            a: ["href", "title", "target", "rel"],
+            span: ["class"],
+            p: ["class"],
+          },
+          allowedSchemes: ["http", "https", "mailto"],
+        }),
     },
   })
 );

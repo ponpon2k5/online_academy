@@ -334,7 +334,7 @@ router.get("/profile", async (req, res) => {
 });
 
 router.post("/profile", checkAuthenticated, async (req, res) => {
-  // Luôn lấy ID từ session để chống IDOR - không tin tưởng ID từ client
+  // Luôn lấy ID từ session 
   const id = req.session.authUser.id;
   const user = { name: req.body.name, email: req.body.email };
   await userModel.patch(id, user);
@@ -354,7 +354,7 @@ router.get("/change-pwd", checkAuthenticated, (req, res) => {
 });
 
 router.post("/change-pwd", checkAuthenticated, async (req, res) => {
-  // Luôn lấy ID từ session để chống IDOR - không tin tưởng ID từ client
+  // Luôn lấy ID từ session 
   const id = req.session.authUser.id;
   const curpwd = req.body.currentPassword;
   const newpwd = req.body.newPassword;

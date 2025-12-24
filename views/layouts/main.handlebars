@@ -205,7 +205,6 @@
     });
   </script>
   <script>
-    // Tự động gắn CSRF token vào form POST và header fetch/XHR
     (() => {
       const token = document.querySelector('meta[name="csrf-token"]')?.content;
       if (!token) return;
