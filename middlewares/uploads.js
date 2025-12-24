@@ -2,6 +2,8 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { customAlphabet } from "nanoid";
+const makeSuffix = customAlphabet("0123456789abcdef", 8);
 
 // Video upload middleware - lưu vào storage/videos
 const videosDir = path.join(process.cwd(), "storage", "videos");
@@ -66,12 +68,17 @@ fs.mkdirSync(instructorAvatarDir, { recursive: true });
 const instructorAvatarStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, instructorAvatarDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname || ".jpg");
-    // Lưu tên file là instructor_id để dễ dàng truy cập
-    const instructorId =
-      req.session?.user?.id || req.body.instructor_id || Date.now();
-    cb(null, `${instructorId}${ext}`);
-  },
+  const ext = path.extname(file.originalname || ".jpg");
+  const instructorId = req.session?.authUser?.id;
+  const suffix = makeSuffix();
+  if (!instructorId) {
+    // nếu không có auth user: tạo tên random hoặc reject upload
+    cb(null, `avatar_${Date.now()}_${suffix}${ext}`);
+  } else {
+    // dùng id + suffix để tránh ghi đè
+    cb(null, `${instructorId}_${Date.now()}_${suffix}${ext}`);
+  }
+},
 });
 
 export const uploadInstructorAvatar = multer({

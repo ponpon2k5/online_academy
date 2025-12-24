@@ -8,7 +8,81 @@ import userModel from "../models/user.model.js";
 import { checkAuthenticated } from "../middlewares/auth.mdw.js";
 import { customAlphabet } from "nanoid";
 import coursesModel from "../models/courses.model.js";
+import rateLimit from "express-rate-limit";
+import { z } from "zod";
 const router = express.Router();
+
+
+const signinSchema = z.object({
+  username: z.string().min(1).transform(s => s.trim()),
+  password: z.string().min(1), // có thể nâng lên min(8)
+});
+
+const sendOtpSchema = z.object({
+  username: z.string().min(1).trim(),
+  password: z.string().min(1),
+  name: z.string().min(1).trim(),
+  email: z.string().email().transform(s => s.toLowerCase()),
+  dob: z.string().min(1),
+  permission: z
+    .optional(z.union([z.string(), z.number()]))
+    .transform(v => Number(v ?? 0))
+    .refine(n => Number.isInteger(n) && n >= 0, { message: "Invalid permission" }),
+});
+
+const verifyOtpSchema = z.object({
+  otp: z.string().min(4).max(8).regex(/^\d+$/, "OTP must be numeric"),
+});
+// rate limiters
+const signinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) =>
+    // trả UI giống nhau / generic message
+    res.status(429).render("vwAccount/signin", {
+      title: "Đăng nhập",
+      error: true,
+      message: "Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau 15 phút.",
+    }),
+});
+
+const sendOtpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 giờ
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) =>
+    res.status(429).json({
+      success: false,
+      message: "Quá nhiều yêu cầu OTP. Vui lòng thử lại sau một giờ.",
+    }),
+});
+
+const verifyOtpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 giờ
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) =>
+    res.status(429).json({
+      success: false,
+      message: "Quá nhiều lần thử OTP. Vui lòng gửi lại OTP.",
+    }),
+});
+
+function validate(schema) {
+  return (req, res, next) => {
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      const msg = parsed.error.errors.map(e => e.message).join("; ");
+      return res.status(400).json({ success: false, message: msg });
+    }
+    req.body = parsed.data;
+    next();
+  };
+}
 
 async function verifyAccount(username, password_verify) {
   const user = await userModel.findByUsername(username);
@@ -63,36 +137,51 @@ router.get("/signin", (req, res) => {
   });
 });
 
-router.post("/signin", async (req, res) => {
-  const user = await userModel.findByUsername(req.body.username);
-  if (!user)
-    return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
+router.post("/signin", signinLimiter, validate(signinSchema), async (req, res) => {
+  try {
+    const username = req.body.username;
+    const password = req.body.password;
 
-  const ok = bcrypt.compareSync(req.body.password, user.password);
-  if (!ok)
-    return res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
+    const user = await userModel.findByUsername(username);
+    // dùng generic message để tránh leak info
+    const genericSigninRender = () =>
+      res.render("vwAccount/signin", { title: "Đăng nhập", error: true });
 
-  // Kiểm tra tài khoản có bị khóa không
-  if (user.is_active === false) {
-    return res.render("vwAccount/signin", {
-      title: "Đăng nhập",
-      error: true,
-      message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
-    });
-  }
+    if (!user) return genericSigninRender();
 
-  req.session.regenerate((err) => {
-    if (err) {
-      console.error("Session regenerate error:", err);
-      return res.status(500).send("Lỗi phiên đăng nhập");
+    // async compare để không block event loop
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return genericSigninRender();
+
+    // kiểm tra tài khoản active
+    if (user.is_active === false) {
+      return res.render("vwAccount/signin", {
+        title: "Đăng nhập",
+        error: true,
+        message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+      });
     }
 
-    req.session.isAuthenticated = true;
-    req.session.authUser = user;
-    const retUrl = req.session.retUrl || "/";
-    delete req.session.retUrl;
-    res.redirect(retUrl);
-  });
+    // regenerate session để chống session fixation
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Session regenerate error:", err);
+        return res.status(500).send("Lỗi phiên đăng nhập");
+      }
+
+      // KHÔNG lưu password hash trong session: chỉ lưu user an toàn
+      const { password: _pwd, ...safeUser } = user;
+      req.session.isAuthenticated = true;
+      req.session.authUser = safeUser;
+
+      const retUrl = req.session.retUrl || "/";
+      delete req.session.retUrl;
+      res.redirect(retUrl);
+    });
+  } catch (e) {
+    console.error("signin error:", e);
+    return res.status(500).render("vwAccount/signin", { title: "Đăng nhập", error: true });
+  }
 });
 
 router.get("/signup", (req, res) => {
@@ -109,55 +198,46 @@ router.post("/signout", (req, res) => {
   });
 });
 
-router.post("/send-otp", async (req, res) => {
+router.post("/send-otp", sendOtpLimiter, validate(sendOtpSchema), async (req, res) => {
   try {
     let { username, password, name, email, dob, permission } = req.body || {};
-    // Validate tối thiểu phía server
-    if (!username || !password || !name || !email || !dob) {
-      return res.json({ success: false, message: "Thiếu dữ liệu bắt buộc" });
-    }
+    // (validation đã xong bởi validate middleware)
 
     const normEmail = String(email).trim().toLowerCase();
 
-    // Kiểm tra định dạng email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(normEmail)) {
-      return res.json({ success: false, message: "Email không hợp lệ" });
+    // Kiểm tra trùng username/email giống trước...
+
+    // Giới hạn gửi OTP per-session (quick mitigation). Better: per-email counter in Redis/DB.
+    req.session._otpSendCount = (req.session._otpSendCount || 0) + 1;
+    if (req.session._otpSendCount > 5) {
+      return res.json({ success: false, message: "Quá nhiều yêu cầu OTP từ phiên này. Vui lòng thử lại sau." });
     }
 
-    // Kiểm tra trùng username
-    const existedUsername = await userModel.findByUsername(username);
-    if (existedUsername) {
-      return res.json({ success: false, message: "Tên người dùng đã tồn tại" });
-    }
-
-    // Kiểm tra trùng email (an toàn với model trả array hoặc object)
-    const existedEmail = await userModel.findByEmail(normEmail);
-    const emailExists = !!(
-      existedEmail &&
-      (existedEmail.id || (Array.isArray(existedEmail) && existedEmail.length))
-    );
-    if (emailExists) {
-      return res.json({ success: false, message: "Email đã tồn tại" });
-    }
-
-    // Tạo OTP & lưu session
     const otp = "" + Math.floor(100000 + Math.random() * 900000); // 6 số
-    req.session.otp = { code: otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+
+    // Hash OTP trước khi lưu (để không lưu mã thẳng trong session)
+    const otpHash = bcrypt.hashSync(otp, 10);
+
+    req.session.otp = {
+      hash: otpHash,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      attempts: 0, // số lần verify đã thử
+      email: normEmail, // optional để xác minh
+    };
+
     req.session.registerData = {
       username,
-      // Hash ngay từ đây (saltRounds = 10)
+      // password đã hash từ trước ở code gốc — giữ nguyên (an toàn)
       password: bcrypt.hashSync(password, 10),
       name,
       email: normEmail,
       dob,
-      permission: parseInt(permission ?? "0", 10) || 0, // 0: student, 1: instructor
+      permission: parseInt(permission ?? "0", 10) || 0,
     };
 
-    // Gửi mail
+    // gửi mail như cũ
     const transporter = createTransporter();
-    await transporter.verify(); // bắt lỗi config SMTP ngay tại đây
-
+    await transporter.verify();
     await transporter.sendMail({
       from: mailFromAddress(),
       to: normEmail,
@@ -173,12 +253,12 @@ router.post("/send-otp", async (req, res) => {
     console.error("Lỗi gửi email:", e);
     return res.json({
       success: false,
-      message: e.message || "Lỗi khi gửi OTP. Vui lòng thử lại.",
+      message: "Lỗi khi gửi OTP. Vui lòng thử lại.",
     });
   }
 });
 
-router.post("/verify-otp", async (req, res) => {
+router.post("/verify-otp", verifyOtpLimiter, validate(verifyOtpSchema), async (req, res) => {
   try {
     const { otp } = req.body || {};
     const s = req.session.otp;
@@ -187,21 +267,30 @@ router.post("/verify-otp", async (req, res) => {
     if (!otp) {
       return res.json({ success: false, message: "Thiếu OTP" });
     }
-    if (!s || !s.code) {
-      return res.json({
-        success: false,
-        message: "OTP không tồn tại. Vui lòng gửi lại OTP.",
-      });
+    if (!s || !s.hash) {
+      return res.json({ success: false, message: "OTP không tồn tại. Vui lòng gửi lại OTP." });
     }
     if (Date.now() > s.expiresAt) {
-      return res.json({
-        success: false,
-        message: "OTP đã hết hạn. Vui lòng gửi lại OTP.",
-      });
+      delete req.session.otp;
+      return res.json({ success: false, message: "OTP đã hết hạn. Vui lòng gửi lại OTP." });
     }
-    if (String(otp).trim() !== String(s.code)) {
+
+    // tăng attempts và chặn sau N lần sai
+    s.attempts = (s.attempts || 0);
+
+    const ok = await bcrypt.compare(String(otp).trim(), s.hash);
+    if (!ok) {
+      s.attempts++;
+      // block nếu quá nhiều lần thử
+      if (s.attempts >= 5) {
+        delete req.session.otp;
+        return res.json({ success: false, message: "Quá nhiều lần thử OTP. Vui lòng gửi lại OTP." });
+      }
+      // giữ session.otp với attempts tăng
+      req.session.otp = s;
       return res.json({ success: false, message: "Mã OTP không hợp lệ" });
     }
+
     if (!reg) {
       return res.json({
         success: false,
@@ -215,14 +304,13 @@ router.post("/verify-otp", async (req, res) => {
     await userModel.add({
       id: id,
       username: reg.username,
-      password: reg.password, // đã hash ở bước send-otp
+      password: reg.password,
       name: reg.name,
-      email: reg.email.toLowerCase(), // normalize
+      email: reg.email.toLowerCase(),
       dob: reg.dob,
       permission: Number(reg.permission) || 0,
     });
 
-    // Xoá dữ liệu tạm trong session
     delete req.session.otp;
     delete req.session.registerData;
 

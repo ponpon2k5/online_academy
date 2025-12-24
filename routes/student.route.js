@@ -38,12 +38,15 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname)?.toLowerCase() || ".jpg";
-    const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext)
-      ? ext
-      : ".jpg";
-    cb(null, `${req.session.authUser.id}${safeExt}`);
-  },
+  const ext = path.extname(file.originalname)?.toLowerCase() || ".jpg";
+  const safeExt = [".jpg", ".jpeg", ".png", ".webp"].includes(ext)
+    ? ext
+    : ".jpg";
+  const userId = req.session?.authUser?.id;
+  const suffix = Date.now(); // hoặc nanoid
+  if (!userId) return cb(new Error("Not authenticated"));
+  cb(null, `${userId}_${suffix}${safeExt}`);
+},
 });
 const fileFilter = (req, file, cb) => {
   const ok = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
